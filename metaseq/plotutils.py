@@ -22,22 +22,64 @@ def prepare_logged(x, y):
 
     return xi, yi
 
-def matrix_and_line(figsize=(5,12)):
+def matrix_and_line_shell(figsize=(5,12), strip=False):
     """
-    Helper function to construct a figure that has a matrix taking up 3/4,
-    a line plot with shared x-axis in the bottom 1/4, and a colorbar axis
-    """
-    # 3 arrays
-    fig = plt.figure(figsize=figsize)
-    ax1 = plt.subplot2grid((4, 8), (0, 0),
-            colspan=7, rowspan=3)
-    ax2 = plt.subplot2grid((4, 8), (3, 0),
-            colspan=7, rowspan=1, sharex=ax1)
+    Helper function to construct an empty figure that has space for a matrix,
+    a summary line plot directly below it, a colorbar axis, and an optional
+    "strip" axis that parallels the matrix (and shares its y-axis) where data
+    can be added to create callbacks.
 
-    cax = plt.subplot2grid((4, 8), (1, 7),
-            colspan=1, rowspan=1)
+    Returns a tuple of (fig, matrix_ax, line_ax, strip_ax, colorbar_ax).
+
+    If `strip` is False, then the returned `strip_ax` will be None.
+    """
+    fig = plt.figure(figsize=figsize)
+
+    # Constants to keep track
+    if strip:
+        STRIP_COLS = 1
+    else:
+        STRIP_COLS = 0
+    ROWS = 4
+    COLS = 8 + STRIP_COLS
+    MAT_COLS = 7
+    MAT_ROWS = 3
+    LINE_ROWS = ROWS - MAT_ROWS
+
+    mat_ax = plt.subplot2grid(
+            shape=(ROWS, COLS),
+            loc=(0, STRIP_COLS),
+            rowspan=MAT_ROWS,
+            colspan=MAT_COLS,
+            )
+
+    line_ax = plt.subplot2grid(
+            shape=(ROWS, COLS),
+            loc=(MAT_ROWS, STRIP_COLS),
+            rowspan=LINE_ROWS,
+            colspan=MAT_COLS,
+            sharex=mat_ax)
+
+    if strip:
+        strip_ax = plt.subplot2grid(
+                shape=(ROWS, COLS),
+                loc=(0, 0),
+                rowspan=MAT_ROWS,
+                colspan=STRIP_COLS,
+                sharey=mat_ax,
+                )
+    else:
+        strip_ax = None
+
+    cax = plt.subplot2grid(
+            shape=(ROWS, COLS),
+            loc=(ROWS - MAT_ROWS, MAT_COLS + STRIP_COLS),
+            rowspan=1,
+            colspan=1,
+            )
+
     fig.subplots_adjust(hspace=0.1, wspace=0.2, right=0.88, left=0.23)
-    return fig, ax1, ax2, cax
+    return fig, mat_ax, line_ax, strip_ax, cax
 
 
 
