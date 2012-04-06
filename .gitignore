@@ -5,3 +5,11 @@
 *.c
 *.so
 build/*
+metaseq/test/data/wgEncodeUwTfbsK562InputStdAlnRep1.bam
+metaseq/test/data/wgEncodeUwTfbsK562CtcfStdAlnRep1.bam
+metaseq/test/data/wgEncodeUwTfbsK562InputStdRawRep1.bigWig
+metaseq/test/data/wgEncodeUwTfbsK562CtcfStdRawRep1.bigWig
+metaseq/test/data/wgEncodeUwTfbsK562CtcfStdAlnRep1.bam.bai
+metaseq/test/data/wgEncodeUwTfbsK562InputStdAlnRep1.bam.bai
+metaseq/test/data/wgEncodeUwTfbsK562CtcfStdPkRep1.narrowPeak.gz
+metaseq/test/data/wgEncodeUwTfbsK562CtcfStdHotspotsRep1.broadPeak.gz
