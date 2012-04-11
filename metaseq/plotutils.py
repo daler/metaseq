@@ -4,6 +4,16 @@ from matplotlib import pyplot as plt
 import numpy as np
 from scipy import stats
 
+def nice_log(x):
+    """
+    Uses a log scale but with negative numbers.
+    """
+    neg = x < 0
+    xi = np.log2(np.abs(x) + 1)
+    xi[neg] = -xi[neg]
+    return xi
+
+
 def prepare_logged(x, y):
     """
     scales x and y so that they have zero values at the global min
