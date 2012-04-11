@@ -3,6 +3,8 @@ import matplotlib
 from matplotlib import pyplot as plt
 import numpy as np
 from scipy import stats
+from scikits.statsmodels.sandbox.stats.multicomp import fdrcorrection0
+
 
 def nice_log(x):
     """
@@ -12,6 +14,27 @@ def nice_log(x):
     xi = np.log2(np.abs(x) + 1)
     xi[neg] = -xi[neg]
     return xi
+
+
+def tip_zscores(a):
+    """
+    Calculates the "target identification from profiles" (TIP) zscores from
+    Cheng et al. 2001, Bioinformatics 27(23):3221-3227.
+    """
+    weighted = a * a.mean(axis=0)
+    scores = weighted.sum(axis=1)
+    zscores = (scores - scores.mean()) / scores.std()
+    return zscores
+
+
+def tip_fdr(a, alpha=0.05):
+    """
+    Returns adjusted p-values for a particular `alpha`
+    """
+    zscores = tip_zscores(a)
+    pvals = stats.norm.pdf(zscores)
+    rejected, fdrs = fdrcorrection0(pvals)
+    return fdrs
 
 
 def prepare_logged(x, y):
