@@ -22,7 +22,8 @@ def prepare_logged(x, y):
 
     return xi, yi
 
-def matrix_and_line_shell(figsize=(5,12), strip=False):
+
+def matrix_and_line_shell(figsize=(5, 12), strip=False):
     """
     Helper function to construct an empty figure that has space for a matrix,
     a summary line plot directly below it, a colorbar axis, and an optional
@@ -80,7 +81,6 @@ def matrix_and_line_shell(figsize=(5,12), strip=False):
 
     fig.subplots_adjust(hspace=0.1, wspace=0.2, right=0.88, left=0.23)
     return fig, mat_ax, line_ax, strip_ax, cax
-
 
 
 def clustered_sortind(x, k=10, scorefunc=None):
@@ -209,17 +209,20 @@ def input_ip_plots(iparr, inputarr, diffed, x, sort_ind,
     limits1 = list(limits1)
     limits2 = list(limits2)
 
-    all_base = np.column_stack( (iparr.ravel(), inputarr.ravel()) ).ravel()
-
+    all_base = np.column_stack((iparr.ravel(), inputarr.ravel())).ravel()
 
     if limits1[0] is None:
-        limits1[0] = stats.scoreatpercentile(all_base, 1./all_base.size)
+        limits1[0] = stats.scoreatpercentile(
+                all_base, 1. / all_base.size)
     if limits1[1] is None:
-        limits1[1] = stats.scoreatpercentile(all_base, 100 - 1./all_base.size)
+        limits1[1] = stats.scoreatpercentile(
+                all_base, 100 - 1. / all_base.size)
     if limits2[0] is None:
-        limits2[0] = stats.scoreatpercentile(diffed.ravel(), 1./all_base.size)
+        limits2[0] = stats.scoreatpercentile(
+                diffed.ravel(), 1. / all_base.size)
     if limits2[1] is None:
-        limits2[1] = stats.scoreatpercentile(diffed.ravel(), 100 - 1./all_base.size)
+        limits2[1] = stats.scoreatpercentile(
+                diffed.ravel(), 100 - 1. / all_base.size)
 
     del all_base
 
