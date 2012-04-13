@@ -5,8 +5,17 @@
 *.c
 *.so
 build/*
+metaseq/test/examples/example_tsses.gtf
+
+# example files downloaded with download_data.py script:
+#
+metaseq/test/data/Homo_sapiens.GRCh37.66.gtf.gz
+metaseq/test/data/Homo_sapiens.GRCh37.66.cleaned.gtf
+metaseq/test/data/Homo_sapiens.GRCh37.66.cleaned.gtf.db
 metaseq/test/data/wgEncodeUwTfbsK562InputStdAlnRep1.bam
 metaseq/test/data/wgEncodeUwTfbsK562CtcfStdAlnRep1.bam
+metaseq/test/data/wgEncodeUwTfbsK562InputStdAlnRep1.bam.scale
+metaseq/test/data/wgEncodeUwTfbsK562CtcfStdAlnRep1.bam.scale
 metaseq/test/data/wgEncodeUwTfbsK562InputStdRawRep1.bigWig
 metaseq/test/data/wgEncodeUwTfbsK562CtcfStdRawRep1.bigWig
 metaseq/test/data/wgEncodeUwTfbsK562CtcfStdAlnRep1.bam.bai
