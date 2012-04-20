@@ -33,7 +33,7 @@ class BamAdapter(BaseAdapter):
         super(BamAdapter, self).__init__(fn)
 
     def make_fileobj(self):
-        return pysam.Samfile(self.fn)
+        return pysam.Samfile(self.fn, 'rb')
 
     def __getitem__(self, key):
         iterator = self.fileobj.fetch(
