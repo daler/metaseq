@@ -147,6 +147,8 @@ if RUN_TYPE == 'TSS':
 
 # TODO: "minibrowser" really ought to be built-in to metaseq . . . use mixins
 # for flexibility?
+#
+# see minibrowser.py for an implementation and details
 def minibrowser(feature):
     """
     Given a feature, spawns a new figure showing the local coverage of that
