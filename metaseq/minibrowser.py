@@ -196,6 +196,11 @@ class GeneModelMiniBrowser(SignalMiniBrowser):
         padding = (xmax - xmin) * 0.01
         ax.axis('tight')
 
+        # add lines indicating extent of current feature
+        vline_kwargs = dict(color='k', linestyle='--')
+        ax.axvline(feature.start, **vline_kwargs)
+        ax.axvline(feature.stop, **vline_kwargs)
+
         # Make a new feature to represent the region plus surrounding genes
         interval = pybedtools.create_interval_from_list(feature.fields)
         interval.start = xmin - padding
