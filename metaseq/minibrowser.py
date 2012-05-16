@@ -1,24 +1,78 @@
 """
 Module for spawning mini genome browsers using a plugin structure, making it
-possible to build rather complex mini-browsers.
+possible to build rather complex mini-browsers.  The goal is to point the
+mini-browser to some data, and call its plot() method with a feature.  This
+will spawn a new figure showing the data for that interval.
+
+MiniBrowser classes are just a general way of mapping data-manipulation or
+data-visualization methods to an Axes on which the data should be displayed.
+
+To make a new subclass:
+
+1. Create one or more methods that accept an Axes object and a pybedtools
+   Interval object and return a feature.  The simplest do-nothing method would
+   be::
+
+        def my_panel(self, ax, feature)
+            return feature
+
+   A more useful method might be one that plots genomic signal over the
+   region::
+
+        def my_panel(self, ax, feature):
+            # for simplicity, assume just use the first genomic_signal
+            gs = self.genomic_signal_objs[0]
+            x, y = gs.local_coverage(feature, bins=100)
+            ax.plot(x, y, **kwargs)
+            ax.axis('tight')
+            return feature
+
+2. Then, override the `panels()` method.  This method:
+
+    * Creates Axes as needed; assumes that self.make_fig() has already been
+      called so that self.fig is available.
+    * Returns a list of (ax, method) tuples.  This list maps created Axes to
+      methods that should operate on them (like `my_panel` method above).
+
+    For example::
+
+        def panels(self):
+            ax = self.fig.add_subplot(111)
+            return [(ax, self.my_panel)]
+
+
+A figure is spawned by calling the `plot` method on a pybedtools genomic
+interval, e.g.::
+
+    s = SignalMiniBrowser(ip, control])
+    s.plot(feature)
+
 """
 
 from matplotlib import pyplot as plt
 from pybedtools.contrib.plotting import Track
+import pybedtools
 
 
 class BaseMiniBrowser(object):
     """
-    Base class for plotting genomic signal.  This class is designed to be
-    sub-classed, so it really just a shell with some example methods filled in.
+    Base class for plotting genomic signal.
+
+    This class is designed to be sub-classed, so it really just a shell with
+    some example methods filled in.
     """
     def __init__(self, genomic_signal_objs):
         self.genomic_signal_objs = genomic_signal_objs
 
     def plot(self, feature):
         """
+        Spawns a new figure showing data for `feature`.
+
+        :param feature: A `pybedtools.Interval` object
+
         Using the pybedtools.Interval `feature`, creates figure specified in
-        make_fig() and plots data on panels according to panels().
+        :meth:`BaseMiniBrowser.make_fig` and plots data on panels according to
+        `self.panels()`.
         """
         self.make_fig()
         for ax, method in self.panels():
@@ -26,12 +80,14 @@ class BaseMiniBrowser(object):
 
     def make_fig(self):
         """
-        Figure constructor, called before plot()
+        Figure constructor, called before `self.plot()`
         """
         self.fig = plt.figure(figsize=(8, 4))
 
     def panels(self):
         """
+        Method to be overriden by subclasses.
+
         This method should create Axes objects on self.fig and register which
         methods operate on which axes.
 
@@ -45,7 +101,7 @@ class BaseMiniBrowser(object):
 
     def example_panel(self, ax, feature):
         """
-        A lame panel that just prints the text of the feature...
+        A example panel that just prints the text of the feature.
         """
         txt = '%s:%s-%s' % (feature.chrom, feature.start, feature.stop)
         ax.text(0.5, 0.5, txt, transform=ax.transAxes)
