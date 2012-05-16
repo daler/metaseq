@@ -56,7 +56,7 @@ import pybedtools
 
 class BaseMiniBrowser(object):
     """
-    Base class for plotting genomic signal.
+    Base class for plotting a genomic region.
 
     This class is designed to be sub-classed, so it really just a shell with
     some example methods filled in.
@@ -112,23 +112,23 @@ class SignalMiniBrowser(BaseMiniBrowser):
     def __init__(self, genomic_signal_objs, local_coverage_kwargs=None,
             plotting_kwargs=None):
         """
-        Base class for plotting genomic signal over a particular area of the
-        genome, designed to be extended by subclasses, but can stand alone if
-        all you want is a simple one-panel browser.
+        Base class for plotting genomic signal.
 
-        `genomic_signal_objs` is a list of genomic signal objects (e.g.,
-        BamSignal or BigWigSignal).
+        Plots genomic signal over a particular area of the genome.  Designed to
+        be extended by subclasses, but can stand alone if all you want is
+        a simple one-panel browser.
 
-        `local_coverage_kwargs` is a dictionary of kwargs to send to each
-        genomic signals' local_coverage method, e.g.::
+        :param genomic_signal_objs: list of genomic signal objects (e.g.,
+            :class:`metaseq.genomic_signal.BamSignal` instances).
+        :param local_coverage_kwargs: a dictionary of kwargs to send to each
+            genomic signals' `local_coverage()` method, e.g.::
 
-            local_coverage_kwargs = dict(fragment_size=200).
+                local_coverage_kwargs = dict(fragment_size=200).
+        :param plotting_kwargs:  a list of dictionaries, one for each genomic
+            signals object, e.g,::
 
-        `plotting_kwargs` is a list of dictionaries, one for each genomic
-        signals object, e.g,::
-
-            plotting_kwargs = [dict(color='r', label='IP', dict(color='k',
-                label='input')]
+                plotting_kwargs = [dict(color='r', label='IP', dict(color='k',
+                    label='input')]
 
         """
         super(SignalMiniBrowser, self).__init__(genomic_signal_objs)
@@ -136,6 +136,9 @@ class SignalMiniBrowser(BaseMiniBrowser):
         self.local_coverage_kwargs = local_coverage_kwargs or {}
 
     def panels(self):
+        """
+        Add a single panel to the figure
+        """
         ax = self.fig.add_subplot(111)
         return [(ax, self.signal_panel)]
 
@@ -154,19 +157,33 @@ class SignalMiniBrowser(BaseMiniBrowser):
 class GeneModelMiniBrowser(SignalMiniBrowser):
     def __init__(self, genomic_signal_objs, db, **kwargs):
         """
-        Signal panel on top, gene models on the bottom. `db` is
-        a gffutils.FeatureDB.
+        Mini-browser to show a signal panel on top and gene models on the bottom.
+
+        :param genomic_signal_objs: a list of genomic_signals objects
+        :param db: a `gffutils.FeatureDB`
         """
         super(GeneModelMiniBrowser, self).__init__(
                 genomic_signal_objs, **kwargs)
         self.db = db
 
     def panels(self):
+        """
+        Add 2 panels to the figure, top for signal and bottom for gene models
+        """
         ax1 = self.fig.add_subplot(211)
         ax2 = self.fig.add_subplot(212, sharex=ax1)
         return (ax2, self.gene_panel), (ax1, self.signal_panel)
 
     def gene_panel(self, ax, feature):
+        """
+        Plots gene models on an Axes.
+
+        Queries the database
+
+        :param ax: matplotlib.Axes object
+        :param feature: pybedtools.Interval
+
+        """
         from gffutils.contrib.plotting import Gene
         extent = [feature.start, feature.stop]
         nearby_genes = self.db.overlapping_features(
