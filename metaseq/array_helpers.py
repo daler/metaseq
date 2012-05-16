@@ -9,11 +9,17 @@ from rebin import rebin, float_rebin
 from helpers import chunker
 import filetype_adapters
 
+
 def _local_count(reader, feature, stranded=False):
     """
-    Returns just the count of genomic signal found within the
-    pybedtools.Interval, `feature`.  Usually this only makes sense for BED or
-    BAM (not bigWig) files.
+    The count of genomic signal (typcially BED features) found within an
+    interval.
+
+    Usually this only makes sense for BED or BAM (not bigWig) files.
+
+    :param feature: pybedtools.Interval object
+    :param stranded: If `stranded=True`, then only counts signal on the same
+        strand as `feature`.
     """
     chrom = feature.chrom
     start = feature.start
@@ -38,7 +44,7 @@ def _local_coverage(reader, features, read_strand=None,
     `features`, extending each read by `fragmentsize` bp.
 
     Depending on the arguments provided, this method can return a vector
-    containing values from a single features or from concatenated features.
+    containing values from a single feature or from concatenated features.
 
     An example of the latter case: `features` can be a 3-tuple of
     pybedtools.Intervals representing (TSS + 1kb upstream, gene, TTS + 1kb
@@ -47,39 +53,43 @@ def _local_coverage(reader, features, read_strand=None,
     1000, and 100 bins respectively.  Note that is up to the caller to
     construct the right axes labels in the final plot!
 
-    :`features`:
+    :param features:
         A pybedtools.Interval object or an iterable of pybedtools.Interval
         objects.
 
-    :`bins`:
-        If `bins` is None, then each value in the returned array will
-        correspond to one bp in the genome.
+    :param bins:
+        * If `bins` is None, then each value in the returned array will
+          correspond to one bp in the genome.
 
-        If `features` is a single Interval, then `bins` is an integer or None.
+        * If `features` is a single Interval, then `bins` is an integer or
+          None.
 
-        If `features` is an iterable of Intervals, `bins` is an iterable of
-        integers of the same length as `features.
+        * If `features` is an iterable of Intervals, `bins` is an iterable of
+          integers of the same length as `features`.
 
-    :`fragment_size`:
-        Each item from the genomic signal (e.g., reads from a BAM file) will be
-        extended this many bp in the 3' direction.  Higher fragment sizes will
-        result in smoother signal
+    :param fragment_size:
+        Integer. Each item from the genomic signal (e.g., reads from a BAM
+        file) will be extended this many bp in the 3' direction.  Higher
+        fragment sizes will result in smoother signal
 
-    :`shift_width`:
-        Each item from the genomic signal (e.g., reads from a BAM file) will be
-        shifted this number of bp in the 3' direction.  This can be useful for
-        reconstructing a ChIP-seq profile, using the shift width determined
-        from the peak-caller (e.g., modeled `d` in MACS)
+    :param shift_width:
+        Integer. Each item from the genomic signal (e.g., reads from a BAM
+        file) will be shifted this number of bp in the 3' direction.  This can
+        be useful for reconstructing a ChIP-seq profile, using the shift width
+        determined from the peak-caller (e.g., modeled `d` in MACS)
 
-    :`read_strand`:
-        If `read_strand` is one of "+" or "-", then only reads on that strand
-        will be considered and reads on the opposite strand ignored.  Useful
-        for plotting genomic signal for stranded libraries
+    :param read_strand:
+        String. If `read_strand` is one of "+" or "-", then only reads on that
+        strand will be considered and reads on the opposite strand ignored.
+        Useful for plotting genomic signal for stranded libraries
 
-    :`use_score`:
+
+    :param use_score:
         If True, then each bin will contain the sum of the *score* attribute of
         genomic features in that bin instead of the *number* of genomic
         features falling within each bin.
+
+    :rtype: NumPy array
 
     If a feature has a "-" strand attribute, then the resulting profile will be
     *relative to a minus-strand feature*.  That is, the resulting profile will
@@ -158,7 +168,6 @@ def _local_coverage(reader, features, read_strand=None,
                     al.start = al.stop - fragment_size
                 else:
                     al.stop = al.start + fragment_size
-
 
             # Convert to 0-based coords that can be used as indices into
             # array, making sure not to overflow the window.
@@ -260,7 +269,8 @@ def _array(fn, cls, genelist, **kwargs):
 
 def _local_coverage_bigwig(bigwig, features, bins=None):
     """
-    Returns matrix of coverage of `features` using `bins`
+    Returns matrix of coverage of `features` using `bins` -- see
+    :func:`metaseq.array_helpers._local_coverage` for more info.
     """
 
     if not (isinstance(features, list) or isinstance(features, tuple)):

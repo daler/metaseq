@@ -1,6 +1,10 @@
 """
-File-type adapters accept a filename of the appropriate format (not checked) as
-the only argument to their constructor.
+This module provides classes that make a file format conform to a uniform API.
+These are not generally needed by end-users, rather, they are used internally
+by higher-level code like :mod:`metaseq.genomic_signal`.
+
+File-type adapters accept a filename of the appropriate format (which is not
+checked) as the only argument to their constructor.
 
 Subclasses must define __getitem__ to accept a pybedtools.Interval and return
 an iterator of pybedtools.Intervals
@@ -16,6 +20,9 @@ strand_lookup = {16: '-', 0: '+'}
 
 
 class BaseAdapter(object):
+    """
+    Base class for filetype adapters
+    """
     def __init__(self, fn):
         self.fn = fn
         self.fileobj = None
@@ -29,6 +36,9 @@ class BaseAdapter(object):
 
 
 class BamAdapter(BaseAdapter):
+    """
+    Adapter that provides random access to BAM objects using Pysam
+    """
     def __init__(self, fn):
         super(BamAdapter, self).__init__(fn)
 
@@ -51,11 +61,13 @@ class BamAdapter(BaseAdapter):
 
 
 class BedAdapter(BaseAdapter):
+    """
+    Adapter that provides random access to BED files via Tabix
+    """
     def __init__(self, fn):
         super(BedAdapter, self).__init__(fn)
 
     def make_fileobj(self):
-        
         obj = pybedtools.BedTool(self.fn)
         if not obj._tabixed():
             obj = obj.sort().tabix(in_place=True, force=True)
@@ -71,6 +83,9 @@ class BedAdapter(BaseAdapter):
 
 
 class BigBedAdapter(BaseAdapter):
+    """
+    Adapter that provids random access to bigBed files via bx-python
+    """
     def __init__(self, fn):
         super(BigBedAdapter, self).__init__(fn)
 

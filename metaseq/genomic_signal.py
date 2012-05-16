@@ -1,3 +1,29 @@
+"""
+The classes in this module enable random access to a variety of file formats
+(BAM, bigWig, bigBed, BED) using a uniform syntax, and allow you to compute
+coverage across many features in parallel or just a single feature.
+
+Using classes in the :mod:`metaseq.integration` and :mod:`metaseq.minibrowser`
+modules, you can connect these objects to matplotlib figures that show a window
+into the data, making exploration easy and interactive.
+
+Generally, the :func:`genomic_signal` function is all you need -- just provide
+a filename and the format and it will take care of the rest, returning
+a genomic signal of the proper type.
+
+Adding support for a new format is straightforward:
+
+    * Write a new adapter for the format in :mod:`metaseq.filetype_adapters`
+    * Subclass one of the existing classes below, setting the `adapter`
+      attribute to be an instance of this new adapter
+    * Add the new class to the `_registry` dictionary to enable support for the
+      file format.
+
+Note that to support parallel processing and to avoid repeating code, these
+classes delegate their local_coverage methods to the
+:func:`metaseq.array_helpers._local_coverage` function.
+"""
+
 import os
 import sys
 import subprocess
@@ -10,15 +36,28 @@ from array_helpers import _array, _array_parallel, _local_coverage, \
 import filetype_adapters
 
 
+def supported_formats():
+    """
+    Returns list of formats supported by metaseq's genomic signal objects.
+    """
+    return _registry.keys()
+
+
 def genomic_signal(fn, kind='bam'):
     """
-    Factory function to make the correct kind of Signal object based on the
-    file format.
+    Factory function that makes the right class for the file format.
+
+    Typically you'll only need this function to create a new genomic signal
+    object.
+
+    :param fn: Filename
+    :param kind: String.  Format of the file; see metaseq.genomic_signal._registry.keys()
     """
     try:
         klass = _registry[kind.lower()]
     except KeyError:
-        raise ValueError('No support for %s format' % kind)
+        raise ValueError('No support for %s format, choices are %s' \
+                % (kind, _registry.keys()))
     m = klass(fn)
     m.kind = kind
     return m
@@ -29,23 +68,34 @@ class BaseSignal(object):
     Base class to represent objects from which genomic signal can be
     calculated/extracted.
 
-    __getitem__ uses the underlying adapter the instance was created with
-    (BamAdapter, BedAdapter, etc)
+    `__getitem__` uses the underlying adapter the instance was created with
+    (e.g., :class:`metaseq.filetype_adapters.BamAdapter` for
+    a :class:`BamSignal` object).
     """
     def __init__(self, fn):
         self.fn = fn
 
     def array(self, features, processes=None, chunksize=None, **kwargs):
         """
-        Creates a NumPy array of genomic signal for the region defined by each
-        feature in `features`, which is an iterable of pybedtools.Interval
-        objects.
+        Creates an MxN NumPy array of genomic signal for the region defined by
+        each feature in `features`, where M=len(features) and N=bins.
 
-        If `processes` is not None, then create the array in parallel, giving
-        each process chunks of length `chunksize` to work on.
+        :param features:
+            An iterable of pybedtools.Interval objects
 
-        Keyword args are passed to local_coverage() which performs the work for
-        each feature; see that method for more details.
+        :param processes:
+            Integer or None. If not None, then create the array in
+            parallel, giving each process chunks of length `chunksize` to work
+            on.
+
+        :param chunksize:
+            Integer.  `features` will be split into `chunksize` pieces, and
+            each piece will be given to a different process. The optimum value
+            is dependent on the size of the features and the underlying data
+            set, but `chunksize=100` is a good place to start.
+
+        Additional keyword args are passed to local_coverage() which performs
+        the work for each feature; see that method for more details.
         """
         if processes is not None:
             return _array_parallel(
@@ -94,6 +144,9 @@ class IntervalSignal(BaseSignal):
 
 class BamSignal(IntervalSignal):
     def __init__(self, fn):
+        """
+        Class for operating on BAM files.
+        """
         BaseSignal.__init__(self, fn)
         self._readcount = None
         self.adapter = filetype_adapters.BamAdapter(self.fn)
@@ -104,10 +157,12 @@ class BamSignal(IntervalSignal):
         reads.
 
         If a file self.bam + '.scale' exists, then just read the first line of
-        that file that doesn't start with a "#".
+        that file that doesn't start with a "#".  If such a file doesn't exist,
+        then it will be created with the number of reads as the first and only
+        line in the file.
 
-        Stores result in self._readcount so that the time-consuming part only
-        runs once; use force=True to force re-count.
+        The result is also stored in self._readcount so that the time-consuming
+        part only runs once; use force=True to force re-count.
         """
         # Already run?
         if self._readcount and not force:
@@ -146,12 +201,18 @@ class BamSignal(IntervalSignal):
 
 class BigBedSignal(IntervalSignal):
     def __init__(self, fn):
+        """
+        Class for operating on bigBed files.
+        """
         IntervalSignal.__init__(self, fn)
         self.adapter = filetype_adapters.BigBedAdapter(fn)
 
 
 class BedSignal(IntervalSignal):
     def __init__(self, fn):
+        """
+        Class for operating on BED files.
+        """
         IntervalSignal.__init__(self, fn)
         self.adapter = filetype_adapters.BedAdapter(fn)
 

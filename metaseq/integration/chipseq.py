@@ -1,3 +1,6 @@
+"""
+This module integrates parts of metaseq that are useful for ChIP-seq analysis.
+"""
 import gffutils
 from gffutils.helpers import asinterval
 import metaseq
