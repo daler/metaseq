@@ -19,7 +19,12 @@ exts = [Extension(
             ['metaseq/rebin.pyx'],
             include_dirs=[numpy.get_include()])]
 
-long_description = ""
+long_description = """
+metaseq is a Python framework for genomic data analysis (primarily
+high-throughput sequencing, but can be used for much more).  It ties
+together other frameworks like BEDTools/pybedtools, samtools/pysam, bx-python,
+HTSeq, gffutils, and matplotlib.
+"""
 setup(
         name='metaseq',
         version=version,
