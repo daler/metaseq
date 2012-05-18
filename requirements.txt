@@ -1,0 +1,8 @@
+bx-python
+numpy
+HTSeq
+matplotlib
+scipy
+scikits.learn
+pybedtools
+gffutils
