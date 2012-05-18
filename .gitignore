@@ -5,6 +5,7 @@
 *.c
 *.so
 build/*
+doc/build/*
 metaseq/test/examples/example_tsses.gtf
 
 # example files downloaded with download_data.py script:
