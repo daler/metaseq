@@ -18,19 +18,16 @@ all nearby genes.
 """
 
 import os
+
 import numpy as np
-import matplotlib
 from matplotlib import pyplot as plt
-import matplotlib.gridspec as gridspec
-from scikits.statsmodels.sandbox.stats.multicomp import fdrcorrection0
+
 import pybedtools
-from pybedtools.contrib import plotting
-import gffutils
-from gffutils.helpers import asinterval
-from gffutils.contrib.plotting import Gene
 import metaseq
 from metaseq.integration import chipseq
 from metaseq import colormap_adjust
+
+# Edit the settings files to make tweaks
 import ctcf_peaks_settings as settings
 import ctcf_peaks_helpers as helpers
 
