@@ -5,6 +5,7 @@
 *.c
 *.so
 build/*
+dist/*
 doc/build/*
 metaseq/test/examples/example_tsses.gtf
 
