@@ -115,19 +115,18 @@ class Chipseq(object):
         self.browser_local_coverage_kwargs.pop('chunksize')
 
         if not self.ip_array or force:
-            self.ip_array = self.ip.array(
-                    features, **local_coverage_kwargs)
+            self.ip_array = self.ip.array(features, **array_kwargs)
             self.ip_array /= self.ip.million_mapped_reads()
+
         if not self.control_array or force:
-            self.control_array = self.control.array(
-                    features, **local_coverage_kwargs)
+            self.control_array = self.control.array(features, **array_kwargs)
             self.control_array /= self.control.million_mapped_reads()
 
         if func is None:
             func = metaseq.plotutils.nice_log
         self.diffed_array = func(self.ip_array - self.control_array)
 
-    def plot(self, x, row_order=None):
+    def plot(self, x, row_order=None, imshow_kwargs=None):
         """
         Plot the scaled ChIP-seq data.
 
@@ -142,11 +141,13 @@ class Chipseq(object):
         extent = (min(x), max(x), 0, nrows)
         axes_info = metaseq.plotutils.matrix_and_line_shell(strip=True)
         fig, matrix_ax, line_ax, strip_ax, cbar_ax = axes_info
+        _imshow_kwargs = dict(aspect='auto', extent=extent, interpolation='nearest')
+        if imshow_kwargs:
+            _imshow_kwargs.update(imshow_kwargs)
+
         mappable = matrix_ax.imshow(
                 self.diffed_array[row_order],
-                aspect='auto',
-                extent=extent,
-                interpolation='nearest')
+                **_imshow_kwargs)
         plt.colorbar(mappable, cbar_ax)
         line_ax.plot(x, self.diffed_array.mean(axis=0))
         line, = strip_ax.plot(np.zeros((nrows,)), np.arange(nrows) + 0.5,
@@ -166,6 +167,13 @@ class Chipseq(object):
                 local_coverage_kwargs=self.browser_local_coverage_kwargs)
 
         fig.canvas.mpl_connect('pick_event', self.callback)
+
+        self.axes = {
+                'matrix_ax': matrix_ax,
+                 'strip_ax': strip_ax,
+                  'line_ax': line_ax,
+                  'cbar_ax': cbar_ax
+                }
 
     def callback(self, event):
         """
