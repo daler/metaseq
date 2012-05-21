@@ -114,11 +114,11 @@ class Chipseq(object):
         self.browser_local_coverage_kwargs.pop('processes')
         self.browser_local_coverage_kwargs.pop('chunksize')
 
-        if not self.ip_array or force:
+        if (self.ip_array is None) or force:
             self.ip_array = self.ip.array(features, **array_kwargs)
             self.ip_array /= self.ip.million_mapped_reads()
 
-        if not self.control_array or force:
+        if (self.control_array is None) or force:
             self.control_array = self.control.array(features, **array_kwargs)
             self.control_array /= self.control.million_mapped_reads()
 
@@ -191,6 +191,7 @@ class Chipseq(object):
             print feature,
             if browser:
                 self.minibrowser.plot(feature)
+
 
 if __name__ == "__main__":
 
