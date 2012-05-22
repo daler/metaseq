@@ -1,39 +1,8 @@
-.. contents::
 
-Intro
-=====
-The goal of :mod:`metaseq` is to tie together lots of existing software into
-a framework for exploring genomic data.  It focuses on flexibility and
-interactive exploration of data.
+.. _CTCF example:
 
-:mod:`metaseq` is a framework, sort of like a glue that brings together lot of
-great software commonly used for genomic data analysis.  It gives you the tools you
-need to do analyses that are difficult to do in any other way that I know of.
-It ties together other packages like:
-
-* :mod:`Pysam` for access to BAM and SAM files
-* :mod:`bx-python` for access to bigWig and bigBed files
-* :mod:`pybedtools`, which integrates BEDTools into Python, for fast "genome
-  algebra"
-* :mod:`matplotlib` for rich, interactive, highly customizable plotting
-* :mod:`gffutils` for hierarchical access to gene models
-* :mod:`Cython` for speed
-* :mod:`scikits.learn` for fast clustering
-* :mod:`NumPy` for large, fast arrays
-
-:mod:`metaseq` also:
-
-* Supplies a fast "rebinning" routine that is compiled in C for speed
-* Accepts bigBed, bigWig, BAM and SAM files as input for continuous data (and
-  with Tabix, accepts BED, GFF, GTF, VCF as well)
-* Provides a framework for "mini-browsers", zoomable and pannable Python-only
-  figures that show genomic signal and gene models and are spawned by clicking
-  on features of interest
-* Integrates RNA-seq and ChIP-seq data by using gffutils to convert between
-  gene IDs and coordinates as well as handle full gene models and plotting.
-
-Example
--------
+CTCF example
+------------
 The following example highlights the part of :mod:`metaseq` that deals with
 ChIP-seq data and demonstrates the "mini-browser" functionality.  The images
 below can be generated using the included example script, `ctcf_peaks.py` (in
