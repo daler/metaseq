@@ -1,3 +1,6 @@
+"""
+Module with handy utilities for plotting genomic signal
+"""
 from itertools import groupby
 import matplotlib
 from matplotlib import pyplot as plt
@@ -9,6 +12,8 @@ from scikits.statsmodels.sandbox.stats.multicomp import fdrcorrection0
 def nice_log(x):
     """
     Uses a log scale but with negative numbers.
+
+    :param x: NumPy array
     """
     neg = x < 0
     xi = np.log2(np.abs(x) + 1)
@@ -18,8 +23,10 @@ def nice_log(x):
 
 def tip_zscores(a):
     """
-    Calculates the "target identification from profiles" (TIP) zscores from
-    Cheng et al. 2001, Bioinformatics 27(23):3221-3227.
+    Calculates the "target identification from profiles" (TIP) zscores
+    from Cheng et al. 2001, Bioinformatics 27(23):3221-3227.
+
+    :param a: NumPy array, where each row is the signal for a feature.
     """
     weighted = a * a.mean(axis=0)
     scores = weighted.sum(axis=1)
@@ -29,7 +36,13 @@ def tip_zscores(a):
 
 def tip_fdr(a, alpha=0.05):
     """
-    Returns adjusted p-values for a particular `alpha`
+    Returns adjusted TIP p-values for a particular `alpha`.
+
+    (see :func:`tip_zscores` for more info)
+
+    :param a: NumPy array, where each row is the signal for a feature
+    :param alpha: False discovery rate
+
     """
     zscores = tip_zscores(a)
     pvals = stats.norm.pdf(zscores)
@@ -39,7 +52,18 @@ def tip_fdr(a, alpha=0.05):
 
 def prepare_logged(x, y):
     """
-    scales x and y so that they have zero values at the global min
+    Transform `x` and `y` to a log scale while dealing with zeros.
+
+    This function scales `x` and `y` such that the points that are zero in one
+    array are set to the min of the other array.
+    
+    When plotting expression data, frequently one sample will have reads in
+    a particular feature but the other sample will not.  Expression data also
+    tends to look better on a log scale, but log(0) is undefined and therefore
+    cannot be shown on a plot.  This function allows these points to be shown,
+    piled up along one side of the plot.
+
+    :param x,y: NumPy arrays
     """
     xi = np.log2(x)
     yi = np.log2(y)
@@ -63,9 +87,12 @@ def matrix_and_line_shell(figsize=(5, 12), strip=False):
     "strip" axis that parallels the matrix (and shares its y-axis) where data
     can be added to create callbacks.
 
-    Returns a tuple of (fig, matrix_ax, line_ax, strip_ax, colorbar_ax).
+    Returns a tuple of (fig, matrix_ax, line_ax, strip_ax, colorbar_ax) that
+    can then be used to plot upon.
 
-    If `strip` is False, then the returned `strip_ax` will be None.
+    :param figsize: Tuple of (width, height), in inches, for the figure to be
+    :param strip: If `strip` is False, then the returned `strip_ax` will be
+        None and no strip axes will be created.
     """
     fig = plt.figure(figsize=figsize)
 
@@ -118,8 +145,9 @@ def matrix_and_line_shell(figsize=(5, 12), strip=False):
 
 def clustered_sortind(x, k=10, scorefunc=None):
     """
-    Uses MiniBatch k-means clustering to cluster matrix `x` into `k` groups of
-    rows.  The clusters are then sorted by `scorefunc` -- by default, the max
+    Uses MiniBatch k-means clustering to cluster matrix into groups.
+
+    Each cluster of rows is then sorted by `scorefunc` -- by default, the max
     peak height when all rows in a cluster are averaged, or
     cluster.mean(axis=0).max().
 
@@ -130,6 +158,12 @@ def clustered_sortind(x, k=10, scorefunc=None):
 
     If `k` is a list or tuple, iteratively try each one and select the best
     with the lowest mean distance from cluster centers.
+
+    :param x: Matrix whose rows are to be clustered
+    :param k: Number of clusters to create or a list of potential clusters; the
+        optimum will be chosen from the list
+    :param scorefunc: Optional function for sorting rows within clusters.  Must
+        accept a single argument of a NumPy array.
     """
     try:
         from sklearn.cluster import MiniBatchKMeans
@@ -179,31 +213,28 @@ def input_ip_plots(iparr, inputarr, diffed, x, sort_ind,
                    hlines=None, vlines=None):
 
     """
-    All-in-one plotting function to make a 5-panel (IP, input, and diffed;
-    2 line plots showing averages) figure out of pre-computed data.
+    All-in-one plotting function to make a 5-panel figure.
+    
+    Panels are IP, input, and diffed; plus 2 line plots showing averages.
+    
+    :param iparr, inputarr: NumPy arrays constructed by a genomic_signal object
+    :param diffed: Difference of `iparr` and `inputarr`, but can be some other transformation.
+    :param x: Extent to use -- for TSSs, maybe something like
+        np.linspace(-1000, 1000, bins), or for just bin IDs, something like
+        `np.arange(bins)`.
 
-    `iparr` and `inputarr` are arrays constructed from MetaChip.array().
+    :param sort_ind: row order for each of the 3 panels -- usually interesting
+        to use `clustered_sortind` or `tip_zscores`
 
-    `diffed` is the difference of the two, possibly re-scaled.
-
-    `x` is the extent to use -- for TSSs, maybe something like
-    np.linspace(-1000, 1000, bins), or just bin IDs like np.arange(bins).
-
-    `sort_ind` is the row order for each of the 3 panels -- usually interesting
-    to use clustered_sortind.
-
-    `prefix` is used to prefix plot titles with '%(prefix)s IP", etc
-
-    `limits1` is a tuple passed to the Normalize function for IP and input.
-
-    `limits2` is a tuple passed tot he Normalize function for the diffed array
-
-    `hlines` is a list of (position, kwarg) tuples for plotting horizontal
-    lines.  Kwargs are passed directly to axhline. Useful for delimiting
-    clusters, if you used clustered_sortind.
-
-    `vlines` is a list of (position, kwargs) tuples.  A vertical line will be
-    plotted at each position using kwargs.
+    :param prefix: Used to prefix plot titles with '%(prefix)s IP", etc
+    :param limits1: Tuple passed to the Normalize function for IP and input.
+    :param limits2: Tuple passed tot he Normalize function for the diffed array
+    :param hlines: List of (position, kwarg) tuples for plotting horizontal
+        lines.  Kwargs are passed directly to axhline. Useful for delimiting
+        clusters, if you used `clustered_sortind` and have both `row_order` and
+        `breaks`.
+    :param vlines: List of (position, kwargs) tuples.  A vertical line will be
+        plotted at each position using kwargs.
     """
 
     # global min and max
