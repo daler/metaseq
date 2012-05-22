@@ -112,6 +112,23 @@ def bam2bigwig(bam, bigwig, genome, scale=1e6, verbose=False):
         sys.stderr.flush()
 
 
+def bedgraph2bigwig(bedgraph, bigwig, genome, verbose=False):
+    """
+    Create a bigWig from `bedgraph`.
+
+    :param bedgraph: Input filename of bedgraph
+    :param bigwig: Output filename of bigWig to create
+    :param genome: String assembly name of genome
+    :param verbose: Print messages to stderr
+    """
+    chromsizes = pybedtools.chromsizes_to_file(pybedtools.chromsizes(genome))
+    cmds = ['bedGraphToBigWig', bedgraph, chromsizes, bigwig]
+    p = subprocess.Popen(cmds, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = p.communicate()
+    if verbose:
+        sys.stderr.write('Completed bigWig %s\n' % bigwig)
+        sys.stderr.flush()
+
 def data_dir():
     """
     Returns the data directory that contains example files for tests and
