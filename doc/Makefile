@@ -42,6 +42,7 @@ clean:
 	-rm -rf $(BUILDDIR)/*
 
 html:
+	cp ../README.rst source
 	rm -r source/autodocs
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	cd $(BUILDDIR)/html && zip -r docs.zip . && cd -
