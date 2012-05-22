@@ -7,6 +7,7 @@ import pybedtools
 import itertools
 import numpy as np
 
+
 def compare(signal1, signal2, features, outfn, comparefunc=np.subtract,
         batchsize=5000, array_kwargs=None, verbose=False):
     """
@@ -55,8 +56,10 @@ def compare(signal1, signal2, features, outfn, comparefunc=np.subtract,
     :param signal1: A genomic_signal object
     :param signal2: Another genomic_signal object
     :param features: An iterable of pybedtools.Interval objects. A list will be
-        created for every `batchsize` features, so you need enough memory for that
-    :param comparefunc: Function to use to compare arrays (default is np.subtract)
+        created for every `batchsize` features, so you need enough memory for
+        this.
+    :param comparefunc: Function to use to compare arrays (default is
+        np.subtract)
     :param outfn: String filename to write bedGraph file
     :param batchsize: Number of features (each with length `windowsize` bp) to
         process at a time
@@ -120,15 +123,16 @@ if __name__ == "__main__":
                 'wgEncodeUwTfbsK562InputStdAlnRep1.bam'), 'bam')
 
     BINSIZE = 10
-    WINDOWSIZE=10000
+    WINDOWSIZE = 10000
     BINS = WINDOWSIZE / BINSIZE
     features = pybedtools.BedTool()\
             .window_maker(genome='hg19', w=WINDOWSIZE)\
-            .filter(lambda x: x.chrom=='chr19')
+            .filter(lambda x: x.chrom == 'chr19')
 
     result = compare(
             signal1=ip_bam,
             signal2=control_bam,
             features=features,
             outfn='diffed.bedgraph',
-            array_kwargs=dict(bins=BINS, processes=6, chunksize=50), verbose=True)
+            array_kwargs=dict(bins=BINS, processes=6, chunksize=50),
+            verbose=True)
