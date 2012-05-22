@@ -9,6 +9,7 @@ dist/*
 doc/build/*
 metaseq/test/examples/example_tsses.gtf
 doc/source/autodocs
+doc/source/README.rst
 
 # example files downloaded with download_data.py script:
 #
