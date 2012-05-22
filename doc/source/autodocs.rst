@@ -32,7 +32,6 @@ API docs
    metaseq.genomic_signal.BigBedSignal
    metaseq.genomic_signal.BedSignal
 
-
 ----
 
 :mod:`metaseq.integration`
@@ -59,9 +58,35 @@ API docs
 
     metaseq.integration.signal_comparison.compare
 
+----
+
+:mod:`metaseq.plotutils`
+------------------------
+
+.. automodule:: metaseq.plotutils
+
+.. rubric:: Functions
+
+.. autosummary::
+    :nosignatures:
+    :toctree: autodocs
+
+    metaseq.plotutils.nice_log
+    metaseq.plotutils.tip_zscores
+    metaseq.plotutils.tip_fdr
+    metaseq.plotutils.prepare_logged
+    metaseq.plotutils.matrix_and_line_shell
+    metaseq.plotutils.clustered_sortind
+    metaseq.plotutils.input_ip_plots
+
+----
+
+
 :mod:`metaseq.colormap_adjust`
 ------------------------------
 .. automodule:: metaseq.colormap_adjust
+
+.. rubric:: Functions
 
 .. autosummary::
     :nosignatures:
@@ -76,11 +101,13 @@ API docs
 
 ----
 
+
 :mod:`metaseq.minibrowser`
 --------------------------
-.. currentmodule:: metaseq.minibrowser
 
 .. automodule:: metaseq.minibrowser
+
+.. rubric:: Classes
 
 .. autosummary::
     :nosignatures:
@@ -98,6 +125,9 @@ API docs
 :mod:`metaseq.filetype_adapters`
 --------------------------------
 .. automodule:: metaseq.filetype_adapters
+
+.. rubric:: Classes
+
 .. autosummary::
     :nosignatures:
     :toctree: autodocs
