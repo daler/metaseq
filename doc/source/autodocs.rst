@@ -4,17 +4,29 @@ API docs
 
 
 .. currentmodule:: metaseq.genomic_signal
+
 :mod:`genomic_signal`
 ---------------------
 .. automodule:: metaseq.genomic_signal
 
 ----
 
+.. rubric:: Functions:
+
 .. autosummary::
    :nosignatures:
+   :toctree: autodocs
 
    metaseq.genomic_signal.genomic_signal
    metaseq.genomic_signal.supported_formats
+
+.. rubric:: Classes
+
+.. autosummary::
+   :nosignatures:
+   :toctree: autodocs
+   :template: auto_template.rst
+
    metaseq.genomic_signal.BigWigSignal
    metaseq.genomic_signal.BamSignal
    metaseq.genomic_signal.BigBedSignal
@@ -23,96 +35,64 @@ API docs
 
 ----
 
-.. autofunction:: metaseq.genomic_signal.genomic_signal
+:mod:`metaseq.integration`
+--------------------------
+
+.. automodule:: metaseq.integration
 
 ----
 
-.. autofunction:: metaseq.genomic_signal.supported_formats
-
-----
-
-.. autoclass:: BigWigSignal
-    :show-inheritance:
-    :inherited-members:
-    :members:
-
-----
-
-.. autoclass:: BamSignal
-    :show-inheritance:
-    :inherited-members:
-    :members:
-
-----
-
-.. autoclass:: BigBedSignal
-    :show-inheritance:
-    :inherited-members:
-    :members:
-
-----
-
-.. autoclass:: BedSignal
-    :show-inheritance:
-    :inherited-members:
-    :members:
-
-
-:mod:`integration`
-------------------
-.. currentmodule:: metaseq.integration
-
-Module that ties together the various parts of :mod:`metaseq`.
-
-----
+.. rubric:: Classes
 
 .. autosummary::
     :nosignatures:
+    :toctree: autodocs
+    :template: auto_template.rst
 
     metaseq.integration.chipseq.Chipseq
 
-:mod:`integration.chipseq`
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. automodule:: metaseq.integration.chipseq
+.. rubric:: Functions
+
+.. autosummary::
+    :nosignatures:
+    :toctree: autodocs
+
+    metaseq.integration.signal_comparison.compare
+
+:mod:`metaseq.colormap_adjust`
+------------------------------
+.. automodule:: metaseq.colormap_adjust
+
+.. autosummary::
+    :nosignatures:
+    :toctree: autodocs
+
+    metaseq.colormap_adjust.color_test
+    metaseq.colormap_adjust.smart_colormap
+    metaseq.colormap_adjust.cmap_discretize
+    metaseq.colormap_adjust.cmap_powerlaw_adjust
+    metaseq.colormap_adjust.cmap_center_adjust
+    metaseq.colormap_adjust.cmap_center_point_adjust
 
 ----
-
-.. autoclass:: metaseq.integration.chipseq.Chipseq
-
-
-
 
 :mod:`metaseq.minibrowser`
 --------------------------
 .. currentmodule:: metaseq.minibrowser
 
+.. automodule:: metaseq.minibrowser
 
 .. autosummary::
     :nosignatures:
+    :toctree: autodocs
+    :template: auto_template.rst
 
     metaseq.minibrowser.BaseMiniBrowser
     metaseq.minibrowser.SignalMiniBrowser
     metaseq.minibrowser.GeneModelMiniBrowser
 
-.. automodule:: metaseq.minibrowser
 
-----
 
-.. autoclass:: metaseq.minibrowser.BaseMiniBrowser
-    :show-inheritance:
-    :members:
-
-----
-
-.. autoclass:: metaseq.minibrowser.SignalMiniBrowser
-    :show-inheritance:
-    :members:
-
-----
-
-.. autoclass:: metaseq.minibrowser.GeneModelMiniBrowser
-    :show-inheritance:
-    :members:
 
 
 :mod:`metaseq.filetype_adapters`
@@ -120,6 +100,8 @@ Module that ties together the various parts of :mod:`metaseq`.
 .. automodule:: metaseq.filetype_adapters
 .. autosummary::
     :nosignatures:
+    :toctree: autodocs
+    :template: auto_template.rst
 
     metaseq.filetype_adapters.BaseAdapter
     metaseq.filetype_adapters.BamAdapter
