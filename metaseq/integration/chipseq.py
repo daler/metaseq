@@ -32,7 +32,8 @@ class Chipseq(object):
 
     Example usage:
 
-        >>> dbfn=metaseq.example_filename('Homo_sapiens.GRCh37.66.cleaned.gtf.db')
+        >>> dbfn=metaseq.example_filename(
+        ...        'Homo_sapiens.GRCh37.66.cleaned.gtf.db')
         >>> C = Chipseq(
         ...        ip_bam=metaseq.example_filename(
         ...            'wgEncodeUwTfbsK562CtcfStdAlnRep1.bam'),
@@ -57,7 +58,8 @@ class Chipseq(object):
         >>> C.diff_array(features=features, array_kwargs=local_coverage_kwargs)
 
         >>> # sort genes by
-        >>> row_order = np.argsort(metaseq.plotutils.tip_zscores(C.diffed_array))[::-1]
+        >>> row_order = np.argsort(
+        ...     plotutils.tip_zscores(C.diffed_array))[::-1]
         >>> C.plot(x=x, row_order=row_order)
         >>> plt.show()
 
@@ -91,10 +93,10 @@ class Chipseq(object):
         scaled control from scaled IP, applies `func(diffed)` to the diffed
         array, and finally sets `self.diffed_array` to be the result.
 
-        Arrays `self.ip` and `self.control` are set as well, and if `force=False`,
-        then previously-created arrays will be used instead of re-calculating
-        new ones.  This is useful if you want to easily try multiple `func`
-        functions without having to re-calculate the data.
+        Arrays `self.ip` and `self.control` are set as well, and if
+        `force=False`, then previously-created arrays will be used instead of
+        re-calculating new ones.  This is useful if you want to easily try
+        multiple `func` functions without having to re-calculate the data.
 
         Another side-effect is that `self.features` is set so that it can be
         accesed by other methods.
@@ -141,7 +143,8 @@ class Chipseq(object):
         extent = (min(x), max(x), 0, nrows)
         axes_info = metaseq.plotutils.matrix_and_line_shell(strip=True)
         fig, matrix_ax, line_ax, strip_ax, cbar_ax = axes_info
-        _imshow_kwargs = dict(aspect='auto', extent=extent, interpolation='nearest')
+        _imshow_kwargs = dict(
+                aspect='auto', extent=extent, interpolation='nearest')
         if imshow_kwargs:
             _imshow_kwargs.update(imshow_kwargs)
 

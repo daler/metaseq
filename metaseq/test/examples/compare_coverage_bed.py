@@ -72,14 +72,13 @@ def run_metaseq():
     CHUNKSIZE = 100
 
     # the trick is to use a single bin...
-    ms_array = m.array(windows, processes=PROCESSES, chunksize=CHUNKSIZE, bins=1)
+    ms_array = m.array(
+            windows, processes=PROCESSES, chunksize=CHUNKSIZE, bins=1)
 
     t1 = time.time()
     print 'completed in %.2fs' % (t1 - t0)
     sys.stdout.flush()
     return ms_array.ravel()
-
-
 
 
 if __name__ == "__main__":
