@@ -1,9 +1,11 @@
 """
 This module integrates parts of metaseq that are useful for ChIP-seq analysis.
 """
+from itertools import izip
 import gffutils
 from gffutils.helpers import asinterval
 import metaseq
+import pybedtools
 from metaseq.minibrowser import SignalMiniBrowser, GeneModelMiniBrowser
 import numpy as np
 from matplotlib import pyplot as plt
@@ -196,32 +198,160 @@ class Chipseq(object):
                 self.minibrowser.plot(feature)
 
 
+def estimate_shift(signal, genome=None, windowsize=5000, thresh=None,
+        nwindows=1000, maxlag=500, array_kwargs=None):
+    """
+    Experimental: cross-correlation to estimate the shift width of ChIP-seq
+    data
+
+    This can be interpreted as the binding site footprint.  TODO: the windows
+    should not be random, rather, they should be regions surrounding
+    a first-pass peak-finding.
+
+    For ChIP-seq, the plus and minus strand reads tend to be shifted away from
+    each other (shifted in the 5' direction).  Various ChIP-seq peak-callers
+    estimate this distance; this function provides a quick, tunable way to do
+    so using cross-correlation.  The resulting shift can then be incorporated
+    into subsequent calls to `array` by adding the shift_width kwarg.
+
+
+    :param signal: genomic_signal object
+    :param genome: String assembly for constructing windows
+    :param nwindows: Number of windows to compute cross-correlation on
+    :param windowsize: Size of each window to compute cross-correlation on.
+    :param thresh: Threshold read coverage across a region of size `windowsize`
+        to run cross-correlation on.  If `thresh` is small, then the cross
+        correlation can be noisy.
+    :param maxlag: Max shift to look for
+    :param array_kwargs: Kwargs passed directly to genomic_signal.array, with
+        the default of `bins=windowsize` for single-bp resolution, and
+        `read_strand` will be overwritten.
+
+    Returns a `maxlag*2+1` x `nwindows` matrix of cross-correlations.
+    """
+    if genome is None:
+        genome = signal.genome()
+
+    if array_kwargs is None:
+        array_kwargs = {}
+
+    array_kwargs.pop('read_strand', None)
+
+    if 'bins' not in array_kwargs:
+        array_kwargs['bins'] = windowsize
+
+    def add_strand(f, strand):
+        fields = f.fields[:]
+        while len(fields) < 5:
+            fields.append('.')
+        fields.append(strand)
+        return pybedtools.create_interval_from_list(fields)
+
+    windows = pybedtools.BedTool()\
+            .window_maker(genome=genome, w=windowsize)
+
+    random_subset = pybedtools.BedTool(windows[:nwindows])\
+            .shuffle(genome=genome).saveas()
+
+    plus_features = [i for i in random_subset.each(add_strand, '+')]
+    minus_features = [i for i in random_subset.each(add_strand, '-')]
+
+    plus = signal.array(
+            features=plus_features,
+            read_strand="+",
+            **array_kwargs).astype(float)
+    minus = signal.array(
+            features=minus_features,
+            read_strand="-",
+            **array_kwargs).astype(float)
+
+    # only do cross-correlation if you have enough reads to do so; otherwise
+    # it's just noise
+
+    THRESH = windowsize
+    enough = (plus.sum(axis=1) > THRESH) & (minus.sum(axis=1) > THRESH)
+
+    results = np.zeros((sum(enough), 2 * maxlag + 1))
+
+    for i, xy in enumerate(izip(plus[enough], minus[enough])):
+        x, y = xy
+        results[i] = xcorr(x, y, maxlag)
+
+    lags = np.arange(-maxlag, maxlag + 1)
+
+    return lags, results
+
+
+def xcorr(x, y, maxlags):
+    """
+    Streamlined version of matplotlib's `xcorr`, without the plots.
+
+    :param x, y: NumPy arrays to cross-correlate
+    :param maxlags: Max number of lags; result will be `2*maxlags+1` in length
+    """
+    xlen = len(x)
+    ylen = len(y)
+    assert xlen == ylen
+
+    c = np.correlate(x, y, mode=2)
+
+    # normalize
+    c /= np.sqrt(np.dot(x, x) * np.dot(y, y))
+
+    lags = np.arange(-maxlags, maxlags + 1)
+    c = c[xlen - 1 - maxlags:xlen + maxlags]
+
+    return c
+
+
 if __name__ == "__main__":
 
-    dbfn=metaseq.example_filename('Homo_sapiens.GRCh37.66.cleaned.gtf.db')
-    C = Chipseq(
-            ip_bam=metaseq.example_filename(
-                'wgEncodeUwTfbsK562CtcfStdAlnRep1.bam'),
-            control_bam=metaseq.example_filename(
-                'wgEncodeUwTfbsK562InputStdAlnRep1.bam'),
-            dbfn=dbfn)
+    if 1:
+        ip = metaseq.genomic_signal(
+                metaseq.example_filename(
+                    'wgEncodeUwTfbsK562CtcfStdAlnRep1.bam'), 'bam')
 
-    local_coverage_kwargs = dict(fragment_size=200, bins=100, chunksize=50, processes=6)
+        FRAGMENT_SIZE = 15.0
+        WINDOWSIZE = 5000
+        THRESH = WINDOWSIZE / FRAGMENT_SIZE
+        lags, shift = estimate_shift(
+                ip, nwindows=25000, maxlag=500, thresh=THRESH,
+                array_kwargs=dict(
+                    processes=8, chunksize=100,
+                    fragment_size=FRAGMENT_SIZE))
+        plt.plot(lags, shift.mean(axis=0))
+        plt.axvline(
+                lags[np.argmax(shift.mean(axis=0))],
+                linestyle='--', color='k')
 
-    # make some features to use
-    G = gffutils.FeatureDB(dbfn)
-    genes = G.features_of_type('gene')
-    features = []
-    for i in range(1000):
-        features.append(asinterval(genes.next()))
+    if 0:
+        dbfn = metaseq.example_filename(
+                'Homo_sapiens.GRCh37.66.cleaned.gtf.db')
+        C = Chipseq(
+                ip_bam=metaseq.example_filename(
+                    'wgEncodeUwTfbsK562CtcfStdAlnRep1.bam'),
+                control_bam=metaseq.example_filename(
+                    'wgEncodeUwTfbsK562InputStdAlnRep1.bam'),
+                dbfn=dbfn)
 
-    # x-axis for plots
-    x = np.arange(100)
+        local_coverage_kwargs = dict(
+                fragment_size=200, bins=100, chunksize=50, processes=6)
 
-    # Create the array
-    C.diff_array(features=features, array_kwargs=local_coverage_kwargs)
+        # make some features to use
+        G = gffutils.FeatureDB(dbfn)
+        genes = G.features_of_type('gene')
+        features = []
+        for i in range(1000):
+            features.append(asinterval(genes.next()))
 
-    # sort genes by
-    row_order = np.argsort(metaseq.plotutils.tip_zscores(C.diffed_array))[::-1]
-    C.plot(x=x, row_order=row_order)
+        # x-axis for plots
+        x = np.arange(100)
+
+        # Create the array
+        C.diff_array(features=features, array_kwargs=local_coverage_kwargs)
+
+        # sort genes by
+        row_order = np.argsort(
+                metaseq.plotutils.tip_zscores(C.diffed_array))[::-1]
+        C.plot(x=x, row_order=row_order)
     plt.show()
