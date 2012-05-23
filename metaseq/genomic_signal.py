@@ -151,6 +151,17 @@ class BamSignal(IntervalSignal):
         self._readcount = None
         self.adapter = filetype_adapters.BamAdapter(self.fn)
 
+    def genome(self):
+        """
+        "genome" dictionary ready for pybedtools, based on the BAM header.
+        """
+        # This gets the underlying pysam Samfile object
+        f = self.adapter.fileobj
+        d = {}
+        for ref, length in zip(f.references, f.lengths):
+            d[ref] = (0, length)
+        return d
+
     def million_mapped_reads(self, force=False):
         """
         Counts total reads in a BAM file and returns the result in millions of
