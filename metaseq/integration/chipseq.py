@@ -199,7 +199,7 @@ class Chipseq(object):
 
 
 def estimate_shift(signal, genome=None, windowsize=5000, thresh=None,
-        nwindows=1000, maxlag=500, array_kwargs=None):
+        nwindows=1000, maxlag=500, array_kwargs=None, verbose=False):
     """
     Experimental: cross-correlation to estimate the shift width of ChIP-seq
     data
@@ -226,6 +226,7 @@ def estimate_shift(signal, genome=None, windowsize=5000, thresh=None,
     :param array_kwargs: Kwargs passed directly to genomic_signal.array, with
         the default of `bins=windowsize` for single-bp resolution, and
         `read_strand` will be overwritten.
+    :param verbose: Be verbose.
 
     Returns a `maxlag*2+1` x `nwindows` matrix of cross-correlations.
     """
@@ -255,11 +256,21 @@ def estimate_shift(signal, genome=None, windowsize=5000, thresh=None,
 
     plus_features = [i for i in random_subset.each(add_strand, '+')]
     minus_features = [i for i in random_subset.each(add_strand, '-')]
+    if verbose:
+        sys.stderr.write("Getting plus-strand signal for %s regions...\n"\
+                % nwindows)
+        sys.stderr.flush()
 
     plus = signal.array(
             features=plus_features,
             read_strand="+",
             **array_kwargs).astype(float)
+
+    if verbose:
+        sys.stderr.write("Getting minus-strand signal for %s regions...\n"\
+                % nwindows)
+        sys.stderr.flush()
+
     minus = signal.array(
             features=minus_features,
             read_strand="-",
@@ -271,6 +282,10 @@ def estimate_shift(signal, genome=None, windowsize=5000, thresh=None,
     THRESH = windowsize
     enough = (plus.sum(axis=1) > THRESH) & (minus.sum(axis=1) > THRESH)
 
+    if verbose:
+        sys.stderr.write(
+                "Running cross-correlation on %s regions that passed "
+                "threshold\n" % sum(enough))
     results = np.zeros((sum(enough), 2 * maxlag + 1))
 
     for i, xy in enumerate(izip(plus[enough], minus[enough])):
