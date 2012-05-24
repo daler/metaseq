@@ -292,18 +292,15 @@ def estimate_shift(signal, genome=None, windowsize=5000, thresh=None,
             read_strand="-",
             **array_kwargs).astype(float)
 
-    # only do cross-correlation if you have enough reads to do so; otherwise
-    # it's just noise
-
-    THRESH = windowsize
-    enough = (plus.sum(axis=1) > THRESH) & (minus.sum(axis=1) > THRESH)
+    # only do cross-correlation if you have enough reads to do so
+    enough = ((plus.sum(axis=1) / windowsize) > thresh) \
+            & ((minus.sum(axis=1) / windowsize) > thresh)
 
     if verbose:
         sys.stderr.write(
                 "Running cross-correlation on %s regions that passed "
                 "threshold\n" % sum(enough))
     results = np.zeros((sum(enough), 2 * maxlag + 1))
-
     for i, xy in enumerate(izip(plus[enough], minus[enough])):
         x, y = xy
         results[i] = xcorr(x, y, maxlag)
