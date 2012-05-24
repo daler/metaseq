@@ -245,6 +245,9 @@ def estimate_shift(signal, genome=None, windowsize=5000, thresh=None,
 
         shift.shape[0]
     """
+    if thresh is None:
+        thresh = 0
+
     if genome is None:
         genome = signal.genome()
 
