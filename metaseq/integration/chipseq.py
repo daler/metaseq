@@ -204,23 +204,22 @@ def estimate_shift(signal, genome=None, windowsize=5000, thresh=None,
     Experimental: cross-correlation to estimate the shift width of ChIP-seq
     data
 
-    This can be interpreted as the binding site footprint.  TODO: the windows
-    should not be random, rather, they should be regions surrounding
-    a first-pass peak-finding.
+    This can be interpreted as the binding site footprint.
 
-    For ChIP-seq, the plus and minus strand reads tend to be shifted away from
-    each other (shifted in the 5' direction).  Various ChIP-seq peak-callers
-    estimate this distance; this function provides a quick, tunable way to do
-    so using cross-correlation.  The resulting shift can then be incorporated
-    into subsequent calls to `array` by adding the shift_width kwarg.
+    For ChIP-seq, the plus and minus strand reads tend to be shifted in the 5'
+    direction away from each other.  Various ChIP-seq peak-callers estimate
+    this distance; this function provides a quick, tunable way to do so using
+    cross-correlation.  The resulting shift can then be incorporated into
+    subsequent calls to `array` by adding the shift_width kwarg.
 
 
     :param signal: genomic_signal object
     :param genome: String assembly for constructing windows
     :param nwindows: Number of windows to compute cross-correlation on
     :param windowsize: Size of each window to compute cross-correlation on.
-    :param thresh: Threshold read coverage across a region of size `windowsize`
-        to run cross-correlation on.  If `thresh` is small, then the cross
+    :param thresh: Threshold read coverage to run cross-correlation on.  This
+        is likely to be a function of the fragment size provided in
+        `array_kwargs` `windowsize`.  If `thresh` is small, then the cross
         correlation can be noisy.
     :param maxlag: Max shift to look for
     :param array_kwargs: Kwargs passed directly to genomic_signal.array, with
@@ -228,7 +227,23 @@ def estimate_shift(signal, genome=None, windowsize=5000, thresh=None,
         `read_strand` will be overwritten.
     :param verbose: Be verbose.
 
-    Returns a `maxlag*2+1` x `nwindows` matrix of cross-correlations.
+    Returns lags and a `maxlag*2+1` x `nwindows` matrix of cross-correlations.
+
+    You can then plot the average cross-correlation function with::
+
+        plt.plot(lags, shift.mean(axis=0))
+
+    and get the distance to shift with::
+
+        d = lags[np.argmax(shift.mean(axis=0))]
+
+    and then plot that with::
+
+        plt.axvline(d, color='k', linestyle='--')
+
+    The number of windows with at least `thresh` coverage is::
+
+        shift.shape[0]
     """
     if genome is None:
         genome = signal.genome()
