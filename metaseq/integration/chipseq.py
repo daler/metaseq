@@ -333,26 +333,40 @@ def xcorr(x, y, maxlags):
 
 
 if __name__ == "__main__":
+    import sys
+    choices = ['xcorr', 'chipseq']
+    try:
+        examples = sys.argv[1:]
+    except IndexError:
+        print 'Choices are: ', choices
+        examples = []
 
-    if 1:
+    for ex in examples:
+        if ex not in choices:
+            raise ValueError('%s not in %s' % (ex, choices))
+
+    if 'xcorr' in examples:
         ip = metaseq.genomic_signal(
                 metaseq.example_filename(
                     'wgEncodeUwTfbsK562CtcfStdAlnRep1.bam'), 'bam')
 
-        FRAGMENT_SIZE = 15.0
+        NWINDOWS = 5000
+        FRAGMENT_SIZE = 1
         WINDOWSIZE = 5000
-        THRESH = WINDOWSIZE / FRAGMENT_SIZE
+        THRESH = FRAGMENT_SIZE / float(WINDOWSIZE) * 10
         lags, shift = estimate_shift(
-                ip, nwindows=25000, maxlag=500, thresh=THRESH,
+                ip, nwindows=NWINDOWS, maxlag=500, thresh=THRESH,
                 array_kwargs=dict(
                     processes=8, chunksize=100,
-                    fragment_size=FRAGMENT_SIZE))
+                    fragment_size=FRAGMENT_SIZE),
+                verbose=True)
         plt.plot(lags, shift.mean(axis=0))
         plt.axvline(
                 lags[np.argmax(shift.mean(axis=0))],
                 linestyle='--', color='k')
 
-    if 0:
+    if 'chipseq' in examples:
+        # Example files...
         dbfn = metaseq.example_filename(
                 'Homo_sapiens.GRCh37.66.cleaned.gtf.db')
         C = Chipseq(
@@ -362,24 +376,33 @@ if __name__ == "__main__":
                     'wgEncodeUwTfbsK562InputStdAlnRep1.bam'),
                 dbfn=dbfn)
 
-        local_coverage_kwargs = dict(
-                fragment_size=200, bins=100, chunksize=50, processes=6)
+        # Make some features to use (TSS +/- 1kb)
+        def generator():
+            G = gffutils.FeatureDB(dbfn)
+            genes = G.features_of_type('gene')
+            for i in range(5000):
+                yield asinterval(genes.next())
 
-        # make some features to use
-        G = gffutils.FeatureDB(dbfn)
-        genes = G.features_of_type('gene')
-        features = []
-        for i in range(1000):
-            features.append(asinterval(genes.next()))
+        from pybedtools.featurefuncs import TSS
+        features = pybedtools.BedTool(generator())\
+                .each(TSS, upstream=1000, downstream=1000)\
+                .saveas()
 
         # x-axis for plots
-        x = np.arange(100)
+        x = np.linspace(-500, 500, 100)
 
         # Create the array
-        C.diff_array(features=features, array_kwargs=local_coverage_kwargs)
+        C.diff_array(features=features,
+                array_kwargs=dict(
+                    fragment_size=200, bins=100, chunksize=50, processes=6))
 
-        # sort genes by
+        # sort genes by TIP zscore
         row_order = np.argsort(
                 metaseq.plotutils.tip_zscores(C.diffed_array))[::-1]
-        C.plot(x=x, row_order=row_order)
+
+        # Plot 'em using a nice red-to-blue colormap
+        from metaseq.colormap_adjust import smart_colormap
+        cmap = smart_colormap(C.diffed_array.min(), C.diffed_array.max())
+
+        C.plot(x=x, row_order=row_order, imshow_kwargs=dict(cmap=cmap))
     plt.show()
