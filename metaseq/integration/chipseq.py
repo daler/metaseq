@@ -272,15 +272,13 @@ def estimate_shift(signal, genome=None, windowsize=5000, thresh=None,
     random_subset = pybedtools.BedTool(windows[:nwindows])\
             .shuffle(genome=genome).saveas()
 
-    plus_features = [i for i in random_subset.each(add_strand, '+')]
-    minus_features = [i for i in random_subset.each(add_strand, '-')]
     if verbose:
         sys.stderr.write("Getting plus-strand signal for %s regions...\n"\
                 % nwindows)
         sys.stderr.flush()
 
     plus = signal.array(
-            features=plus_features,
+            features=random_subset,
             read_strand="+",
             **array_kwargs).astype(float)
 
@@ -290,7 +288,7 @@ def estimate_shift(signal, genome=None, windowsize=5000, thresh=None,
         sys.stderr.flush()
 
     minus = signal.array(
-            features=minus_features,
+            features=random_subset,
             read_strand="-",
             **array_kwargs).astype(float)
 
