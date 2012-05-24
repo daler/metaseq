@@ -2,15 +2,18 @@
 Benchmark script to compare metaseq to coverageBed on a very specific task
 (counting reads in windows).
 
-Currently metaseq is ~18x faster, but there are discrepancies where metaseq is
-not counting as many reads as bedtools.  Across the 5913 windows on chr19,
+Currently metaseq is ~18x faster (coverageBed = 66s, metaseq = 3.5s), but there
+are discrepancies where metaseq is not counting as many reads as bedtools for
+some windows.  Across the 5913 windows on chr19,
 
  * 904 (15%) of windows are off by one
  * 19 are off by 5 reads
- * 20 are off by 9-41 reads
+ * 20 are off by anywhere from 9 to 41 reads
 
 Diagnostic plots are generated at the end of the script.
 
+TODO: figure out what's causing the discrepancies (open vs closed intervals?
+Binning artifact? CIGAR operations?)
 """
 import os
 import sys
