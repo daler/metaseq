@@ -1,3 +1,5 @@
+#! /usr/bin/python
+
 # Download large data for running metaseq tests.
 #
 # > 1.6 GB of downloads
@@ -5,24 +7,55 @@
 import os
 import hashlib
 import gffutils
+import pybedtools
 
-# md5 hex digests for example files
-MD5 = """
-47b33c89d7dcc58067550c7c28796794  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeUwTfbs/wgEncodeUwTfbsK562CtcfStdAlnRep1.bam
-fa991dcf9da229136ed9ecdb710017d4  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeUwTfbs/wgEncodeUwTfbsK562CtcfStdAlnRep1.bam.bai
-0f3c15c9399e988b5b4e44a1c6d84cae  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeUwTfbs/wgEncodeUwTfbsK562CtcfStdHotspotsRep1.broadPeak.gz
-e8332ac71efe7497fe88b557ce628c9c  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeUwTfbs/wgEncodeUwTfbsK562CtcfStdPkRep1.narrowPeak.gz
-0290f47c68f51e4cfb256fb752cf3859  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeUwTfbs/wgEncodeUwTfbsK562CtcfStdRawRep1.bigWig
-87bf94aee05213d3abd24e4256b14d29  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeUwTfbs/wgEncodeUwTfbsK562InputStdAlnRep1.bam
-abd48cc689cd6efc49d2e42249540391  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeUwTfbs/wgEncodeUwTfbsK562InputStdAlnRep1.bam.bai
-171d60dcfd75ec4e646532c6688a1ef3  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeUwTfbs/wgEncodeUwTfbsK562InputStdRawRep1.bigWig
+# md5 hex digests for example files ===========================================
+
+# ENCODE data
+DATA = """
+ff6979ace9befe82e71b6a05609d36e1  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562RxlchV0416101AlnRep1.bam
+ab2f3d2efd5a0281092e7ad542dfad36  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562RxlchV0416101AlnRep1.bam.bai
+fa20b05ea082dcb063463b73b6a5af2f  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562RxlchV0416101RawRep1.bigWig
+b0716bd81170efe1fd0a8e411fb669d8  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562Atf3V0416101AlnRep1.bam
+6e8f85d3ab428ef95e3382237b1b2419  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562Atf3V0416101PkRep1.broadPeak.gz
+cf869424dc915e59d9f1b3f73d720883  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562Atf3V0416101AlnRep1.bam.bai
+fb3b9dc8e85636a3a1226d22f8c1dbec  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562Atf3V0416101RawRep1.bigWig
+"""
+
+# Ensembl annotations
+DATA += """
 25e76f628088daabd296447d06abe16b  ftp://ftp.ensembl.org/pub/release-66/gtf/homo_sapiens/Homo_sapiens.GRCh37.66.gtf.gz
 """
-MD5 = dict([(i.split()[1], i.split()[0]) for i in MD5.splitlines() if len(i) > 0])
 
-header = "[metachip download]"
+# Cufflinks results files from GSE33816, ATF3 samples
+#
+# GSM847565_SL2585 = uninduced rep 1
+# GSM847566_SL2592 = induced rep 1
+# GSM847567_SL4337 = uninduced rep 2
+# GSM847568_SL4326 = induced rep 2
+DATA += """
+4d02dcbd813a538bbbcf27b3732ef7aa  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847568/GSM847568_SL4326.gtf.gz
+a419d585a4a214885d6f249b5fc9a3a4  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847567/GSM847567_SL4337.gtf.gz
+ec23fb05d3b46cae6a3fcd38fd64a8c5  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847566/GSM847566_SL2592.gtf.gz
+45cffa476d6e74b144744ef515bb433e  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847565/GSM847565_SL2585.gtf.gz
+"""
 
-for full_path, md5 in MD5.items():
+# bigWig files from GSE33816, ATF3 samples
+DATA += """
+6449cb8a49a78a45de654aa8af54c732  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847568/GSM847568_SL4326.bw
+9e02208fec0f23b2859f44df4ad6d7af  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847567/GSM847567_SL4337.bw
+82919ea67c564f6786e29a9150255d2d  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847566/GSM847566_SL2592.bw
+b2e33ceb52bbd35629c0c666ad820ac7  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847565/GSM847565_SL2585.bw
+"""
+
+items = []
+for i in DATA.splitlines():
+    if (len(i) > 0) and not (i.startswith('#')):
+        items.append(i.strip().split())
+
+header = "[metaseq download]"
+
+for md5, full_path in items:
     fn = os.path.basename(full_path)
     if os.path.exists(fn):
         if hashlib.md5(open(fn).read()).hexdigest() == md5:
@@ -30,11 +63,13 @@ for full_path, md5 in MD5.items():
             continue
         else:
             print header, fn, "md5 hash does not match; downloading..."
+            os.unlink(fn)
     else:
         print header, fn, "does not exist, downloading..."
     cmds = [
             'wget',
-            full_path]
+            full_path,
+            ]
     os.system(' '.join(cmds))
 
 chroms_to_ignore = [
@@ -56,10 +91,9 @@ chroms_to_ignore = [
 'HSCHR6_MHC_DBB', 'HSCHR6_MHC_MANN', 'HSCHR6_MHC_MCF', 'HSCHR6_MHC_QBL',
 'HSCHR6_MHC_SSTO',]
 
-
 gtf_fn, gtf_md5 = ('Homo_sapiens.GRCh37.66.gtf.gz', '25e76f628088daabd296447d06abe16b')
-cleaned_fn, cleaned_md5 = ('Homo_sapiens.GRCh37.66.cleaned.gtf', '877208f1d322d0751600ccb1904b2d2d')
-db_fn, db_md5 = ('Homo_sapiens.GRCh37.66.cleaned.gtf.db', '65d4014fee14198062e94bc3a9f18d18')
+cleaned_fn, cleaned_md5 = ('Homo_sapiens.GRCh37.66.cleaned.gtf', '6964313797754c68ea0e892abbfdc9d4')
+db_fn, db_md5 = ('Homo_sapiens.GRCh37.66.cleaned.gtf.db', 'bf0a69d0787d01d0e3241ee23b1c66e3')
 
 if os.path.exists(cleaned_fn) and hashlib.md5(open(cleaned_fn).read()).hexdigest() == cleaned_md5:
     print header, cleaned_fn, "up to date"
@@ -70,4 +104,32 @@ else:
 if os.path.exists(db_fn) and hashlib.md5(open(db_fn).read()).hexdigest() == db_md5:
     print header, db_fn, "up to date"
 else:
+    os.unlink(db_fn)
     gffutils.create_db(cleaned_fn, db_fn, verbose=True, force=True)
+
+
+# convert Cufflinks output GTF files into tables
+fns = [
+    ('5c601c78e89e8d76fa998e2462ea718f', 'GSM847568_SL4326.gtf.gz'),
+    ('9616609cd5c2ef012341471c07988e69', 'GSM847567_SL4337.gtf.gz'),
+    ('b46eb07e01abc6c76c096896582f4a2d', 'GSM847566_SL2592.gtf.gz'),
+    ('845cf7e32c61703781cf3316b9452029', 'GSM847565_SL2585.gtf.gz'),
+    ]
+for md5, fn in fns:
+    table = fn.replace('.gtf.gz', '.table')
+    if os.path.exists(table) and hashlib.md5(open(table).read()).hexdigest() == md5:
+        print header, table, 'up to date'
+        continue
+
+    else:
+        print header, "Converting Cufflinks GTF %s to table" % fn
+        fout = open(table, 'w')
+        fout.write('id\tscore\tfpkm\n')
+        x = pybedtools.BedTool(fn)
+        seen = set()
+        for i in x:
+            accession = i['transcript_id'].split('.')[0]
+            if accession not in seen:
+                seen.update([accession])
+                fout.write('\t'.join([accession, i.score, i['FPKM']]) + '\n')
+        fout.close()
