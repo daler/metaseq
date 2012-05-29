@@ -14,7 +14,6 @@ from pandas import read_table
 import numpy as np
 from matplotlib import pyplot as plt
 
-import metaseq
 import gffutils
 from gffutils.helpers import asinterval
 import pybedtools
@@ -312,27 +311,26 @@ def panel_splom(p, val='baseMeanA', hist_kwargs=None, **kwargs):
 
 
 if __name__ == "__main__":
-    import matplotlib.pyplot as plt
-    import numpy as np
+    from metaseq import example_filename
 
-    dbfn = metaseq.example_filename('Homo_sapiens.GRCh37.66.cleaned.gtf.db')
+    dbfn = example_filename('Homo_sapiens.GRCh37.66.cleaned.gtf.db')
     db = gffutils.FeatureDB(dbfn)
 
     p = pandas.Panel(
             {
                 'uninduced_1': deseq_dataframe(
-                    metaseq.example_filename('GSM847565_SL2585.table'),
+                    example_filename('GSM847565_SL2585.table'),
                     index_col='id', db=db),
 
                 'induced_1': deseq_dataframe(
-                    metaseq.example_filename('GSM847566_SL2592.table'),
+                    example_filename('GSM847566_SL2592.table'),
                     index_col='id', db=db),
                 'uninduced_2': deseq_dataframe(
-                    metaseq.example_filename('GSM847567_SL4337.table'),
+                    example_filename('GSM847567_SL4337.table'),
                     index_col='id', db=db),
 
                 'induced_2': deseq_dataframe(
-                    metaseq.example_filename('GSM847568_SL4326.table'),
+                    example_filename('GSM847568_SL4326.table'),
                     index_col='id', db=db),
                 })
 
@@ -340,7 +338,7 @@ if __name__ == "__main__":
 
     features = dataframe_features(p['uninduced_1'], db)
     strong_peaks = pybedtools.BedTool(
-            metaseq.example_filename('wgEncodeHaibTfbsK562Atf3V0416101PkRep1.broadPeak.gz'))\
+            example_filename('wgEncodeHaibTfbsK562Atf3V0416101PkRep1.broadPeak.gz'))\
                     .filter(lambda x: int(x.score) > 800)
 
     features_with_peaks = features\
