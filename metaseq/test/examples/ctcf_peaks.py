@@ -53,9 +53,11 @@ RUN_TYPE = 'TSS'
 try:
     chip = chipseq.Chipseq(
             ip_bam=metaseq.example_filename(
-                'wgEncodeUwTfbsK562CtcfStdAlnRep1.bam'),
+                'wgEncodeHaibTfbsK562Atf3V0416101AlnRep1.bam'
+                ),
             control_bam=metaseq.example_filename(
-                'wgEncodeUwTfbsK562InputStdAlnRep1.bam'),
+                'wgEncodeHaibTfbsK562RxlchV0416101AlnRep1.bam'
+                ),
             dbfn=metaseq.example_filename(
                 'Homo_sapiens.GRCh37.66.cleaned.gtf.db')
             )
