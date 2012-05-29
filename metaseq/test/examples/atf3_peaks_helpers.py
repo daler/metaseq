@@ -1,5 +1,5 @@
 """
-Various helper functions for the ctcf_peaks example script -- mostly for
+Various helper functions for the atf3_peaks example script -- mostly for
 generating and manipulating features
 """
 import pybedtools

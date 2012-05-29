@@ -28,8 +28,8 @@ from metaseq.integration import chipseq
 from metaseq import colormap_adjust
 
 # Edit the settings files to make tweaks
-import ctcf_peaks_settings as settings
-import ctcf_peaks_helpers as helpers
+import atf3_peaks_settings as settings
+import atf3_peaks_helpers as helpers
 
 # global list that will store spawned figs, so you can use close_figs() to
 # close them all
