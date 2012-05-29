@@ -32,6 +32,27 @@ API docs
    metaseq.genomic_signal.BigBedSignal
    metaseq.genomic_signal.BedSignal
 
+
+----
+
+:mod:`metaseq.tables`
+---------------------
+.. automodule:: metaseq.tables
+
+.. rubric:: Functions
+
+.. autosummary::
+    :nosignatures:
+    :toctree: autodocs
+
+    metaseq.tables.dataframe_features
+    metaseq.tables.deseq_dataframe
+    metaseq.tables.panel_splom
+    metaseq.tables.scatter
+    metaseq.tables.enriched
+    metaseq.tables.clean_unknown
+    metaseq.tables.skiprows
+
 ----
 
 :mod:`metaseq.integration`
@@ -80,7 +101,6 @@ API docs
     metaseq.plotutils.input_ip_plots
 
 ----
-
 
 :mod:`metaseq.colormap_adjust`
 ------------------------------
