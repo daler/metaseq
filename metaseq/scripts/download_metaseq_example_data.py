@@ -4,10 +4,14 @@
 #
 # > 1.6 GB of downloads
 
+import sys
 import os
 import hashlib
 import gffutils
 import pybedtools
+import metaseq
+
+DATA_DIR = metaseq.data_dir()
 
 # md5 hex digests for example files ===========================================
 
@@ -55,23 +59,6 @@ for i in DATA.splitlines():
 
 header = "[metaseq download]"
 
-for md5, full_path in items:
-    fn = os.path.basename(full_path)
-    if os.path.exists(fn):
-        if hashlib.md5(open(fn).read()).hexdigest() == md5:
-            print header, fn, "up to date"
-            continue
-        else:
-            print header, fn, "md5 hash does not match; downloading..."
-            os.unlink(fn)
-    else:
-        print header, fn, "does not exist, downloading..."
-    cmds = [
-            'wget',
-            full_path,
-            ]
-    os.system(' '.join(cmds))
-
 chroms_to_ignore = [
 'MT', 'Y', 'GL000191.1', 'GL000192.1', 'GL000193.1', 'GL000194.1',
 'GL000195.1', 'GL000199.1', 'GL000201.1', 'GL000204.1', 'GL000205.1',
@@ -91,45 +78,73 @@ chroms_to_ignore = [
 'HSCHR6_MHC_DBB', 'HSCHR6_MHC_MANN', 'HSCHR6_MHC_MCF', 'HSCHR6_MHC_QBL',
 'HSCHR6_MHC_SSTO',]
 
-gtf_fn, gtf_md5 = ('Homo_sapiens.GRCh37.66.gtf.gz', '25e76f628088daabd296447d06abe16b')
-cleaned_fn, cleaned_md5 = ('Homo_sapiens.GRCh37.66.cleaned.gtf', '6964313797754c68ea0e892abbfdc9d4')
-db_fn, db_md5 = ('Homo_sapiens.GRCh37.66.cleaned.gtf.db', 'bf0a69d0787d01d0e3241ee23b1c66e3')
+gtf_fn, gtf_md5 = (os.path.join(DATA_DIR, 'Homo_sapiens.GRCh37.66.gtf.gz'), '25e76f628088daabd296447d06abe16b')
+cleaned_fn, cleaned_md5 = (os.path.join(DATA_DIR, 'Homo_sapiens.GRCh37.66.cleaned.gtf'), '6964313797754c68ea0e892abbfdc9d4')
+db_fn, db_md5 = (os.path.join(DATA_DIR, 'Homo_sapiens.GRCh37.66.cleaned.gtf.db'), 'bf0a69d0787d01d0e3241ee23b1c66e3')
 
-if os.path.exists(cleaned_fn) and hashlib.md5(open(cleaned_fn).read()).hexdigest() == cleaned_md5:
-    print header, cleaned_fn, "up to date"
-else:
-    print header, "cleaning GTF..."
-    gffutils.clean_gff(fn=gtf_fn, newfn=cleaned_fn, addchr=True, sanity_check=True, chroms_to_ignore=chroms_to_ignore)
+def _up_to_date(md5, fn):
+    if os.path.exists(fn):
+        print header, 'calculating md5 for %s...' % os.path.basename(fn),
+        sys.stdout.flush()
+        if hashlib.md5(open(fn).read()).hexdigest() == md5:
+            print 'up to date'
+            return True
+        else:
+            print 'md5sum does not match.'
+            os.unlink(fn)
+            return False
 
-if os.path.exists(db_fn) and hashlib.md5(open(db_fn).read()).hexdigest() == db_md5:
-    print header, db_fn, "up to date"
-else:
-    os.unlink(db_fn)
-    gffutils.create_db(cleaned_fn, db_fn, verbose=True, force=True)
+
+def _just_download():
+    for md5, full_path in items:
+        fn = os.path.join(DATA_DIR, os.path.basename(full_path))
+        if not _up_to_date(md5, fn):
+            print header, fn, "downloading..."
+            cmds = [
+                    'wget',
+                    full_path,
+                    ]
+            os.system(' '.join(cmds))
 
 
-# convert Cufflinks output GTF files into tables
-fns = [
-    ('5c601c78e89e8d76fa998e2462ea718f', 'GSM847568_SL4326.gtf.gz'),
-    ('9616609cd5c2ef012341471c07988e69', 'GSM847567_SL4337.gtf.gz'),
-    ('b46eb07e01abc6c76c096896582f4a2d', 'GSM847566_SL2592.gtf.gz'),
-    ('845cf7e32c61703781cf3316b9452029', 'GSM847565_SL2585.gtf.gz'),
-    ]
-for md5, fn in fns:
-    table = fn.replace('.gtf.gz', '.table')
-    if os.path.exists(table) and hashlib.md5(open(table).read()).hexdigest() == md5:
-        print header, table, 'up to date'
-        continue
+def _gffutils_prep():
+    if not _up_to_date(cleaned_md5, cleaned_fn):
+        print header, "cleaning GTF..."
+        gffutils.clean_gff(fn=gtf_fn, newfn=cleaned_fn, addchr=True, sanity_check=True, chroms_to_ignore=chroms_to_ignore)
 
-    else:
-        print header, "Converting Cufflinks GTF %s to table" % fn
-        fout = open(table, 'w')
-        fout.write('id\tscore\tfpkm\n')
-        x = pybedtools.BedTool(fn)
-        seen = set()
-        for i in x:
-            accession = i['transcript_id'].split('.')[0]
-            if accession not in seen:
-                seen.update([accession])
-                fout.write('\t'.join([accession, i.score, i['FPKM']]) + '\n')
-        fout.close()
+    if not _up_to_date(db_md5, db_fn):
+        os.unlink(db_fn)
+        gffutils.create_db(cleaned_fn, db_fn, verbose=True, force=True)
+
+
+def _cufflinks_conversion():
+    # convert Cufflinks output GTF files into tables
+    fns = [
+        ('5c601c78e89e8d76fa998e2462ea718f', 'GSM847568_SL4326.gtf.gz'),
+        ('9616609cd5c2ef012341471c07988e69', 'GSM847567_SL4337.gtf.gz'),
+        ('b46eb07e01abc6c76c096896582f4a2d', 'GSM847566_SL2592.gtf.gz'),
+        ('845cf7e32c61703781cf3316b9452029', 'GSM847565_SL2585.gtf.gz'),
+        ]
+    for md5, fn in fns:
+        fn = os.path.join(DATA_DIR, fn)
+        table = fn.replace('.gtf.gz', '.table')
+        if not _up_to_date(md5, table):
+            print header, "Converting Cufflinks GTF %s to table" % fn
+            fout = open(table, 'w')
+            fout.write('id\tscore\tfpkm\n')
+            x = pybedtools.BedTool(fn)
+            seen = set()
+            for i in x:
+                accession = i['transcript_id'].split('.')[0]
+                if accession not in seen:
+                    seen.update([accession])
+                    fout.write('\t'.join([accession, i.score, i['FPKM']]) + '\n')
+            fout.close()
+
+def download_and_prep_data():
+    _just_download()
+    _gffutils_prep()
+    _cufflinks_conversion()
+
+if __name__ == "__main__":
+    download_and_prep_data()

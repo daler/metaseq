@@ -34,6 +34,7 @@ setup(
         install_requires=['bx-python', 'numpy', 'HTSeq', 'matplotlib', 'scipy', 'scikits.learn', 'pybedtools', 'gffutils'],
         packages=['metaseq', 'metaseq.test', 'metaseq.test.data'],
         package_data={'metaseq':['test/data/*']},
+        scripts=['metaseq/scripts/download_metaseq_example_data.py'],
         author='Ryan Dale',
         author_email='dalerr@niddk.nih.gov',
         url='http://github.com/daler/metaseq',
