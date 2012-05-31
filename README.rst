@@ -5,6 +5,9 @@ Metaseq
     The main documentation for `metaseq` can be found at
     http://packages.python.org/metaseq/
 
+    See http://packages.python.org/metaseq/example_session.html for an example
+    session.
+
 The goal of `metaseq` is to tie together lots of existing software into
 a framework for exploring genomic data.  It focuses on flexibility and
 interactive exploration of data.
