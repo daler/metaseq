@@ -9,6 +9,21 @@ import pybedtools
 from metaseq.minibrowser import SignalMiniBrowser, GeneModelMiniBrowser
 import numpy as np
 from matplotlib import pyplot as plt
+import matplotlib
+
+
+class ChipseqMiniBrowser(GeneModelMiniBrowser):
+    def __init__(self, genomic_signal_objs, db, **kwargs):
+        super(ChipseqMiniBrowser, self).__init__(genomic_signal_objs, db, **kwargs)
+
+    def plot(self, feature):
+        super(ChipseqMiniBrowser, self).plot(feature)
+        ax1, ax2 = self.fig.axes
+        ax1.legend(loc='best')
+        ax1.set_ylabel('RPMMR')
+        ax1.xaxis.set_visible(False)
+        ax2.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%d'))
+        ax2.set_xlabel(feature.chrom)
 
 
 class Chipseq(object):
@@ -86,7 +101,8 @@ class Chipseq(object):
                 linestyle='None', picker=5)
         self.browser_plotting_kwargs = [
                 dict(color='r', label='IP'),
-                dict(color='k', linestyle=':', label='control')]
+                dict(color='k', linestyle=':', label='control')
+                ]
 
     def diff_array(self, features, force=True, func=None,
             array_kwargs=dict()):
@@ -165,7 +181,7 @@ class Chipseq(object):
         matrix_ax.yaxis.set_visible(False)
         matrix_ax.xaxis.set_visible(False)
 
-        self.minibrowser = GeneModelMiniBrowser(
+        self.minibrowser = ChipseqMiniBrowser(
                 [self.ip, self.control],
                 db=self.db,
                 plotting_kwargs=self.browser_plotting_kwargs,
@@ -173,6 +189,7 @@ class Chipseq(object):
 
         fig.canvas.mpl_connect('pick_event', self.callback)
 
+        self.fig = fig
         self.axes = {
                 'matrix_ax': matrix_ax,
                  'strip_ax': strip_ax,
