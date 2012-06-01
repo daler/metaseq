@@ -45,6 +45,7 @@ class ResultsTable(object):
         self.data = data
         self.dbfn = dbfn
         self.gffdb = gffutils.FeatureDB(dbfn)
+        self._cached_lookup = None
 
     @property
     def colnames(self):
@@ -221,13 +222,13 @@ class ResultsTable(object):
         """
         Ensure identical sorting of this object's data with another.
 
-        Returns `other`, sorted the same way as `self`.
+        Returns `self`, sorted the same way as `other`.
 
         :param other: Another instance of a ResultsTable or ResultsTable
             subclass.
         """
-        other_ind = other.gene_ind(self[self.id_column])
-        return other[other_ind]
+        ind = self.gene_ind(other[other.id_column])
+        return self[ind]
 
     def scatter(self, x, y, xfunc=None, yfunc=None, xscale=None,
             yscale=None, xlab=None, ylab=None, genes_to_highlight=None,
