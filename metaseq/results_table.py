@@ -410,7 +410,7 @@ class ResultsTable(object):
         common = these.intersection(those)
         return list(common)
 
-    def gene_ind(self, genes):
+    def gene_ind(self, genes, idx=True):
         """
         Returns an array of indices for `genes`.
 
