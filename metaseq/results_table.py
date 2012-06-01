@@ -1,3 +1,11 @@
+"""
+Module for working with tables of data, typically with at least one columns
+containing gene accessions.
+
+Results tables saved from DESeq are a perfect example of this, but any data can
+be used.
+"""
+
 import sys
 import tempfile
 from matplotlib.mlab import csv2rec
@@ -10,21 +18,37 @@ from scipy import stats
 from rpy2.robjects import r
 import rpy2.robjects as RO
 import random
-from helpers import gfffeature_to_interval
+from gffutils.helpers import asinterval
 
 
 class ResultsTable(object):
-    def __init__(self, data, dbfn=None):
+    def __init__(self, data, dbfn=None, id_column='id', csv2rec_kwargs=None):
         """
-        If `data` is a string, assume it's a filename and load that.
-        Otherwise, assume it's a record array.
+        Generic class for handling tables of data.
+
+        :param data: If a string, assume it's a filename and load that using
+            `csv2rec_kwargs`. Otherwise, assume it's a record array.
+        :param dbfn: Filename for a `gffutils.FeatureDB`. Optional, but really
+            handy.
+        :param id_column: Which column contains gene accessions that can be
+            looked up in the `gffutils.FeatureDB`.
+        :param csv2rec_kwargs: Kwargs passed to `matplotlib.mlab.csv2rec`.
+            Default is dict(delimiter="\\t", missing="NA").
         """
+        if csv2rec_kwargs is None:
+            csv2rec_kwargs = dict(delimiter='\t', missing='NA')
+
         if isinstance(data, basestring):
-            data = csv2rec(data, delimiter='\t', missing='NA')
+            data = csv2rec(data, **csv2rec_kwargs)
+
+        self.id_column = id_column
         self.data = data
         self.dbfn = dbfn
         self.gffdb = gffutils.FeatureDB(dbfn)
-        self._gene_ind_cache = None
+
+    @property
+    def colnames(self):
+        return self.data.dtype.names
 
     def __repr__(self):
         return "<%s instance with %s items>" % (self.__class__.__name__,
@@ -50,47 +74,29 @@ class ResultsTable(object):
         return len(self.data)
 
     def __getitem__(self, ind):
-        """
-        Return a copy of self, attaching a GFFDB etc
-        """
+        orig_kwargs = dict(dbfn=self.dbfn, id_column=self.id_column)
         if isinstance(ind, int):
             if ind > len(self) - 1:
                 raise IndexError
-            new_instance = ResultsTable(self.data.copy()[ind:ind + 1],
-                    dbfn=self.dbfn)
+            new_instance = self.__class__(
+                    self.data[ind:ind + 1].copy(), **orig_kwargs)
         else:
-            new_instance = ResultsTable(self.data.copy()[ind], dbfn=self.dbfn)
+            new_instance = self.__class__(self.data[ind].copy(), **orig_kwargs)
         return new_instance
 
     def __getattr__(self, attr):
         try:
             return getattr(self.data, attr)
         except AttributeError:
-            raise AttributeError('ResultsTable has no attribute "%s"' % attr)
-
-    def strip_deseq_nongenes(self):
-        """
-        DESeq adds "no_feature", "not_aligned", etc. features.  This method
-        removes them for better plotting.
-        """
-        to_remove = [
-                'no_feature',
-                'not_aligned',
-                'alignment_not_unique',
-                'ambiguous',
-                'too_low_aQual']
-        remove_ind = self.gene_ind(to_remove)
-        keep_ind = []
-        for i in range(len(self)):
-            if i not in remove_ind:
-                keep_ind.append(i)
-        return self[keep_ind]
+            raise AttributeError('%s has no attribute "%s"' \
+                    % (self.__class__.__name__, attr))
 
     def strip_unknown_features(self):
         """
-        Remove features not found in the GFFDB.  This will typically include
-        'ambiguous', 'no_feature', etc, but can also be useful if the GFFDB was
-        created from a different one than was used to count reads
+        Remove features not found in the `gffutils.FeatureDB`.  This will
+        typically include 'ambiguous', 'no_feature', etc, but can also be
+        useful if the database was created from a different one than was used
+        to create the table.
         """
         ind = []
         for i, gene_id in enumerate(self.id):
@@ -102,70 +108,27 @@ class ResultsTable(object):
         ind = np.array(ind)
         return self[ind]
 
-    def gene_data(self, gene_id):
-        if self._gene_ind_cache is None:
-            self._gene_ind_cache = {}
-            for i, name in enumerate(self.id):
-                self._gene_ind_cache[name] = i
-        try:
-            return self[self._gene_ind_cache[gene_id]]
-        except KeyError:
-            raise KeyError('No gene %s found' % gene_id)
-
-    def enriched(self, pval=0.05, column='padj'):
+    def random_subset(self, n, idx=True):
         """
-        Index of enriched genes at `pval` significance
+        Random subset of all rows
+
+        :param n: Number of rows to return
+        :param idx: If True, return the index; if False, returns a subsetted
+            version.
         """
-        ind1 = self.data[column] <= pval
-        ind2 = self.log2foldchange > 0
-        return ind1 & ind2
-
-    def disenriched(self, pval=0.05, column='padj'):
-        """
-        Index of disenriched genes at `pval` significance
-        """
-        ind1 = self.data[column] <= pval
-        ind2 = self.log2foldchange < 0
-        return ind1 & ind2
-
-    def nonsig(self, pval=0.05, column='padj'):
-        """
-        Index of non-significant genes at `pval` significance
-        """
-        return (self.data[column] > pval) & (self.basemean > 0)
-
-    def random_subset(self, n):
-        """
-        Random subset of all available genes
-        """
-        return random.sample(xrange(len(self.data)), n)
-
-    def random_nonsig(self, pval, n):
-        """
-        Random subset of nonsignifcant genes at `pval` significance
-        """
-        # get inds of nonsig as bool
-        ind1 = self.nonsig(pval)
-
-        # indices as integers
-        ind2 = np.nonzero(ind1)[0]
-
-        # indices to keep
-        keepers = random.sample(ind2, n)
-
-        # array of all False
-        final_ind = np.ones_like(ind1) == 0
-
-        # Only set the keepers to True
-        final_ind[keepers] = True
-
-        return final_ind
-
-    @property
-    def colnames(self):
-        return self.data.dtype.names
+        ind = random.sample(xrange(len(self.data)), n)
+        if idx:
+            return ind
+        return self[ind]
 
     def sorted_by(self, attr, absolute=False, reverse=False):
+        """
+        Re-sort by an attribute and return a copy.
+
+        :param attr: Attribute to sort by; must be a column in `self.colnames`
+        :param absolute: If True, then ignore sign when sorting
+        :param reverse: If True, highest values are first
+        """
         vals = getattr(self, attr)
         if absolute:
             vals = abs(vals)
@@ -226,225 +189,151 @@ class ResultsTable(object):
                  transform=ax2.transAxes)
         return results, fig
 
-    def features_to_gff(self, fn=None):
+    def features(self, ignore_unknown=False):
         """
-        Save features as a GFF file on disk as `fn`. If `fn` is None, then save
-        to a temp file.  Always returns the filename.
-        """
-        if fn is None:
-            fn = tempfile.mktemp()
-        fout = open(fn, 'w')
-        for gene_id in self.data.id:
-            try:
-                gene = self.gffdb[gene_id]
-                fout.write(str(gene) + '\n')
-            except gffutils.FeatureNotFoundError:
-                pass
-        fout.close()
-        return fn
+        Generator of currently-selected features.
 
-    def features(self):
-        """
-        Generator of currently-selected features from the GFF database.  Raises
-        a warning if you haven't yet attached a GFFDB to this instance.
+        Looks up each feature in the attached `gffutils.FeatureDB` and converts
+        it into a `pybedtools.Interval` object for use with `pybedtools`.
+        Raises a warning if you haven't yet attached a `gffutils.FeatureDB` to
+        this instance.
+
+        :param ignore_unknown: If `ignore_unknown=False` then an exception will
+            be raised if a feature cannot be found; if `ignore_unknown=True`
+            then silently ignore these cases. Consider using the
+            `strip_unknown_features()` method to handle these cases up front.
         """
         if not self.gffdb:
             raise ValueError('Please attach a GFF database created by '
                              'gffutils by setting the .gffdb attribute to the '
                              'database\'s path.')
 
-        for i in self.data.id:
+        for i in self.data[self.id_column]:
             try:
-                yield gfffeature_to_interval(self.gffdb[i])
+                yield asinterval(self.gffdb[i])
             except gffutils.FeatureNotFoundError:
-                yield None
-                #sys.stderr.write('no data for "%s", skipping...\n' % i)
-                #sys.stderr.flush()
-
-    def genes_with_peak(self, bed, as_ind=False):
-        """
-        Given a `bed` file (say, of peaks), search for peaks in promoters of
-        the currently-selected-and-sorted genes.
-
-        Returns a list of ALL genes, with their score attribute set to the
-        number of peaks.
-
-        If `as_ind` is True, then don't return a list of genes -- just return
-        True/False if a peak was found.
-        """
-        hits = []
-
-        x = pybedtools.IntervalFile(bed)
-        for feature in self.features():
-            c = 0
-            if feature is not None:
-                if isinstance(feature, gffutils.Feature):
-                    interval = gfffeature_to_Interval(feature)
+                if ignore_unknown:
+                    continue
                 else:
-                    interval = feature
-                c += x.count_hits(interval)
-            if as_ind:
-                hits.append(c > 0)
-            else:
-                hits.append(feature)
-        if as_ind:
-            return np.array(hits)
-        return hits
+                    raise gffutils.FeatureNotFoundError('%s not found' % i.id)
 
-    def genes_in_common(self, other):
+    def align_with(self, other):
         """
-        Return a list of genes shared between this ResultsTable instance and
-        another one.  If `other` is a ResultsTable object, then it will get the
-        id field; if it's a list-like object, it will be converted to a set.
+        Ensure identical sorting of this object's data with another.
+
+        Returns `other`, sorted the same way as `self`.
+
+        :param other: Another instance of a ResultsTable or ResultsTable
+            subclass.
         """
-        these = set(self.data.id.tolist())
-        if isinstance(other, ResultsTable):
-            those = set(other.data.id.tolist())
-        else:
-            those = set(other)
-        common = these.intersection(those)
-        return list(common)
+        other_ind = other.gene_ind(self[self.id_column])
+        return other[other_ind]
 
-    def gene_ind(self, genes):
+    def scatter(self, x, y, xfunc=None, yfunc=None, xscale=None,
+            yscale=None, xlab=None, ylab=None, genes_to_highlight=None,
+            label_genes=False, general_kwargs=dict(color="k", alpha=0.2,
+                linewidths=0), marginal=True, offset_kwargs={},
+            label_kwargs=None, ax=None, one_to_one=None, callback=None,
+            xlab_prefix=None, ylab_prefix=None):
         """
-        Returns an array of indices for `genes`.  Useful for matching up two
-        ResultsTable instances that are not guaranteed to have the same gene
-        order.
+        Do-it-all method for making annotated scatterplots.
 
-        If a gene in the list cannot be found, then the index will be NaN so
-        that the returned index and the length of `genes` will always be the
-        same.
-        """
-        # make a dictionary mapping current gene to index.
-        d = dict(zip(self.data.id, np.arange(len(self.data))))
-        ind = []
-        for gene in genes:
-            try:
-                ind.append(d[gene])
-            except KeyError:
-                ind.append(np.NaN)
-        return np.array(ind)
+        :param x, y:
+            Variables to plot -- say, "df.baseMeanA" and "df.baseMeanB"
 
-    def chisq(self, bed, obs_ind, exp_ind, as_string=False,
-            title=""):
-        """
-        Chi-square test of gene with peaks in BED file `bed`.
+        :param xfunc, yfunc:
+            Functions to apply to `xvar` and `yvar` respectively. Default is
+            log2; set to None to have no transformation.
 
-        `obs_ind` will typically be self.enriched(); `exp_ind` will typically
-        be self.nonsig().
+        :param xlab, ylab:
+            Labels for x and y axes; default is to use function names for
+            `xfunc` and `yfunc` and variable names `xvar` and `yvar`, e.g.,
+            "log2(baseMeanA)"
 
-        If `as_string` is True, then return a nicely formatted string instead
-        of a dictionary.  This will include the optional `title`, too.
-        """
-        # construct temp files of the genes of interest...
+        :param ax:
+            If `ax=None`, then makes a new fig and returns the Axes object,
+            otherwise, plots onto `ax`
 
-        obs_w_peak = sum(self[obs_ind].genes_with_peak(bed,
-            as_ind=True))
-        exp_w_peak = sum(self[exp_ind].genes_with_peak(bed,
-            as_ind=True))
-        total_obs = float(sum(obs_ind))
-        total_exp = float(sum(exp_ind))
-        x = RO.FloatVector((obs_w_peak, total_obs - obs_w_peak))
-        p = RO.FloatVector((exp_w_peak, total_exp - exp_w_peak))
-        res = r['chisq.test'](x=x, p=p, rescale_p=True)
-        pval = res.rx('p.value')[0][0]
-        d = {
-               'total_obs': total_obs,
-               'total_exp': total_exp,
-              'obs_w_peak': obs_w_peak,
-              'exp_w_peak': exp_w_peak,
-               'obs_ratio': obs_w_peak / total_obs,
-               'exp_ratio': exp_w_peak / total_exp,
-                    'pval': pval}
-        if not as_string:
-            return d
+        :param general_kwargs:
+            Kwargs for matplotlib.scatter; specifies how all points look
 
-        d['title'] = title
-        d['underline'] = '-' * (len(title) + 1)
-        return """
-%(title)s:
-%(underline)s
-      \tobs\texp
-total \t%(total_obs)i\t%(total_exp)i
-w/peak\t%(obs_w_peak)s\t%(exp_w_peak)s
-ratio \t%(obs_ratio).4f\t%(exp_ratio).4f
-%(underline)s
-pval: %(pval)s
-%(underline)s
-""" % d
+        :param genes_to_highlight:
+            Provides lots of control to colors.  It is a list of (`ind`,
+            `kwargs`) tuples, where each `ind` specifies genes to plot with
+            `kwargs`.  Each dictionary updates a copy of `general_kwargs`. If
+            `genes_to_highlight` has a "name" kwarg, this must be a list that't
+            the same length as `ind`.  It will be used to label the genes in
+            `ind` using `label_kwargs`.
 
-    def hgpval(self, other, totalgenes=None):
-        """
-        Returns the hypergeometric pval of this ResultsTable object with
-        another.  `totalgenes` is the number of possible genes, or the total
-        number of "gene" features in the GFF database if None.
+        :param marginal:
+            Boolean, toggles display of non-finite cases where `x` or `y` is
+            nonzero but the other one is zero (and `xfunc` or `yfunc` are log)
 
-        Low pvals means the sets of genes share significantly more genes than
-        would be expected by chance alone.
-        """
-        if totalgenes is None:
-            totalgenes = self.gffdb.count_features_of_type('gene')
-        n1 = len(self.data)
+        :param callback:
+            Function to call upon clicking a point. Default is to print the
+            gene name, but an example of another useful callback would be
+            a mini-browser connected to a genomic_signal object from which the
+            expression data were calculated.
 
-        if isinstance(other, ResultsTable):
-            n2 = len(other.data)
-            fb = frozenset(other.data.id)
-        else:
-            n2 = len(other)
-            fb = frozenset(other)
+        :param one_to_one:
+            If not None, a dictionary of matplotlib.plot kwargs that will be
+            used to plot a 1:1 line.
 
-        fa = frozenset(self.data.id)
-        m = len(fa.intersection(fb))
-        pval = hypergeom(m, totalgenes, n1, n2)
-        results = {
-                           'pval': pval,
-                    'total genes': totalgenes,
-                           'set1': n1,
-                           'set2': n2,
-                        'overlap': m
-                  }
-        return results
+        :param label_kwargs:
+            Kwargs for labeled genes (e.g., dict=(style='italic')).  Will only
+            be used if an entry in `genes_to_highlight` has a `name` key.
 
-    def scatter(self, xvar, yvar, xfunc=np.log2, yfunc=np.log2, xscale=None,
-                yscale=None, xlab=None, ylab=None, genes_to_highlight=None,
-                label_genes=False, pvals=None, outfn=None, general_kwargs=None,
-                force_gene_pval_color=True, color_by_variance=False,
-                marginal=True, offset_kwargs={}, label_kwargs=None,
-                featuretypes=None, GFFDB=None, ax=None, one_to_one=None,
-                callback=None):
-        """
-        Do-it-all method for making scatterplots.
+        :param offset_kwargs:
+            Kwargs to be passed to matplotlib.transforms.offset_copy, used for
+            adjusting the positioning of gene labels in relation to the actual
+            point.
 
-        `xvar` and `yvar` are the variables to plot -- say, "basemeana" and
-        "basemeanb"
-
-        `xfunc` and `yfunc` are the functions to apply to x and y respectively.
-
-        `xscale` and `yscale`, if not None, will be multiplied before applying
-        xfunc and yfunc.
-
-        If ax=None, then makes a new fig and returns the Axes object,
-        otherwise, plots onto `ax`
-
-        `general_kwargs` specifies how all points look
-
-        `genes_to_highlight` provides lots of control to colors.  It is a list
-        of (ind, kwargs) tuples, where each ind specifies genes to plot with
-        `kwargs`.  Each dictionary updates a copy of `general_kwargs`.
-
-        If `genes_to_highlight` has a "name" kwarg, this must be a list that't
-        the same length as `ind`.  It will be used to label the genes in `ind`
-
-        `marginal` toggles display of non-finite cases where x or y is nonzero
-        but the other one is zero (and `xfunc` or `yfunc` are log)
-
-        `callback` is a function to call upon clicking a point.  Default is to
-        print the GFFFeature of the clicked point.
-
+        :param xlab_prefix, ylab_prefix:
+            Optional label prefix that will be added to the beginning of `xlab`
+            and/or `ylab`.
         """
         # Construct defaults---------------------------------------------------
+        def identity(x):
+            return x.copy()
+
+        if xlab_prefix is None:
+            xlab_prefix = ""
+
+        if ylab_prefix is None:
+            ylab_prefix = ""
+
+        if xlab is None:
+            try:
+                xname = x.name
+            except AttributeError:
+                xname = 'x'
+
+            if xfunc is not None:
+                xlab = xlab_prefix + "%s(%s)" % (xfunc.__name__, xname)
+            else:
+                xlab = xlab_prefix + "%s" % xname
+
+        if ylab is None:
+            try:
+                yname = y.name
+            except AttributeError:
+                yname = 'y'
+            if yfunc is not None:
+                ylab = ylab_prefix + "%s(%s)" % (yfunc.__name__, yname)
+            else:
+                ylab = ylab_prefix + "%s" % yname
+
+        if xfunc is None:
+            xfunc = identity
+
+        if yfunc is None:
+            yfunc = identity
+
         if general_kwargs is None:
             general_kwargs = {}
+
+        if genes_to_highlight is None:
+            genes_to_highlight = []
 
         if ax is None:
             fig = plt.figure()
@@ -455,36 +344,13 @@ pval: %(pval)s
                     verticalalignment='center', style='italic',
                     bbox=dict(facecolor='w', edgecolor='None', alpha=0.5))
 
-        if featuretypes is None:
-            featuretypes = {}
-
-        if xlab is None:
-            xlab = "%s(%s)" % (xfunc.__name__, xvar)
-
-        if ylab is None:
-            ylab = "%s(%s)" % (yfunc.__name__, yvar)
-
-        if callback is None:
-            def callback(event):
-                for ind in event.ind:
-                    sys.stderr.write(str(self[ind]))
-                    sys.stderr.flush()
-
         # ---------------------------------------------------------------------
-
-        x = self.data[xvar].copy()
-        y = self.data[yvar].copy()
-        if xscale is not None:
-            x *= xscale
-
-        if yscale is not None:
-            y *= scale
 
         xi = xfunc(x)
         yi = yfunc(y)
 
-        xv = np.isfinite(xi)
-        yv = np.isfinite(yi)
+        xv = np.isfinite(xi.astype(float))
+        yv = np.isfinite(yi.astype(float))
 
         global_min = min(xi[xv].min(), yi[yv].min())
         global_max = max(xi[xv].max(), yi[yv].max())
@@ -521,107 +387,141 @@ pval: %(pval)s
                             **label_kwargs)
 
         # register callback
-        ax.figure.canvas.mpl_connect('pick_event', callback)
+        if callback is not None:
+            ax.figure.canvas.mpl_connect('pick_event', callback)
 
         ax.set_xlabel(xlab)
         ax.set_ylabel(ylab)
 
         return ax
 
-    def filter_features(self, features):
+    def genes_in_common(self, other):
         """
-        Given a list of pybedtools.Interval features (say, from the output of
-        metaseq.MetaChip.array_parallel), return the subset of those features
-        that are also in this ResultsTable instance.
+        Return a list of shared IDs.
 
-        For example,
-
-        enriched = self[self.enriched()]
-        enriched_tss = enriched.filter_gene_list(all_tss_features)
-
-        Note that this matches **names**, so your accessions need to match
-        up....
+        :param other: List of gene IDs, or another similar object
         """
-        these_features = set(self.id)
+        these = set(self[self.id_column].tolist())
+        if isinstance(other, ResultsTable):
+            those = set(other[other.id_column].tolist())
+        else:
+            those = set(other)
+        common = these.intersection(those)
+        return list(common)
 
-        def in_this_instance(feature):
-            return feature.name in these_features
-        return filter(in_this_instance, features)
+    def gene_ind(self, genes):
+        """
+        Returns an array of indices for `genes`.
+
+        Useful for matching up two ResultsTable instances that are not
+        guaranteed to have the same gene order (though they should have the
+        same total gene set)
+
+        :param genes: An iterable of feature accessions that are in the
+            accession column.
+        """
+        # make a dictionary mapping current gene to index.
+        d = dict(zip(self.data.id, np.arange(len(self.data))))
+        ind = []
+        for gene in genes:
+            ind.append(d[gene])
+        return np.array(ind)
 
 
-def rank_plot(genelists, height=0.5, spacing=0.2):
-    """
-    strip plot.  `genelists` is a list.  Each item in the list contains the
-    following dictionary:
+class DESeqResults(ResultsTable):
+    def __init__(self, *args, **kwargs):
+        """
+        Subclass of :class:`ResultsTable` specifically for working with DESeq
+        results.
+        """
+        super(DESeqResults, self).__init__(*args, **kwargs)
 
-        genelist: list of features with .npeaks attribute
-        colorfunc: function to determine box color given score.
-        kwargs: Dictionary of kwargs that are passed to BrokenBarHCollection.
-                Default is to pass only the generated colors.
-        label: label to use as ytick label
+    def strip_deseq_nongenes(self):
+        """
+        DESeq adds "no_feature", "not_aligned", etc. features.  This method
+        removes them for better plotting.
+        """
+        to_remove = [
+                'no_feature',
+                'not_aligned',
+                'alignment_not_unique',
+                'ambiguous',
+                'too_low_aQual']
+        remove_ind = self.gene_ind(to_remove)
+        keep_ind = []
+        for i in range(len(self)):
+            if i not in remove_ind:
+                keep_ind.append(i)
+        return self[keep_ind]
 
-    Example usage::
+    def enriched(self, pval=0.05, column='padj', idx=True):
+        """
+        Enriched genes at `pval` significance.
 
-        >>> def colorfunc1(x):
-        ...     if x.score > 0:
-        ...        return 'r'
-        ...    else:
-        ...        return 'w'
-        >>> def colorfunc2(x):
-        ...     if x.score > 0:
-        ...        return 'b'
-        ...    else:
-        ...        return 'w'
-        >>> genelists = []
-        >>> genelists.append(dict(genelist=hits1, colorfunc=colorfunc1,
-        ...                  kwargs=dict(linewidths=0.3)))
-        >>> genelists.append(dict(genelist=hits2, colorfunc=colorfunc2,
-        ...                  kwargs=dict(linewidths=0.3)))
-        >>> rank_plot(genelists)
+        :param pval: Alpha to use as a cutoff
+        :param column: Column to apply cutoff to
+        :param idx: If True, return the index; if False, returns a subsetted
+            version.
+        """
+        ind1 = self.data[column] <= pval
+        ind2 = self.log2foldchange > 0
+        ind = ind1 & ind2
+        if idx:
+            return ind
+        return self[ind]
 
-    """
-    fig = plt.figure(figsize=(12, 1.8), facecolor='w')
-    ax = fig.add_subplot(111)
-    ymin = 0
-    yticks = []
-    yticklabels = []
-    for i, data in enumerate(genelists[::-1]):
-        genelist = data['genelist']
-        try:
-            colorfunc = data['colorfunc']
-        except KeyError:
-            def colorfunc(x):
-                if x is not None:
-                    if x.score > 0:
-                        return 'r'
-                return 'w'
-        try:
-            kwargs = data['kwargs'].copy()
-        except KeyError:
-            kwargs = {}
+    def disenriched(self, pval=0.05, column='padj', idx=True):
+        """
+        Disenriched genes at `pval` significance.
 
-        colors = [colorfunc(k) for k in genelist]
-        if 'facecolors' not in kwargs:
-            kwargs['facecolors'] = colors
+        :param pval: Alpha to use as a cutoff
+        :param column: Column to apply cutoff to
+        :param idx: If True, return the index; if False, returns a subsetted
+            version.
+        """
+        ind1 = self.data[column] <= pval
+        ind2 = self.log2foldchange < 0
+        ind = ind1 & ind2
+        if idx:
+            return ind
+        return self[ind]
 
-        xranges = [(j, 1) for j in range(len(genelist))]
-        ywidth = height
-        ax.add_collection(
-                matplotlib.collections.BrokenBarHCollection(xranges,
-                                                            (ymin, ywidth),
-                                                            **kwargs))
-        yticks.append(ymin + height / 2.)
-        try:
-            yticklabels.append(data['label'])
-        except KeyError:
-            yticklabels.append('')
-        ymin += height + spacing
-    ax.axis('tight')
-    ax.set_yticks(yticks)
-    ax.set_yticklabels(yticklabels)
-    ax.set_xlabel('ranked genes')
-    fig.subplots_adjust(bottom=0.5, top=0.8)
-    return fig
+    def nonsig(self, pval=0.05, column='padj', idx=True):
+        """
+        Non-significant genes (that were still expressed at some level)
+
+        :param pval: Alpha to use as a cutoff
+        :param column: Column to apply cutoff to
+        :param idx: If True, return the index; if False, returns a subsetted
+            version.
+        """
+        ind = (self.data[column] > pval) & (self.basemean > 0)
+        if idx:
+            return ind
+        return self[ind]
+
+    def random_nonsig(self, n, pval=0.05, column='padj'):
+        """
+        Random subset of nonsignifcant genes at `pval` significance
+        """
+        # get inds of nonsig as bool
+        ind1 = self.nonsig(pval=pval, column=column)
+
+        # indices as integers
+        ind2 = np.nonzero(ind1)[0]
+
+        # indices to keep
+        keepers = random.sample(ind2, n)
+
+        # array of all False
+        final_ind = np.ones_like(ind1) == 0
+
+        # Only set the keepers to True
+        final_ind[keepers] = True
+
+        if idx:
+            return final_ind
+        return self[final_ind]
 
 
 def hypergeom(m, n, n1, n2):
