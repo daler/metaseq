@@ -422,11 +422,15 @@ class ResultsTable(object):
             accession column.
         """
         # make a dictionary mapping current gene to index.
-        d = dict(zip(self.data.id, np.arange(len(self.data))))
+        if not self._cached_lookup:
+            self._cached_lookup = dict(zip(self.data.id, np.arange(len(self.data))))
         ind = []
         for gene in genes:
-            ind.append(d[gene])
-        return np.array(ind)
+            ind.append(self._cached_lookup[gene])
+        ind = np.array(ind)
+        if idx:
+            return ind
+        return self[ind]
 
 
 class DESeqResults(ResultsTable):
