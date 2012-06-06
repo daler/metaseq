@@ -132,7 +132,7 @@ class SignalMiniBrowser(BaseMiniBrowser):
 
         """
         super(SignalMiniBrowser, self).__init__(genomic_signal_objs)
-        self.plotting_kwargs = plotting_kwargs or [{} for i in genomic_signals]
+        self.plotting_kwargs = plotting_kwargs or [{} for i in genomic_signal_objs]
         self.local_coverage_kwargs = local_coverage_kwargs or {}
 
     def panels(self):
