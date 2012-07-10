@@ -86,11 +86,11 @@ class ResultsTable(object):
         return new_instance
 
     def __getattr__(self, attr):
-        try:
-            return getattr(self.data, attr)
-        except AttributeError:
-            raise AttributeError('%s has no attribute "%s"' \
-                    % (self.__class__.__name__, attr))
+        if attr in self.__dict__:
+            return getattr(self, attr)
+        return getattr(self.data, attr)
+
+
 
     def strip_unknown_features(self):
         """
