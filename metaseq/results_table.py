@@ -8,7 +8,7 @@ be used.
 
 import sys
 import tempfile
-from matplotlib.mlab import csv2rec
+from matplotlib.mlab import csv2rec, rec2csv
 import pybedtools
 import gffutils
 import numpy as np
@@ -91,6 +91,14 @@ class ResultsTable(object):
         return getattr(self.data, attr)
 
 
+    def to_file(self, filename, **kwargs):
+        """
+        Saves results to file, which will be gzipped if `filename` has a .gz
+        extension.
+
+        kwargs are passed to matplotlib.mlab.rec2csv
+        """
+        rec2csv(self.data, filename, **kwargs)
 
     def strip_unknown_features(self):
         """
