@@ -6,7 +6,7 @@ import matplotlib
 from matplotlib import pyplot as plt
 import numpy as np
 from scipy import stats
-from scikits.statsmodels.sandbox.stats.multicomp import fdrcorrection0
+from statsmodels.sandbox.stats.multicomp import fdrcorrection0
 
 
 def nice_log(x):
