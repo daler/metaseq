@@ -44,7 +44,9 @@ class ResultsTable(object):
         self.id_column = id_column
         self.data = data
         self.dbfn = dbfn
-        self.gffdb = gffutils.FeatureDB(dbfn)
+        self.gffdb = None
+        if self.dbfn:
+            self.gffdb = gffutils.FeatureDB(dbfn)
         self._cached_lookup = None
 
     @property
@@ -56,6 +58,10 @@ class ResultsTable(object):
                                                 len(self.data))
 
     def __str__(self):
+        if not self.gffdb:
+            raise ValueError('Please attach a GFF database created by '
+                     'gffutils by setting the .gffdb attribute to the '
+                     'database\'s path.')
         fields = ['chrom', 'source', 'featuretype', 'start', 'end', 'score',
                 'strand', 'frame', 'attributes']
         s = []
@@ -107,6 +113,8 @@ class ResultsTable(object):
         useful if the database was created from a different one than was used
         to create the table.
         """
+        if not self.gffdb:
+            return self
         ind = []
         for i, gene_id in enumerate(self.id):
             try:
