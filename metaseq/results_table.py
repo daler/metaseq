@@ -442,7 +442,10 @@ class ResultsTable(object):
             self._cached_lookup = dict(zip(self.data.id, np.arange(len(self.data))))
         ind = []
         for gene in genes:
-            ind.append(self._cached_lookup[gene])
+            try:
+                ind.append(self._cached_lookup[gene])
+            except KeyError:
+                continue
         ind = np.array(ind)
         if idx:
             return ind
