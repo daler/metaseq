@@ -5,4 +5,5 @@ matplotlib
 scipy
 scikits.learn
 pybedtools
+statsmodels
 gffutils
