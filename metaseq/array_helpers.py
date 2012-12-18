@@ -37,8 +37,9 @@ def _local_count(reader, feature, stranded=False):
     return count
 
 
-def _local_coverage(reader, features, read_strand=None,
-        fragment_size=1, shift_width=0, bins=None, use_score=False):
+def _local_coverage(reader, features, read_strand=None, fragment_size=1,
+                    shift_width=0, bins=None, use_score=False,
+                    accumulate=True):
     """
     Computes a 1D vector of coverage at the coordinates for each feature in
     `features`, extending each read by `fragmentsize` bp.
@@ -88,6 +89,11 @@ def _local_coverage(reader, features, read_strand=None,
         If True, then each bin will contain the sum of the *score* attribute of
         genomic features in that bin instead of the *number* of genomic
         features falling within each bin.
+
+    :param accumulate:
+        If False, then only record *that* there was something there, rather
+        than acumulating reads.  This is useful for making matrices with called
+        peaks.
 
     :rtype: NumPy array
 
@@ -181,7 +187,10 @@ def _local_coverage(reader, features, read_strand=None,
             if use_score:
                 score = float(al.score)
 
-            profile[start_ind:stop_ind] += score
+            if accumulate:
+                profile[start_ind:stop_ind] += score
+            else:
+                profile[start_ind:stop_ind] = score
 
         # If no bins, return genomic coords
         if nbin is None:
@@ -195,6 +204,9 @@ def _local_coverage(reader, features, read_strand=None,
             xi = np.linspace(
                     start, stop - (stop - start) / float(nbin), nbin)
             profile = rebin_func(profile, nbin)
+            if not accumulate:
+                nonzero = profile != 0
+                profile[profile != 0] = 1
             x = xi
 
         # Minus-strand profiles should be flipped left-to-right.
