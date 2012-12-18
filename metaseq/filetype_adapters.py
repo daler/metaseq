@@ -100,7 +100,6 @@ class BigBedAdapter(BaseAdapter):
         if bx_intervals is None:
             raise StopIteration
         for i in bx_intervals:
-            interval = pybedtools.Interval(
-                    i.chrom, i.start, i.end, strand=i.strand)
+            interval = pybedtools.create_interval_from_list(i.fields)
             interval.file_type = 'bed'
             yield interval
