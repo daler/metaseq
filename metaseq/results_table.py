@@ -10,15 +10,18 @@ import sys
 import tempfile
 from matplotlib.mlab import csv2rec, rec2csv
 import pybedtools
+from pybedtools.featurefuncs import gff2bed, add_color
 import gffutils
 import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib
+from matplotlib import cm
 from scipy import stats
 from rpy2.robjects import r
 import rpy2.robjects as RO
 import random
 from gffutils.helpers import asinterval
+import colormap_adjust
 
 
 class ResultsTable(object):
@@ -546,6 +549,43 @@ class DESeqResults(ResultsTable):
         if idx:
             return final_ind
         return self[final_ind]
+
+    def colormapped_bedfile(self, cmap=None):
+        """
+        Create a BED file with features colored according to adjusted pval
+        (phred transformed).  Downregulated features have the sign flipped.
+
+        `cmap` is a matplotlib colormap; default is matplotlib.cm.RdBu_r.
+
+        Requires a FeatureDB to be attached.
+        """
+        if self.dbfn is None:
+            raise ValueError("FeatureDB required")
+        db = gffutils.FeatureDB(self.dbfn)
+        def scored_feature_generator(d):
+            for i in range(len(d)):
+                try:
+                    feature = db[d.id[i]]
+                except gffutils.FeatureNotFoundError:
+                    continue
+                score = -10 * np.log10(d.padj[i])
+                lfc = d.log2foldchange[i]
+                if np.isnan(lfc):
+                    score = 0
+                if lfc < 0:
+                    score *= -1
+                feature.score = str(score)
+                yield gff2bed(asinterval(feature))
+
+        x = pybedtools.BedTool(scored_feature_generator(self)).saveas()
+        norm = x.colormap_normalize()
+        if cmap is None:
+            cmap = cm.RdBu_r
+        cmap = colormap_adjust.cmap_center_point_adjust(cmap, [norm.vmin, norm.vmax], 0)
+        return x.each(add_color, cmap=cmap, norm=norm)\
+                .truncate_to_chrom('dm3')\
+                .saveas()
+
 
 
 def hypergeom(m, n, n1, n2):
