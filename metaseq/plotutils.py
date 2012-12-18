@@ -178,12 +178,12 @@ def clustered_sortind(x, k=10, scorefunc=None):
     else:
         mean_dists = {}
         for _k in k:
-            mbk = MiniBatchKMeans(init='k-means++', k=_k, chunk_size=45)
+            mbk = MiniBatchKMeans(init='k-means++', n_clusters=_k)
             mbk.fit(x)
             mean_dists[_k] = mbk.transform(x).mean()
         best_k = sorted(mean_dists.items(), key=lambda x: x[1])[-1][0]
 
-    mbk = MiniBatchKMeans(init='k-means++', k=best_k, chunk_size=45)
+    mbk = MiniBatchKMeans(init='k-means++', n_clusters=best_k)
     mbk.fit(x)
     k = best_k
     labels = mbk.labels_
