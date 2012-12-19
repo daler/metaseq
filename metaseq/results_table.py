@@ -10,7 +10,7 @@ import sys
 import tempfile
 from matplotlib.mlab import csv2rec, rec2csv
 import pybedtools
-from pybedtools.featurefuncs import gff2bed, add_color
+from pybedtools.featurefuncs import gff2bed, add_color, extend_fields
 import gffutils
 import numpy as np
 from matplotlib import pyplot as plt
@@ -575,18 +575,65 @@ class DESeqResults(ResultsTable):
                 if lfc < 0:
                     score *= -1
                 feature.score = str(score)
-                yield gff2bed(asinterval(feature))
+                feature = extend_fields(gff2bed(asinterval(feature)), 9)
+                fields = feature.fields[:]
+                fields[6] = fields[1]
+                fields[7] = fields[2]
+                fields.append(str(d.padj[i]))
+                fields.append(str(d.pval[i]))
+                fields.append('%.3f' % d.log2foldchange[i])
+                fields.append('%.3f' % d.basemeana[i])
+                fields.append('%.3f' % d.basemeanb[i])
+                yield pybedtools.create_interval_from_list(fields)
 
         x = pybedtools.BedTool(scored_feature_generator(self)).saveas()
         norm = x.colormap_normalize()
         if cmap is None:
             cmap = cm.RdBu_r
         cmap = colormap_adjust.cmap_center_point_adjust(cmap, [norm.vmin, norm.vmax], 0)
+        def score_zeroer(f):
+            f.score = '0'
+            return f
         return x.each(add_color, cmap=cmap, norm=norm)\
+                .sort()\
+                .each(score_zeroer)\
                 .truncate_to_chrom('dm3')\
                 .saveas()
 
+    def autosql_file(self):
+        """
+        Returns a temp filename containing the autosql defining the extra fields.
 
+        This for creating bigBed files from BED files created by
+        colormapped_bed.  When a user clicks on a feature, the DESeq results
+        will be reported.
+        """
+        fn = pybedtools.BedTool._tmp()
+
+        AUTOSQL = """
+table example
+"output from DESeq"
+(
+string  chrom;  "chromosome"
+uint chromStart; "start coord"
+uint chromEnd; "stop coord"
+string name; "name of feature"
+uint score; "always zero"
+char[1] strand; "+ or - for strand"
+uint    thickStart; "Coding region start"
+uint    thickEnd;  "Coding region end"
+uint reserved; "color according to score"
+string padj; "DESeq adjusted p value"
+string pval; "DESeq raw p value"
+string logfoldchange; "DESeq log2 fold change"
+string basemeana; "DESeq baseMeanA"
+string basemeanb; "DESeq baseMeanB"
+)
+"""
+        fout = open(fn, 'w')
+        fout.write(AUTOSQL)
+        fout.close()
+        return fn
 
 def hypergeom(m, n, n1, n2):
     """
