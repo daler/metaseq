@@ -550,7 +550,7 @@ class DESeqResults(ResultsTable):
             return final_ind
         return self[final_ind]
 
-    def colormapped_bedfile(self, cmap=None):
+    def colormapped_bedfile(self, genome, cmap=None):
         """
         Create a BED file with features colored according to adjusted pval
         (phred transformed).  Downregulated features have the sign flipped.
@@ -567,7 +567,7 @@ class DESeqResults(ResultsTable):
                 try:
                     feature = db[d.id[i]]
                 except gffutils.FeatureNotFoundError:
-                    continue
+                    raise gffutils.FeatureNotFoundError(d.id[i])
                 score = -10 * np.log10(d.padj[i])
                 lfc = d.log2foldchange[i]
                 if np.isnan(lfc):
@@ -597,7 +597,7 @@ class DESeqResults(ResultsTable):
         return x.each(add_color, cmap=cmap, norm=norm)\
                 .sort()\
                 .each(score_zeroer)\
-                .truncate_to_chrom('dm3')\
+                .truncate_to_chrom(genome)\
                 .saveas()
 
     def autosql_file(self):
