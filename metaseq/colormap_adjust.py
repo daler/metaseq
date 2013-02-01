@@ -45,7 +45,7 @@ def smart_colormap(vmin, vmax, color_high='#b11902', hue_low=0.6):
     """
     # first go from white to color_high
     orig_cmap = matplotlib.colors.LinearSegmentedColormap.from_list(
-            'test', ['#FFFFFF', color_high], N=256)
+            'test', ['#FFFFFF', color_high], N=2048)
 
     # For example, say vmin=-3 and vmax=9.  If vmin were positive, what would
     # its color be?
@@ -62,13 +62,13 @@ def smart_colormap(vmin, vmax, color_high='#b11902', hue_low=0.6):
     new_rgb = colorsys.hsv_to_rgb(*hsv)
     new_hex = matplotlib.colors.rgb2hex(new_rgb)
 
+    zeropoint = -vmin / (vmax - vmin)
+
     # Create a new colormap using the new hue-shifted color as the low end
     new_cmap = matplotlib.colors.LinearSegmentedColormap.from_list(
-            'test', [new_rgb, '#FFFFFF', color_high], N=256)
+            'test', [(0, new_rgb), (zeropoint, '#FFFFFF'), (1, color_high)], N=2048)
 
-    # Re-center on zero
-    return cmap_center_point_adjust(new_cmap, [vmin, vmax], 0)
-
+    return new_cmap
 
 def cmap_discretize(cmap, N):
     """
