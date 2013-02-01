@@ -184,6 +184,11 @@ class Chipseq(object):
         if imshow_kwargs:
             _imshow_kwargs.update(imshow_kwargs)
 
+        if 'cmap' not in _imshow_kwargs:
+            _imshow_kwargs['cmap'] = metaseq.colormap_adjust.smart_colormap(
+                self.diffed_array.min(),
+                self.diffed_array.max()
+            )
         mappable = matrix_ax.imshow(
                 self.diffed_array[row_order],
                 **_imshow_kwargs)
