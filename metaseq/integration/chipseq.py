@@ -12,18 +12,32 @@ from matplotlib import pyplot as plt
 import matplotlib
 
 
-class ChipseqMiniBrowser(GeneModelMiniBrowser):
+class GeneChipseqMiniBrowser(GeneModelMiniBrowser):
     def __init__(self, genomic_signal_objs, db, **kwargs):
-        super(ChipseqMiniBrowser, self).__init__(genomic_signal_objs, db, **kwargs)
+        super(GeneChipseqMiniBrowser, self).__init__(genomic_signal_objs, db, **kwargs)
 
     def plot(self, feature):
-        super(ChipseqMiniBrowser, self).plot(feature)
+        super(GeneChipseqMiniBrowser, self).plot(feature)
         ax1, ax2 = self.fig.axes
         ax1.legend(loc='best')
         ax1.set_ylabel('RPMMR')
         ax1.xaxis.set_visible(False)
         ax2.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%d'))
         ax2.set_xlabel(feature.chrom)
+
+
+class SignalChipseqMiniBrowser(SignalMiniBrowser):
+    def __init__(self, genomic_signal_objs, **kwargs):
+        super(SignalChipseqMiniBrowser, self).__init__(genomic_signal_objs, **kwargs)
+
+    def plot(self, feature):
+        super(SignalChipseqMiniBrowser, self).plot(feature)
+        ax1, = self.fig.axes
+        ax1.legend(loc='best')
+        ax1.set_ylabel('RPMMR')
+        #ax1.xaxis.set_visible(False)
+        #ax2.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%d'))
+        ax1.set_xlabel(feature.chrom)
 
 
 class Chipseq(object):
@@ -81,7 +95,7 @@ class Chipseq(object):
         >>> plt.show()
 
     """
-    def __init__(self, ip_bam, control_bam, dbfn):
+    def __init__(self, ip_bam, control_bam, dbfn=None):
         """
         Set up a :class:`Chipseq` object.
 
@@ -93,7 +107,9 @@ class Chipseq(object):
         self.ip = metaseq.genomic_signal(ip_bam, kind='bam')
         self.control = metaseq.genomic_signal(control_bam, kind='bam')
         self.dbfn = dbfn
-        self.db = gffutils.FeatureDB(dbfn)
+        self.db = None
+        if self.dbfn:
+            self.db = gffutils.FeatureDB(dbfn)
         self.ip_array = None
         self.control_array = None
 
@@ -181,11 +197,17 @@ class Chipseq(object):
         matrix_ax.yaxis.set_visible(False)
         matrix_ax.xaxis.set_visible(False)
 
-        self.minibrowser = ChipseqMiniBrowser(
-                [self.ip, self.control],
-                db=self.db,
-                plotting_kwargs=self.browser_plotting_kwargs,
-                local_coverage_kwargs=self.browser_local_coverage_kwargs)
+        if self.db:
+            self.minibrowser = GeneChipseqMiniBrowser(
+                    [self.ip, self.control],
+                    db=self.db,
+                    plotting_kwargs=self.browser_plotting_kwargs,
+                    local_coverage_kwargs=self.browser_local_coverage_kwargs)
+        else:
+            self.minibrowser = SignalChipseqMiniBrowser(
+                    [self.ip, self.control],
+                    plotting_kwargs=self.browser_plotting_kwargs,
+                    local_coverage_kwargs=self.browser_local_coverage_kwargs)
 
         fig.canvas.mpl_connect('pick_event', self.callback)
 
