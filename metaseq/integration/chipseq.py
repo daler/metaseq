@@ -162,7 +162,7 @@ class Chipseq(object):
             func = metaseq.plotutils.nice_log
         self.diffed_array = func(self.ip_array - self.control_array)
 
-    def plot(self, x, row_order=None, imshow_kwargs=None):
+    def plot(self, x, row_order=None, imshow_kwargs=None, strip=True):
         """
         Plot the scaled ChIP-seq data.
 
@@ -170,12 +170,14 @@ class Chipseq(object):
             be `np.linspace(-1000, 1000, 100)`)
         :param row_order: Array-like object containing row order -- typically
             the result of an `np.argsort` call.
+        :param strip: Include axes along the left side with points that can be
+            clicked to spawn a minibrowser for that feature.
         """
         nrows = self.diffed_array.shape[0]
         if row_order is None:
             row_order = np.arange(nrows)
         extent = (min(x), max(x), 0, nrows)
-        axes_info = metaseq.plotutils.matrix_and_line_shell(strip=True)
+        axes_info = metaseq.plotutils.matrix_and_line_shell(strip=strip)
         fig, matrix_ax, line_ax, strip_ax, cbar_ax = axes_info
         _imshow_kwargs = dict(
                 aspect='auto', extent=extent, interpolation='nearest')
@@ -187,14 +189,17 @@ class Chipseq(object):
                 **_imshow_kwargs)
         plt.colorbar(mappable, cbar_ax)
         line_ax.plot(x, self.diffed_array.mean(axis=0))
-        line, = strip_ax.plot(np.zeros((nrows,)), np.arange(nrows) + 0.5,
-                **self._strip_kwargs)
-        line.features = self.features
-        line.ind = row_order
+        if strip_ax:
+            line, = strip_ax.plot(np.zeros((nrows,)), np.arange(nrows) + 0.5,
+                    **self._strip_kwargs)
+            line.features = self.features
+            line.ind = row_order
 
         matrix_ax.axis('tight')
-        strip_ax.xaxis.set_visible(False)
-        matrix_ax.yaxis.set_visible(False)
+        if strip_ax:
+            strip_ax.xaxis.set_visible(False)
+            matrix_ax.yaxis.set_visible(False)
+
         matrix_ax.xaxis.set_visible(False)
 
         if self.db:
