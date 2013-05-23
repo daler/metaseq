@@ -13,8 +13,12 @@ Subclasses must define make_fileobj(), which returns an object to be iterated
 over in __getitem__
 """
 from bx.bbi.bigbed_file import BigBedFile
+import numpy as np
+import subprocess
 import pysam
 import pybedtools
+import os
+import sys
 
 strand_lookup = {16: '-', 0: '+'}
 
@@ -84,7 +88,7 @@ class BedAdapter(BaseAdapter):
 
 class BigBedAdapter(BaseAdapter):
     """
-    Adapter that provids random access to bigBed files via bx-python
+    Adapter that provides random access to bigBed files via bx-python
     """
     def __init__(self, fn):
         super(BigBedAdapter, self).__init__(fn)
@@ -103,3 +107,64 @@ class BigBedAdapter(BaseAdapter):
             interval = pybedtools.create_interval_from_list(i.fields)
             interval.file_type = 'bed'
             yield interval
+
+
+class BigWigAdapter(BaseAdapter):
+    """
+    Adapter that provides random access to bigWig files bia bx-python
+    """
+    def __init__(self, fn):
+        super(BigWigAdapter, self).__init__(fn)
+
+    def make_fileobj(self):
+        return self.fn
+
+    def __getitem__(self, key):
+        raise NotImplementedError(
+            "__getitem__ not implemented for %s" % self.__class__.__name__)
+
+    def summarize(self, interval, bins=None):
+        # if bins is none, then adaptively work something out...say, 100-bp bins
+        if bins is None:
+            bins = len(interval)
+        y = np.zeros(bins)
+
+        cmds = [
+            'bigWigSummary',
+            self.fn,
+            interval.chrom,
+            str(interval.start),
+            str(interval.stop),
+            str(bins),
+            '-type=mean']
+        p = subprocess.Popen(
+            cmds,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        def gen():
+            try:
+                for line in p.stdout:
+                    yield line
+            finally:
+                if p.poll() is None:
+                    return
+                else:
+                    p.wait()
+                    err = p.stderr.read().strip()
+                    if p.returncode not in (0, None):
+                        if err.startswith('no data'):
+                            return
+                        raise ValueError(
+                            "cmds: %s: %s" %
+                            (' '.join(cmds), p.stderr.read()))
+                    if len(err) != 0:
+                        sys.stderr.write(err)
+
+        for line in gen():
+            for i, x in enumerate(line.split('\t')):
+                try:
+                    y[i] = float(x)
+                except ValueError:
+                    pass
+        return np.array(y)

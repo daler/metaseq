@@ -307,10 +307,10 @@ def _local_coverage_bigwig(bigwig, features, bins=None):
     profiles = []
     xs = []
     for feature, nbin in zip(features, bins):
+        """
         chrom = feature.chrom
         start = feature.start
         stop = feature.stop
-
         s = bigwig.summarize_from_full(chrom, start, stop, nbin)
         x = np.linspace(s.start, s.end, s.size)
         s.sum_data = np.ma.masked_where(s.sum_data == 0,
@@ -318,11 +318,11 @@ def _local_coverage_bigwig(bigwig, features, bins=None):
                                         copy=False)
 
         profile = s.sum_data / s.valid_count
-
+        """
+        profile = bigwig.summarize(feature, nbin)
         if feature.strand == '-':
             profile = profile[::-1]
-
-        xs.append(x)
+        xs.append(np.linspace(feature.start, feature.stop, nbin))
         profiles.append(profile)
 
     return np.hstack(xs), np.hstack(profiles)
