@@ -110,7 +110,11 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=1,
     (with ideas from
     http://www-huber.embl.de/users/anders/HTSeq/doc/tss.html)
     """
-
+    if isinstance(features, basestring):
+        # assume it's in chrom:start-stop format
+        chrom, coords = features.split(':')
+        start, stop = coords.split('-')
+        features = pybedtools.create_interval_from_list([chrom, start, stop])
     if not (isinstance(features, list) or isinstance(features, tuple)):
         if bins is not None:
             if not isinstance(bins, int):
