@@ -271,6 +271,7 @@ def _array(fn, cls, genelist, **kwargs):
     that row's modified feature.
     """
     reader = cls(fn)
+    _local_coverage_func = cls.local_coverage
     biglist = []
     if 'bins' in kwargs:
         if isinstance(kwargs['bins'], int):
@@ -279,7 +280,7 @@ def _array(fn, cls, genelist, **kwargs):
     for gene in genelist:
         if not isinstance(gene, (list, tuple)):
             gene = [gene]
-        coverage_x, coverage_y = _local_coverage(reader, gene,
+        coverage_x, coverage_y = _local_coverage_func(reader, gene,
                                                      **kwargs)
         biglist.append(coverage_y)
     return np.array(biglist)
