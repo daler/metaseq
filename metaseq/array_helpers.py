@@ -37,7 +37,7 @@ def _local_count(reader, feature, stranded=False):
     return count
 
 
-def _local_coverage(reader, features, read_strand=None, fragment_size=1,
+def _local_coverage(reader, features, read_strand=None, fragment_size=None,
                     shift_width=0, bins=None, use_score=False,
                     accumulate=True):
     """
@@ -147,6 +147,8 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=1,
 
         # Extend the window to catch reads that would extend into the
         # requested window
+        if fragment_size is None:
+            fragment_size = len(feature)
         _fs = fragment_size or 0
         pos = pybedtools.Interval(
                 chrom,
