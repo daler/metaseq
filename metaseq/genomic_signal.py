@@ -43,7 +43,7 @@ def supported_formats():
     return _registry.keys()
 
 
-def genomic_signal(fn, kind='bam'):
+def genomic_signal(fn, kind):
     """
     Factory function that makes the right class for the file format.
 
