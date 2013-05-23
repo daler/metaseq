@@ -159,8 +159,10 @@ class Chipseq(object):
             self.control_array /= self.control.million_mapped_reads()
 
         if func is None:
-            func = metaseq.plotutils.nice_log
-        self.diffed_array = func(self.ip_array - self.control_array)
+            #func = metaseq.plotutils.nice_log
+            self.diffed_array = self.ip_array - self.control_array
+        else:
+            self.diffed_array = func(self.ip_array - self.control_array)
 
     def plot(self, x, row_order=None, imshow_kwargs=None, strip=True):
         """
