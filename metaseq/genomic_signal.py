@@ -31,6 +31,8 @@ import subprocess
 import numpy as np
 from bx.bbi.bigwig_file import BigWigFile
 
+import pybedtools
+
 from array_helpers import _array, _array_parallel, _local_coverage, \
     _local_coverage_bigwig, _local_count
 import filetype_adapters
@@ -104,6 +106,10 @@ class BaseSignal(object):
         else:
             return _array(self.fn, self.__class__, features, **kwargs)
 
+    def local_coverage(self, *args, **kwargs):
+        return _local_coverage(self.adapter, *args, **kwargs)
+
+
     def __getitem__(self, key):
         return self.adapter[key]
 
@@ -113,8 +119,8 @@ class BigWigSignal(BaseSignal):
         """
         Class for operating on bigWig files
         """
-        BaseSignal.__init__(self, fn)
-        self.bigwig = BigWigFile(open(fn))
+        super(BigWigSignal, self).__init__(fn)
+        self.bigwig = filetype_adapters.BigWigAdapter(fn)
         import warnings
         warnings.warn('BigWigSignal not well supported '
                       '-- please test and submit bug reports')
@@ -231,6 +237,9 @@ class BedSignal(IntervalSignal):
 _registry = {
         'bam': BamSignal,
         'bed': BedSignal,
+        'gff': BedSignal,
+        'gtf': BedSignal,
+        'vcf': BedSignal,
      'bigwig': BigWigSignal,
      'bigbed': BigBedSignal,
      }
