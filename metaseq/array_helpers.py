@@ -59,11 +59,22 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
     1000, and 100 bins respectively.  Note that is up to the caller to
     construct the right axes labels in the final plot!
 
-    :param features:
-        A pybedtools.Interval object or an iterable of pybedtools.Interval
-        objects.
+    Parameters
+    ----------
+    features : various
+        Can be a single interval, an iterable yielding intervals, or an iterable-of-iterables.
 
-    :param bins:
+        Intervals must have chrom, start, and stop attributes.
+
+        If a single interval, then return a 1-D array for that interval.
+
+        If an iterable of single intervals, then return an array, one row for
+        each interval.
+
+        If an iterable of iterables, then the number of nested intervals must
+        match the number of bins provided.
+
+    bins : None, int, list
         * If `bins` is None, then each value in the returned array will
           correspond to one bp in the genome.
 
@@ -73,24 +84,25 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
         * If `features` is an iterable of Intervals, `bins` is an iterable of
           integers of the same length as `features`.
 
-    :param fragment_size:
-        Integer. Each item from the genomic signal (e.g., reads from a BAM
-        file) will be extended this many bp in the 3' direction.  Higher
-        fragment sizes will result in smoother signal
+    fragment_size : None or int
+        If not None, then each item from the genomic signal (e.g., reads from
+        a BAM file) will be extended `fragment_size` bp in the 3' direction.
+        Higher fragment sizes will result in smoother signal.
 
-    :param shift_width:
-        Integer. Each item from the genomic signal (e.g., reads from a BAM
-        file) will be shifted this number of bp in the 3' direction.  This can
+    shift_width : int
+        Each item from the genomic signal (e.g., reads from a BAM
+        file) will be shifted `shift_width` bp in the 3' direction.  This can
         be useful for reconstructing a ChIP-seq profile, using the shift width
         determined from the peak-caller (e.g., modeled `d` in MACS)
 
-    :param read_strand:
-        String. If `read_strand` is one of "+" or "-", then only reads on that
-        strand will be considered and reads on the opposite strand ignored.
-        Useful for plotting genomic signal for stranded libraries
+    read_strand : None or str
+        If `read_strand` is one of "+" or "-", then only items from the genomic
+        signal (e.g., reads from a BAM file) on that strand will be considered
+        and reads on the opposite strand ignored.  Useful for plotting genomic
+        signal for stranded libraries
 
 
-    :param use_score:
+    use_score : bool
         If True, then each bin will contain the sum of the *score* attribute of
         genomic features in that bin instead of the *number* of genomic
         features falling within each bin.
@@ -120,6 +132,7 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
         chrom, coords = features.split(':')
         start, stop = coords.split('-')
         features = pybedtools.create_interval_from_list([chrom, start, stop])
+
     if not (isinstance(features, list) or isinstance(features, tuple)):
         if bins is not None:
             if not isinstance(bins, int):
