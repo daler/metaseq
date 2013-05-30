@@ -20,7 +20,12 @@ def _local_count(reader, feature, stranded=False):
     :param feature: pybedtools.Interval object
     :param stranded: If `stranded=True`, then only counts signal on the same
         strand as `feature`.
-    """
+    """   
+    if isinstance(feature, basestring):
+        # assume it's in chrom:start-stop format
+        chrom, coords = feature.split(':')
+        start, stop = coords.split('-')
+        feature = pybedtools.create_interval_from_list([chrom, start, stop])
     chrom = feature.chrom
     start = feature.start
     stop = feature.stop
