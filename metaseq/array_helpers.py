@@ -5,7 +5,7 @@ import itertools
 import pysam
 import genomic_signal
 import sys
-from rebin import rebin, float_rebin
+from rebin import rebin
 from helpers import chunker
 import filetype_adapters
 
