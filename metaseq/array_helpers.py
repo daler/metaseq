@@ -44,7 +44,7 @@ def _local_count(reader, feature, stranded=False):
 
 def _local_coverage(reader, features, read_strand=None, fragment_size=None,
                     shift_width=0, bins=None, use_score=False,
-                    accumulate=True):
+                    accumulate=True, verbose=False):
     """
     Computes a 1D vector of coverage at the coordinates for each feature in
     `features`, extending each read by `fragmentsize` bp.
@@ -145,73 +145,79 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
             raise ValueError(
                     "bins must have same length as feature list")
 
-    # To keep speed high and memory low, there are different rebin funcs
-    # depending on data type you need
-    if not use_score:
-        score = 1
-        dtype = "int"
-        rebin_func = rebin
-    else:
-        dtype = "float"
-        rebin_func = float_rebin
-
+    # nomenclature:
+    #   "window" is region we're getting data for
+    #   "alignment" is one item in that region
+    #
     profiles = []
     xs = []
-    for feature, nbin in zip(features, bins):
-        chrom = feature.chrom
-        start = feature.start
-        stop = feature.stop
-        strand = feature.strand
+    for window, nbin in zip(features, bins):
+        chrom = window.chrom
+        start = window.start
+        stop = window.stop
+        strand = window.strand
 
         # Extend the window to catch reads that would extend into the
         # requested window
-        if fragment_size is None:
-            fragment_size = len(feature)
         _fs = fragment_size or 0
-        pos = pybedtools.Interval(
+        padded_window = pybedtools.Interval(
                 chrom,
                 max(start - _fs - shift_width, 0),
                 stop + _fs + shift_width,
                 )
-        feature_size = stop - start
+        window_size = stop - start
 
-        # start off with an array of zeros to represent the feature
-        profile = np.zeros(feature_size, dtype=dtype)
+        # start off with an array of zeros to represent the window
+        profile = np.zeros(window_size, dtype=float)
 
-        for al in reader[pos]:
+        for interval in reader[padded_window]:
 
             if read_strand:
-                if al.strand != read_strand:
+                if interval.strand != read_strand:
                     continue
 
-            # Shift fragment by modeled distance, if specified.
-            if al.strand == '-':
-                al.start -= shift_width
-                al.stop -= shift_width
-            else:
-                al.start += shift_width
-                al.stop += shift_width
-
-            # Extend 3' by fragment size
-            if fragment_size is not None:
-                if al.strand == '-':
-                    al.start = al.stop - fragment_size
+            # Shift interval by modeled distance, if specified.
+            if shift_width:
+                if interval.strand == '-':
+                    interval.start -= shift_width
+                    interval.stop -= shift_width
                 else:
-                    al.stop = al.start + fragment_size
+                    interval.start += shift_width
+                    interval.stop += shift_width
+
+            # Extend fragment size from 3'
+            if fragment_size:
+                if interval.strand == '-':
+                    interval.start = interval.stop - fragment_size
+                else:
+                    interval.stop = interval.start + fragment_size
 
             # Convert to 0-based coords that can be used as indices into
-            # array, making sure not to overflow the window.
-            start_ind = al.start - start
-            stop_ind = al.stop - start
+            # array
+            start_ind = interval.start - start
+
+            # If the feature goes out of the window, then only include the part
+            # that's inside the window
             start_ind = max(start_ind, 0)
-            stop_ind = min(stop_ind, feature_size)
-            if start_ind >= feature_size or stop_ind < 0:
+
+            # Same thing for stop
+            stop_ind = interval.stop - start
+            stop_ind = min(stop_ind, window_size)
+
+            # Skip if the feature is shifted outside the window. This can
+            # happen with large values of `shift_width`.
+            if start_ind >= window_size or stop_ind < 0:
                 continue
+
             # Finally, increment profile
             if use_score:
-                score = float(al.score)
+                score = float(interval.score)
+            else:
+                score = 1
 
             if accumulate:
+                if verbose:
+                    print '%s-%s += %s' % (start_ind, stop_ind, score)
                 profile[start_ind:stop_ind] += score
             else:
                 profile[start_ind:stop_ind] = score
@@ -224,10 +230,9 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
         # coords
         else:
 
-            #profile, x = signal.resample(profile, bins, x)
-            xi = np.linspace(
-                    start, stop - (stop - start) / float(nbin), nbin)
-            profile = rebin_func(profile, nbin)
+            #xi = np.linspace(
+            #        start, stop - (stop - start) / float(nbin), nbin)
+            xi, profile = rebin(x=np.arange(start,stop), y=profile, nbin=nbin)
             if not accumulate:
                 nonzero = profile != 0
                 profile[profile != 0] = 1
