@@ -14,7 +14,8 @@ if 'setuptools.extension' in sys.modules:
 version_py = os.path.join(os.path.dirname(__file__), 'metaseq', 'version.py')
 version = open(version_py).read().split('=')[-1].strip().replace('"','')
 
-exts = [Extension(
+exts = []
+[Extension(
             'metaseq.rebin',
             ['metaseq/rebin.pyx'],
             include_dirs=[numpy.get_include()])]
