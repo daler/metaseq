@@ -208,6 +208,96 @@ def clustered_sortind(x, k=10, scorefunc=None):
     return ind, breaks
 
 
+def new_clustered_sortind(x, k=10, row_key=None, cluster_key=None):
+    """
+    Uses MiniBatch k-means clustering to cluster matrix into groups.
+
+    Each cluster of rows is then sorted by `scorefunc` -- by default, the max
+    peak height when all rows in a cluster are averaged, or
+    cluster.mean(axis=0).max().
+
+    Returns the index that will sort the rows of `x` and a list of "breaks".
+    `breaks` is essentially a cumulative row count for each cluster boundary.
+    In other words, after plotting the array you can use axhline on each
+    "break" to plot the cluster boundary.
+
+    If `k` is a list or tuple, iteratively try each one and select the best
+    with the lowest mean distance from cluster centers.
+
+    :param x: Matrix whose rows are to be clustered
+    :param k: Number of clusters to create or a list of potential clusters; the
+        optimum will be chosen from the list
+    :param row_key:
+        Optional function to act as a sort key for sorting rows within
+        clusters.  Signature should be `scorefunc(a)` where `a` is a 1-D NumPy
+        array.
+    :param cluster_key:
+        Optional function for sorting clusters.  Signature is `clusterfunc(a)`
+        where `a` is a NumPy array containing all rows of `x` for cluster `i`.
+        It must return a single value.
+    """
+    try:
+        from sklearn.cluster import MiniBatchKMeans
+    except ImportError:
+        raise ImportError('please install scikits.learn for '
+                          'clustering.')
+
+    # If integer, do it once and we're done
+    if isinstance(k, int):
+        best_k = k
+
+    else:
+        mean_dists = {}
+        for _k in k:
+            mbk = MiniBatchKMeans(init='k-means++', n_clusters=_k)
+            mbk.fit(x)
+            mean_dists[_k] = mbk.transform(x).mean()
+        best_k = sorted(mean_dists.items(), key=lambda x: x[1])[-1][0]
+
+    mbk = MiniBatchKMeans(init='k-means++', n_clusters=best_k)
+    mbk.fit(x)
+    k = best_k
+    labels = mbk.labels_
+    scores = np.zeros(labels.shape, dtype=float)
+
+
+
+    if cluster_key:
+        # It's easier for calling code to provide something that operates on
+        # a cluster level, but here it's converted to work on a label level
+        # that looks in to the array `x`.
+        def _cluster_key(i):
+            return cluster_key(x[labels==i, :])
+        sorted_labels = sorted(range(k), key=_cluster_key)
+    else:
+        # Otherwise just use them as-is.
+        sorted_labels = range(k)
+
+
+    if row_key:
+        # Again, easier to provide a function to operate on a row.  But here we
+        # need it to accept an index
+        def _row_key(i):
+            return row_key(x[i, :])
+
+    final_ind = []
+    breaks = []
+    pos = 0
+    for label in sorted_labels:
+        # which rows in `x` have this label
+        label_inds = np.nonzero(labels==label)[0]
+        if row_key:
+            label_sort_ind = sorted(label_inds, key=_row_key)
+        else:
+            label_sort_ind = label_inds
+        for li in label_sort_ind:
+            final_ind.append(li)
+        pos += len(label_inds)
+        breaks.append(pos)
+
+    return np.array(final_ind), np.array(breaks)
+
+
 def input_ip_plots(iparr, inputarr, diffed, x, sort_ind,
                    prefix=None, limits1=(None, None), limits2=(None, None),
                    hlines=None, vlines=None):
