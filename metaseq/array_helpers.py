@@ -20,7 +20,7 @@ def _local_count(reader, feature, stranded=False):
     :param feature: pybedtools.Interval object
     :param stranded: If `stranded=True`, then only counts signal on the same
         strand as `feature`.
-    """   
+    """
     if isinstance(feature, basestring):
         # assume it's in chrom:start-stop format
         chrom, coords = feature.split(':')
@@ -43,8 +43,8 @@ def _local_count(reader, feature, stranded=False):
 
 
 def _local_coverage(reader, features, read_strand=None, fragment_size=None,
-                    shift_width=0, bins=None, use_score=False,
-                    accumulate=True, verbose=False):
+                    shift_width=0, bins=None, use_score=False, accumulate=True,
+                    preserve_total=False, verbose=False):
     """
     Computes a 1D vector of coverage at the coordinates for each feature in
     `features`, extending each read by `fragmentsize` bp.
@@ -101,16 +101,23 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
         and reads on the opposite strand ignored.  Useful for plotting genomic
         signal for stranded libraries
 
-
     use_score : bool
         If True, then each bin will contain the sum of the *score* attribute of
         genomic features in that bin instead of the *number* of genomic
         features falling within each bin.
 
-    :param accumulate:
+    accumulate : bool
         If False, then only record *that* there was something there, rather
         than acumulating reads.  This is useful for making matrices with called
         peaks.
+
+    preserve_total : bool
+        If True, re-scales the returned value so that each binned row's total
+        is equal to the sum of the original, un-binned data.  The units of the
+        returned array will be in "total per bin".  This is useful for, e.g.,
+        counting reads in features.  If `preserve_total` is False, then the
+        returned array will have units of "density"; this is more generally
+        useful and is the default behavior.
 
     :rtype: NumPy array
 
@@ -242,6 +249,9 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
         if strand == '-':
             profile = profile[::-1]
         xs.append(x)
+        if preserve_total:
+            scale = window_size / float(nbin)
+            profile *= scale
         profiles.append(profile)
 
     return np.hstack(xs), np.hstack(profiles)
