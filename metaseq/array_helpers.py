@@ -315,6 +315,11 @@ def _local_coverage_bigwig(bigwig, features, bins=None):
     :func:`metaseq.array_helpers._local_coverage` for more info.
     """
 
+    if isinstance(features, basestring):
+        # assume it's in chrom:start-stop format
+        chrom, coords = features.split(':')
+        start, stop = coords.split('-')
+        features = pybedtools.create_interval_from_list([chrom, start, stop])
     if not (isinstance(features, list) or isinstance(features, tuple)):
         if bins is not None:
             if not isinstance(bins, int):
@@ -330,6 +335,8 @@ def _local_coverage_bigwig(bigwig, features, bins=None):
     profiles = []
     xs = []
     for feature, nbin in zip(features, bins):
+        if nbin is None:
+            nbin = len(feature)
         """
         chrom = feature.chrom
         start = feature.start
