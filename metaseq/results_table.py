@@ -3,6 +3,7 @@ import numpy as np
 import pandas
 import gffutils
 from gffutils.helpers import asinterval
+from matplotlib import pyplot as plt
 
 
 class ResultsTable(object):
