@@ -319,7 +319,7 @@ def _array(fn, cls, genelist, **kwargs):
     return np.array(biglist)
 
 
-def _local_coverage_bigwig(bigwig, features, bins=None):
+def _local_coverage_bigwig(bigwig, features, bins=None, accumulate=True, preserve_total=False):
     """
     Returns matrix of coverage of `features` using `bins` -- see
     :func:`metaseq.array_helpers._local_coverage` for more info.
@@ -344,25 +344,39 @@ def _local_coverage_bigwig(bigwig, features, bins=None):
 
     profiles = []
     xs = []
-    for feature, nbin in zip(features, bins):
-        if nbin is None:
-            nbin = len(feature)
-        """
-        chrom = feature.chrom
-        start = feature.start
-        stop = feature.stop
-        s = bigwig.summarize_from_full(chrom, start, stop, nbin)
-        x = np.linspace(s.start, s.end, s.size)
-        s.sum_data = np.ma.masked_where(s.sum_data == 0,
-                                        s.sum_data,
-                                        copy=False)
+    for window, nbin in zip(features, bins):
 
-        profile = s.sum_data / s.valid_count
-        """
-        profile = bigwig.summarize(feature, nbin)
-        if feature.strand == '-':
+        chrom = window.chrom
+        start = window.start
+        stop = window.stop
+        strand = window.strand
+        profile = bigwig.summarize(window, nbin)
+        if nbin is None:
+            x = np.arange(start, stop)
+
+        # Otherwise do the downsampling; resulting x is stll in genomic
+        # coords
+        else:
+
+            #xi = np.linspace(
+            #        start, stop - (stop - start) / float(nbin), nbin)
+            xi, profile = rebin(x=np.arange(start,stop), y=profile, nbin=nbin)
+            if not accumulate:
+                nonzero = profile != 0
+                profile[profile != 0] = 1
+            x = xi
+
+        # Minus-strand profiles should be flipped left-to-right.
+        if strand == '-':
             profile = profile[::-1]
-        xs.append(np.linspace(feature.start, feature.stop, nbin))
+        xs.append(x)
+        if preserve_total:
+            scale = window_size / float(nbin)
+            profile *= scale
         profiles.append(profile)
 
     return np.hstack(xs), np.hstack(profiles)
+
+
+
+
