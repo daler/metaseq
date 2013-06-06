@@ -47,6 +47,16 @@ class ResultsTable(object):
     def __getitem__(self, attr):
         return self.__class__(self.data.__getitem__(attr), **self._kwargs)
 
+
+    def update(self, dataframe):
+        """
+        Updates the current data with a new dataframe.
+
+        This extra step is required to get around the fancy pandas.DataFrame
+        indexing (like .ix, .iloc, etc).
+        """
+        return self.__class__(dataframe, **self._kwargs)
+
     def __repr__(self):
         s = []
         s.append("<%s instance, wrapping the following:"
