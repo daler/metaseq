@@ -84,6 +84,7 @@ class ResultsTable(object):
             if not isinstance(db, gffutils.FeatureDB):
                 raise ValueError(
                     "`db` must be a filename or a gffutils.FeatureDB")
+        self._kwargs['db'] = db
         self.db = db
 
     def features(self, ignore_unknown=False):
