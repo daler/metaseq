@@ -37,8 +37,8 @@ class ResultsTable(object):
             raise ValueError("`data` is not a pandas.DataFrame")
         self.data = data
 
-        self.attach_db(db)
         self._kwargs = dict(db=db, import_kwargs=import_kwargs)
+        self.attach_db(db)
 
     def __getattr__(self, attr):
         if attr in self.__dict__:
