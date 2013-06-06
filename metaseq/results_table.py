@@ -300,6 +300,25 @@ class ResultsTable(object):
 
         return ax
 
+    def strip_unknown_features(self):
+        """
+        Remove features not found in the `gffutils.FeatureDB`.  This will
+        typically include 'ambiguous', 'no_feature', etc, but can also be
+        useful if the database was created from a different one than was used
+        to create the table.
+        """
+        if not self.db:
+            return self
+        ind = []
+        for i, gene_id in enumerate(self.data.index):
+            try:
+                self.db[gene_id]
+                ind.append(i)
+            except gffutils.FeatureNotFoundError:
+                pass
+        ind = np.array(ind)
+        return self.__class__(self.data.ix[ind], **self._kwargs)
+
 
 class DESeqResults(ResultsTable):
     def __init__(self, data, db=None, header_check=True,
