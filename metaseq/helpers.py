@@ -1,3 +1,4 @@
+from copy import copy
 import os
 import sys
 import time
@@ -153,6 +154,26 @@ def example_filename(fn):
     if not os.path.exists(fn):
         raise ValueError("%s does not exist" % fn)
     return fn
+
+
+def split_feature(f, n):
+    """
+    Split an interval into `n` roughly equal portions
+    """
+    if not isinstance(n, int):
+        raise ValueError('n must be an integer')
+    orig_feature = copy(f)
+    step = (f.stop - f.start) / n
+    for i in range(f.start, f.stop, step):
+        f = copy(orig_feature)
+        start = i
+        stop = min(i + step, orig_feature.stop)
+        f.start = start
+        f.stop = stop
+        yield f
+        if stop == orig_feature.stop:
+            break
+
 def tointerval(s):
     """
     If string, then convert to an interval; otherwise just return the input
