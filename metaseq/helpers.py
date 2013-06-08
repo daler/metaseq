@@ -5,7 +5,14 @@ import scipy
 import matplotlib
 import pybedtools
 import subprocess
+import re
 
+coord_re = re.compile(
+    r"""
+    (?P<chrom>.+):
+    (?P<start>\d+)-
+    (?P<stop>\d+)
+    (?:\[(?P<strand>.)\])?""", re.VERBOSE)
 
 def gfffeature_to_interval(feature):
     return pybedtools.create_interval_from_list(feature.tostring().split('\t'))
@@ -146,3 +153,24 @@ def example_filename(fn):
     if not os.path.exists(fn):
         raise ValueError("%s does not exist" % fn)
     return fn
+def tointerval(s):
+    """
+    If string, then convert to an interval; otherwise just return the input
+    """
+    if isinstance(s, basestring):
+        m = coord_re.search(s)
+        if m.group('strand'):
+            return pybedtools.create_interval_from_list([
+                m.group('chrom'),
+                m.group('start'),
+                m.group('stop'),
+                '.',
+                '0',
+                m.group('strand')])
+        else:
+            return pybedtools.create_interval_from_list([
+                m.group('chrom'),
+                m.group('start'),
+                m.group('stop'),
+            ])
+    return s
