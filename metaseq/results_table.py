@@ -360,6 +360,28 @@ class DESeqResults(ResultsTable):
         if remove_deseq_extra:
             self.data = self.data[~self.data.index.isin(to_remove)]
 
+    def changed(self, thresh=0.05, idx=True, col='padj'):
+        """
+        Changed features.
+
+        {threshdoc}
+        """
+        ind = self.data[col] <= thresh
+        if idx:
+            return ind
+        return self[ind]
+
+    def unchanged(self, thresh=0.05, idx=True, col='padj'):
+        """
+        Changed features.
+
+        {threshdoc}
+        """
+        ind = self.data[col] > thresh
+        if idx:
+            return ind
+        return self[ind]
+
     def enriched(self, thresh=0.05, idx=True, col='padj'):
         """
         Enriched features.
