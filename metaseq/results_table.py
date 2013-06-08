@@ -48,7 +48,6 @@ class ResultsTable(object):
     def __getitem__(self, attr):
         return self.__class__(self.data.__getitem__(attr), **self._kwargs)
 
-
     def update(self, dataframe):
         """
         Updates the current data with a new dataframe.
@@ -237,7 +236,6 @@ class ResultsTable(object):
 
         if general_kwargs is None:
             general_kwargs = {}
-
 
         if genes_to_highlight is None:
             genes_to_highlight = []
@@ -495,6 +493,7 @@ class DESeqResults(ResultsTable):
         if self.db is None:
             raise ValueError("FeatureDB required")
         db = gffutils.FeatureDB(self.db)
+
         def scored_feature_generator(d):
             for i in range(len(d)):
                 try:
@@ -525,6 +524,7 @@ class DESeqResults(ResultsTable):
             cmap = cm.RdBu_r
         cmap = colormap_adjust.cmap_center_point_adjust(
             cmap, [norm.vmin, norm.vmax], 0)
+
         def score_zeroer(f):
             f.score = '0'
             return f
@@ -614,6 +614,7 @@ if __name__ == "__main__":
     d = d.align_with(e)
 
     en = e.enriched()
+
     def sizefunc(x):
         return np.abs(x.log2FoldChange * 2)
     general_kwargs = dict(color='k', s=e.log2FoldChange ** 2)
@@ -630,5 +631,9 @@ if __name__ == "__main__":
         callback=e._default_callback,
     )
 
-    e.ma_plot(0.05, callback=e._default_callback, zero_line=dict(color='y', linestyle=':'), general_kwargs=general_kwargs)
+    e.ma_plot(
+        0.05,
+        callback=e._default_callback,
+        zero_line=dict(color='y', linestyle=':'),
+        general_kwargs=general_kwargs)
     plt.show()

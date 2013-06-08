@@ -53,13 +53,16 @@ def genomic_signal(fn, kind):
     object.
 
     :param fn: Filename
-    :param kind: String.  Format of the file; see metaseq.genomic_signal._registry.keys()
+    :param kind:
+        String.  Format of the file; see
+        metaseq.genomic_signal._registry.keys()
     """
     try:
         klass = _registry[kind.lower()]
     except KeyError:
-        raise ValueError('No support for %s format, choices are %s' \
-                % (kind, _registry.keys()))
+        raise ValueError(
+            'No support for %s format, choices are %s'
+            % (kind, _registry.keys()))
     m = klass(fn)
     m.kind = kind
     return m
@@ -101,14 +104,13 @@ class BaseSignal(object):
         """
         if processes is not None:
             return _array_parallel(
-                    self.fn, self.__class__, features, processes=processes,
-                    chunksize=chunksize, **kwargs)
+                self.fn, self.__class__, features, processes=processes,
+                chunksize=chunksize, **kwargs)
         else:
             return _array(self.fn, self.__class__, features, **kwargs)
 
     def local_coverage(self, *args, **kwargs):
         return _local_coverage(self.adapter, *args, **kwargs)
-
 
     def __getitem__(self, key):
         return self.adapter[key]
@@ -197,8 +199,8 @@ class BamSignal(IntervalSignal):
                 '-c',
                 '-F', '0x4',
                 self.fn]
-        p = subprocess.Popen(cmds, stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE)
+        p = subprocess.Popen(
+            cmds, stdout=subprocess.PIPE stderr=subprocess.PIPE)
         stdout, stderr = p.communicate()
         if stderr:
             sys.stderr.write('samtools says: %s' % stderr)
@@ -235,11 +237,11 @@ class BedSignal(IntervalSignal):
 
 
 _registry = {
-        'bam': BamSignal,
-        'bed': BedSignal,
-        'gff': BedSignal,
-        'gtf': BedSignal,
-        'vcf': BedSignal,
-     'bigwig': BigWigSignal,
-     'bigbed': BigBedSignal,
-     }
+    'bam': BamSignal,
+    'bed': BedSignal,
+    'gff': BedSignal,
+    'gtf': BedSignal,
+    'vcf': BedSignal,
+    'bigwig': BigWigSignal,
+    'bigbed': BigBedSignal,
+}

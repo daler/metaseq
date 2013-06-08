@@ -51,9 +51,9 @@ class BamAdapter(BaseAdapter):
 
     def __getitem__(self, key):
         iterator = self.fileobj.fetch(
-                key.chrom,
-                key.start,
-                key.stop)
+            key.chrom,
+            key.start,
+            key.stop)
         for r in iterator:
             interval = pybedtools.Interval(
                 self.fileobj.references[r.rname],
@@ -80,7 +80,7 @@ class BedAdapter(BaseAdapter):
 
     def __getitem__(self, key):
         bt = self.fileobj.tabix_intervals(
-                '%s:%s-%s' % (key.chrom, key.start, key.stop))
+            '%s:%s-%s' % (key.chrom, key.start, key.stop))
         for i in bt:
             yield i
         del bt
@@ -124,7 +124,8 @@ class BigWigAdapter(BaseAdapter):
             "__getitem__ not implemented for %s" % self.__class__.__name__)
 
     def summarize(self, interval, bins=None):
-        # if bins is none, then adaptively work something out...say, 100-bp bins
+        # if bins is none, then adaptively work something out...say, 100-bp
+        # bins
         if bins is None:
             bins = len(interval)
         y = np.zeros(bins)
@@ -142,6 +143,7 @@ class BigWigAdapter(BaseAdapter):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
+
         def gen():
             try:
                 for line in p.stdout:

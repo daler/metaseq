@@ -62,7 +62,8 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
     Parameters
     ----------
     features : various
-        Can be a single interval, an iterable yielding intervals, or an iterable-of-iterables.
+        Can be a single interval, an iterable yielding intervals, or an
+        iterable-of-iterables.
 
         Intervals must have chrom, start, and stop attributes.
 
@@ -144,13 +145,13 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
         if bins is not None:
             if not isinstance(bins, int):
                 raise ValueError(
-                        "bins must be an int, got %s" % type(bins))
+                    "bins must be an int, got %s" % type(bins))
         features = [features]
         bins = [bins]
     else:
         if not len(bins) == len(features):
             raise ValueError(
-                    "bins must have same length as feature list")
+                "bins must have same length as feature list")
 
     # nomenclature:
     #   "window" is region we're getting data for
@@ -168,10 +169,10 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
         # requested window
         _fs = fragment_size or 0
         padded_window = pybedtools.Interval(
-                chrom,
-                max(start - _fs - shift_width, 0),
-                stop + _fs + shift_width,
-                )
+            chrom,
+            max(start - _fs - shift_width, 0),
+            stop + _fs + shift_width,
+        )
         window_size = stop - start
 
         # start off with an array of zeros to represent the window
@@ -239,7 +240,7 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
 
             #xi = np.linspace(
             #        start, stop - (stop - start) / float(nbin), nbin)
-            xi, profile = rebin(x=np.arange(start,stop), y=profile, nbin=nbin)
+            xi, profile = rebin(x=np.arange(start, stop), y=profile, nbin=nbin)
             if not accumulate:
                 nonzero = profile != 0
                 profile[profile != 0] = 1
@@ -277,12 +278,12 @@ def _array_parallel(fn, cls, genelist, chunksize=25, processes=1, **kwargs):
     #               python-multiprocessing-pool-map-for-multiple-arguments
     #
     arrays = pool.map(
-                _array_star,
-                itertools.izip(
-                    itertools.repeat(fn),
-                    itertools.repeat(cls),
-                    chunks,
-                    itertools.repeat(kwargs)))
+        _array_star,
+        itertools.izip(
+            itertools.repeat(fn),
+            itertools.repeat(cls),
+            chunks,
+            itertools.repeat(kwargs)))
     stacked_arrays = np.row_stack(arrays)
     del arrays
     return stacked_arrays
@@ -313,13 +314,14 @@ def _array(fn, cls, genelist, **kwargs):
     for gene in genelist:
         if not isinstance(gene, (list, tuple)):
             gene = [gene]
-        coverage_x, coverage_y = _local_coverage_func(reader, gene,
-                                                     **kwargs)
+        coverage_x, coverage_y = _local_coverage_func(
+            reader, gene, **kwargs)
         biglist.append(coverage_y)
     return np.array(biglist)
 
 
-def _local_coverage_bigwig(bigwig, features, bins=None, accumulate=True, preserve_total=False):
+def _local_coverage_bigwig(bigwig, features, bins=None, accumulate=True,
+                           preserve_total=False):
     """
     Returns matrix of coverage of `features` using `bins` -- see
     :func:`metaseq.array_helpers._local_coverage` for more info.
@@ -334,13 +336,13 @@ def _local_coverage_bigwig(bigwig, features, bins=None, accumulate=True, preserv
         if bins is not None:
             if not isinstance(bins, int):
                 raise ValueError(
-                        "bins must be an int, got %s" % type(bins))
+                    "bins must be an int, got %s" % type(bins))
         features = [features]
         bins = [bins]
     else:
         if not len(bins) == len(features):
             raise ValueError(
-                    "bins must have same length as feature list")
+                "bins must have same length as feature list")
 
     profiles = []
     xs = []
@@ -360,7 +362,7 @@ def _local_coverage_bigwig(bigwig, features, bins=None, accumulate=True, preserv
 
             #xi = np.linspace(
             #        start, stop - (stop - start) / float(nbin), nbin)
-            xi, profile = rebin(x=np.arange(start,stop), y=profile, nbin=nbin)
+            xi, profile = rebin(x=np.arange(start, stop), y=profile, nbin=nbin)
             if not accumulate:
                 nonzero = profile != 0
                 profile[profile != 0] = 1
@@ -376,7 +378,3 @@ def _local_coverage_bigwig(bigwig, features, bins=None, accumulate=True, preserv
         profiles.append(profile)
 
     return np.hstack(xs), np.hstack(profiles)
-
-
-
-

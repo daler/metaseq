@@ -56,7 +56,7 @@ def prepare_logged(x, y):
 
     This function scales `x` and `y` such that the points that are zero in one
     array are set to the min of the other array.
-    
+
     When plotting expression data, frequently one sample will have reads in
     a particular feature but the other sample will not.  Expression data also
     tends to look better on a log scale, but log(0) is undefined and therefore
@@ -108,36 +108,36 @@ def matrix_and_line_shell(figsize=(5, 12), strip=False):
     LINE_ROWS = ROWS - MAT_ROWS
 
     mat_ax = plt.subplot2grid(
-            shape=(ROWS, COLS),
-            loc=(0, STRIP_COLS),
-            rowspan=MAT_ROWS,
-            colspan=MAT_COLS,
-            )
+        shape=(ROWS, COLS),
+        loc=(0, STRIP_COLS),
+        rowspan=MAT_ROWS,
+        colspan=MAT_COLS,
+    )
 
     line_ax = plt.subplot2grid(
-            shape=(ROWS, COLS),
-            loc=(MAT_ROWS, STRIP_COLS),
-            rowspan=LINE_ROWS,
-            colspan=MAT_COLS,
-            sharex=mat_ax)
+        shape=(ROWS, COLS),
+        loc=(MAT_ROWS, STRIP_COLS),
+        rowspan=LINE_ROWS,
+        colspan=MAT_COLS,
+        sharex=mat_ax)
 
     if strip:
         strip_ax = plt.subplot2grid(
-                shape=(ROWS, COLS),
-                loc=(0, 0),
-                rowspan=MAT_ROWS,
-                colspan=STRIP_COLS,
-                sharey=mat_ax,
-                )
+            shape=(ROWS, COLS),
+            loc=(0, 0),
+            rowspan=MAT_ROWS,
+            colspan=STRIP_COLS,
+            sharey=mat_ax,
+        )
     else:
         strip_ax = None
 
     cax = plt.subplot2grid(
-            shape=(ROWS, COLS),
-            loc=(ROWS - MAT_ROWS, MAT_COLS + STRIP_COLS),
-            rowspan=1,
-            colspan=1,
-            )
+        shape=(ROWS, COLS),
+        loc=(ROWS - MAT_ROWS, MAT_COLS + STRIP_COLS),
+        rowspan=1,
+        colspan=1,
+    )
 
     fig.subplots_adjust(hspace=0.1, wspace=0.2, right=0.88, left=0.23)
     return fig, mat_ax, line_ax, strip_ax, cax
@@ -260,19 +260,16 @@ def new_clustered_sortind(x, k=10, row_key=None, cluster_key=None):
     labels = mbk.labels_
     scores = np.zeros(labels.shape, dtype=float)
 
-
-
     if cluster_key:
         # It's easier for calling code to provide something that operates on
         # a cluster level, but here it's converted to work on a label level
         # that looks in to the array `x`.
         def _cluster_key(i):
-            return cluster_key(x[labels==i, :])
+            return cluster_key(x[labels == i, :])
         sorted_labels = sorted(range(k), key=_cluster_key)
     else:
         # Otherwise just use them as-is.
         sorted_labels = range(k)
-
 
     if row_key:
         # Again, easier to provide a function to operate on a row.  But here we
@@ -285,7 +282,7 @@ def new_clustered_sortind(x, k=10, row_key=None, cluster_key=None):
     pos = 0
     for label in sorted_labels:
         # which rows in `x` have this label
-        label_inds = np.nonzero(labels==label)[0]
+        label_inds = np.nonzero(labels == label)[0]
         if row_key:
             label_sort_ind = sorted(label_inds, key=_row_key)
         else:
@@ -304,11 +301,12 @@ def input_ip_plots(iparr, inputarr, diffed, x, sort_ind,
 
     """
     All-in-one plotting function to make a 5-panel figure.
-    
+
     Panels are IP, input, and diffed; plus 2 line plots showing averages.
-    
+
     :param iparr, inputarr: NumPy arrays constructed by a genomic_signal object
-    :param diffed: Difference of `iparr` and `inputarr`, but can be some other transformation.
+    :param diffed: Difference of `iparr` and `inputarr`, but can be some other
+                   transformation.
     :param x: Extent to use -- for TSSs, maybe something like
         np.linspace(-1000, 1000, bins), or for just bin IDs, something like
         `np.arange(bins)`.
@@ -337,12 +335,12 @@ def input_ip_plots(iparr, inputarr, diffed, x, sort_ind,
     # axes that make sense
     #
     # 3 arrays
-    ax1 = plt.subplot2grid((9, 9), (0, 0),
-            colspan=3, rowspan=6)
-    ax2 = plt.subplot2grid((9, 9), (0, 3),
-            colspan=3, rowspan=6, sharex=ax1, sharey=ax1)
-    ax3 = plt.subplot2grid((9, 9), (0, 6),
-            colspan=3, rowspan=6, sharex=ax1, sharey=ax1)
+    ax1 = plt.subplot2grid(
+        (9, 9), (0, 0), colspan=3, rowspan=6)
+    ax2 = plt.subplot2grid(
+        (9, 9), (0, 3), colspan=3, rowspan=6, sharex=ax1, sharey=ax1)
+    ax3 = plt.subplot2grid(
+        (9, 9), (0, 6), colspan=3, rowspan=6, sharex=ax1, sharey=ax1)
 
     # 2 line plots
     ax4 = plt.subplot2grid((9, 9), (6, 3), colspan=3, rowspan=3, sharex=ax1)
@@ -367,26 +365,26 @@ def input_ip_plots(iparr, inputarr, diffed, x, sort_ind,
 
     if limits1[0] is None:
         limits1[0] = stats.scoreatpercentile(
-                all_base, 1. / all_base.size)
+            all_base, 1. / all_base.size)
     if limits1[1] is None:
         limits1[1] = stats.scoreatpercentile(
-                all_base, 100 - 1. / all_base.size)
+            all_base, 100 - 1. / all_base.size)
     if limits2[0] is None:
         limits2[0] = stats.scoreatpercentile(
-                diffed.ravel(), 1. / all_base.size)
+            diffed.ravel(), 1. / all_base.size)
     if limits2[1] is None:
         limits2[1] = stats.scoreatpercentile(
-                diffed.ravel(), 100 - 1. / all_base.size)
+            diffed.ravel(), 100 - 1. / all_base.size)
 
     del all_base
 
     imshow_kwargs = dict(
-                        interpolation='nearest',
-                        aspect='auto',
-                        cmap=cm,
-                        norm=matplotlib.colors.Normalize(*limits1),
-                        extent=extent,
-                        origin='lower')
+        interpolation='nearest',
+        aspect='auto',
+        cmap=cm,
+        norm=matplotlib.colors.Normalize(*limits1),
+        extent=extent,
+        origin='lower')
 
     # modify kwargs for diffed (by changing the normalization)
     diffed_kwargs = imshow_kwargs.copy()
@@ -403,7 +401,7 @@ def input_ip_plots(iparr, inputarr, diffed, x, sort_ind,
 
     # IP and input line plot with vertical line
     ax4.plot(x, inputarr.mean(axis=0), color='k', linestyle='--',
-            label='input')
+             label='input')
     ax4.plot(x, iparr.mean(axis=0), color='k', label='ip')
     ax4.axvline(0, color='k', linestyle=':')
 
