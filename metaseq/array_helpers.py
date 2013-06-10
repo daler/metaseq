@@ -138,10 +138,7 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
 
     """
     if isinstance(features, basestring):
-        # assume it's in chrom:start-stop format
-        chrom, coords = features.split(':')
-        start, stop = coords.split('-')
-        features = pybedtools.create_interval_from_list([chrom, start, stop])
+        features = helpers.tointerval(features)
 
     if not ((isinstance(features, list) or isinstance(features, tuple))):
         if bins is not None:
