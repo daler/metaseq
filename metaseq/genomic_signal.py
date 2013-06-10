@@ -156,9 +156,6 @@ class BigWigSignal(BaseSignal):
         """
         super(BigWigSignal, self).__init__(fn)
         self.bigwig = filetype_adapters.BigWigAdapter(fn)
-        import warnings
-        warnings.warn('BigWigSignal not well supported '
-                      '-- please test and submit bug reports')
 
     def local_coverage(self, *args, **kwargs):
         return _local_coverage_bigwig(self.bigwig, *args, **kwargs)
