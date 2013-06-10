@@ -375,7 +375,7 @@ class DESeqResults(ResultsTable):
 
         {threshdoc}
         """
-        ind = self.data[col] > thresh
+        ind = (self.data[col] > thresh) | np.isnan(self.data[col])
         if idx:
             return ind
         return self[ind]
