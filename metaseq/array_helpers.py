@@ -259,6 +259,67 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
     return np.hstack(xs), np.hstack(profiles)
 
 
+def _local_coverage_bigwig(bigwig, features, bins=None, accumulate=True,
+                           preserve_total=False):
+    """
+    Returns matrix of coverage of `features` using `bins` -- see
+    :func:`metaseq.array_helpers._local_coverage` for more info.
+    """
+    if isinstance(features, basestring):
+        features = helpers.tointerval(features)
+    if not (isinstance(features, list) or isinstance(features, tuple)):
+        if bins is not None:
+            if not isinstance(bins, int):
+                raise ValueError(
+                    "bins must be an int, got %s" % type(bins))
+        features = [features]
+        bins = [bins]
+    else:
+        if bins is None:
+            bins = [None for i in features]
+        if not len(bins) == len(features):
+            raise ValueError(
+                "bins must have same length as feature list")
+
+    profiles = []
+    xs = []
+    for window, nbin in zip(features, bins):
+        window = helpers.tointerval(window)
+        chrom = window.chrom
+        start = window.start
+        stop = window.stop
+        strand = window.strand
+        profile = bigwig.summarize(window, bins=(nbin or len(window)))
+
+
+        # If no bins, return genomic coords
+        if nbin is None:
+            x = np.arange(start, stop)
+
+        # Otherwise do the downsampling; resulting x is stll in genomic
+        # coords
+        else:
+
+            #xi = np.linspace(
+            #        start, stop - (stop - start) / float(nbin), nbin)
+            xi, profile = rebin(x=np.arange(start, stop), y=profile, nbin=nbin)
+            x = xi
+        if not accumulate:
+            nonzero = profile != 0
+            profile[profile != 0] = 1
+
+        # Minus-strand profiles should be flipped left-to-right.
+        if strand == '-':
+            profile = profile[::-1]
+        xs.append(x)
+        if preserve_total:
+            scale = window_size / float(nbin)
+            profile *= scale
+        profiles.append(profile)
+
+    return np.hstack(xs), np.hstack(profiles)
+
+
 def _array_parallel(fn, cls, genelist, chunksize=25, processes=1, **kwargs):
     """
     Returns an array of genes in `genelist`, using `bins` bins.
@@ -314,65 +375,6 @@ def _array(fn, cls, genelist, **kwargs):
             gene = [gene]
         coverage_x, coverage_y = _local_coverage_func(
             reader, gene, **kwargs)
+
         biglist.append(coverage_y)
     return biglist
-
-
-def _local_coverage_bigwig(bigwig, features, bins=None, accumulate=True,
-                           preserve_total=False):
-    """
-    Returns matrix of coverage of `features` using `bins` -- see
-    :func:`metaseq.array_helpers._local_coverage` for more info.
-    """
-
-    if isinstance(features, basestring):
-        # assume it's in chrom:start-stop format
-        chrom, coords = features.split(':')
-        start, stop = coords.split('-')
-        features = pybedtools.create_interval_from_list([chrom, start, stop])
-    if not (isinstance(features, list) or isinstance(features, tuple)):
-        if bins is not None:
-            if not isinstance(bins, int):
-                raise ValueError(
-                    "bins must be an int, got %s" % type(bins))
-        features = [features]
-        bins = [bins]
-    else:
-        if not len(bins) == len(features):
-            raise ValueError(
-                "bins must have same length as feature list")
-
-    profiles = []
-    xs = []
-    for window, nbin in zip(features, bins):
-
-        chrom = window.chrom
-        start = window.start
-        stop = window.stop
-        strand = window.strand
-        profile = bigwig.summarize(window, nbin)
-        if nbin is None:
-            x = np.arange(start, stop)
-
-        # Otherwise do the downsampling; resulting x is stll in genomic
-        # coords
-        else:
-
-            #xi = np.linspace(
-            #        start, stop - (stop - start) / float(nbin), nbin)
-            xi, profile = rebin(x=np.arange(start, stop), y=profile, nbin=nbin)
-            if not accumulate:
-                nonzero = profile != 0
-                profile[profile != 0] = 1
-            x = xi
-
-        # Minus-strand profiles should be flipped left-to-right.
-        if strand == '-':
-            profile = profile[::-1]
-        xs.append(x)
-        if preserve_total:
-            scale = window_size / float(nbin)
-            profile *= scale
-        profiles.append(profile)
-
-    return np.hstack(xs), np.hstack(profiles)
