@@ -13,6 +13,7 @@ Subclasses must define make_fileobj(), which returns an object to be iterated
 over in __getitem__
 """
 from bx.bbi.bigbed_file import BigBedFile
+from bx.bbi.bigwig_file import BigWigFile
 import numpy as np
 import subprocess
 import pysam
@@ -124,6 +125,15 @@ class BigWigAdapter(BaseAdapter):
             "__getitem__ not implemented for %s" % self.__class__.__name__)
 
     def summarize(self, interval, bins=None):
+        bw = BigWigFile(open(self.fn))
+        s = bw.get_as_array(
+            interval.chrom,
+            interval.start,
+            interval.stop,)
+        s[np.isnan(s)] = 0
+        return s
+
+    def ucsc_summarize(self, interval, bins=None):
         # if bins is none, then adaptively work something out...say, 100-bp
         # bins
         if bins is None:
