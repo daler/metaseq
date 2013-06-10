@@ -114,7 +114,7 @@ class BaseSignal(object):
             else:
                 return arrays
         else:
-            return _array(self.fn, self.__class__, features, **kwargs)
+            return np.array(_array(self.fn, self.__class__, features, **kwargs))
         raise ValueError
 
     def local_coverage(self, features, *args, **kwargs):
@@ -135,7 +135,6 @@ class BaseSignal(object):
         features = helpers.tointerval(features)
         x = np.arange(features.start, features.stop)
         features = list(helpers.split_feature(features, processes))
-        print "from genomic signal:", features
         ys = self.array(features, *args, bins=None, processes=processes, ragged=True, **kwargs)
         # now we ravel() and re-bin
         y = np.column_stack(ys).ravel()
@@ -155,10 +154,34 @@ class BigWigSignal(BaseSignal):
         Class for operating on bigWig files
         """
         super(BigWigSignal, self).__init__(fn)
-        self.bigwig = filetype_adapters.BigWigAdapter(fn)
+        self.adapter = filetype_adapters.BigWigAdapter(fn)
 
-    def local_coverage(self, *args, **kwargs):
-        return _local_coverage_bigwig(self.bigwig, *args, **kwargs)
+    def local_coverage(self, features, *args, **kwargs):
+        processes = kwargs.pop('processes', None)
+        if not processes:
+            return _local_coverage_bigwig(self.adapter, features, *args, **kwargs)
+
+        if isinstance(features, (list, tuple)):
+            raise ValueError(
+                "only single features are supported for parallel "
+                "local_coverage")
+
+        # we don't want to have self.array do the binning
+        bins = kwargs.pop('bins', None)
+
+        # since if we got here processes is not None, then this will trigger
+        # a parallel array creation
+        features = helpers.tointerval(features)
+        x = np.arange(features.start, features.stop)
+        features = list(helpers.split_feature(features, processes))
+        ys = self.array(features, *args, bins=None, processes=processes, ragged=True, **kwargs)
+        # now we ravel() and re-bin
+        y = np.column_stack(ys).ravel()
+        if bins:
+            xi, yi = rebin.rebin(x, y, bins)
+            del x, y
+            return xi, yi
+        return x, y
 
     local_coverage.__doc__ = _local_coverage_bigwig.__doc__
 
