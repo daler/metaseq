@@ -75,7 +75,7 @@ class BedAdapter(BaseAdapter):
     def make_fileobj(self):
         obj = pybedtools.BedTool(self.fn)
         if not obj._tabixed():
-            obj = obj.sort().tabix(in_place=True, force=True)
+            obj = obj.sort().tabix(in_place=False, force=False, is_sorted=True)
             self.fn = obj.fn
         return obj
 
