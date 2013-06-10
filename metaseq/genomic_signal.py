@@ -36,7 +36,8 @@ import pybedtools
 from array_helpers import _array, _array_parallel, _local_coverage, \
     _local_coverage_bigwig, _local_count
 import filetype_adapters
-
+import rebin
+import helpers
 
 def supported_formats():
     """
@@ -80,7 +81,7 @@ class BaseSignal(object):
     def __init__(self, fn):
         self.fn = fn
 
-    def array(self, features, processes=None, chunksize=None, **kwargs):
+    def array(self, features, processes=None, chunksize=1, ragged=False, **kwargs):
         """
         Creates an MxN NumPy array of genomic signal for the region defined by
         each feature in `features`, where M=len(features) and N=bins.
@@ -103,14 +104,46 @@ class BaseSignal(object):
         the work for each feature; see that method for more details.
         """
         if processes is not None:
-            return _array_parallel(
+            arrays = _array_parallel(
                 self.fn, self.__class__, features, processes=processes,
                 chunksize=chunksize, **kwargs)
+            if not ragged:
+                stacked_arrays = np.row_stack(arrays)
+                del arrays
+                return stacked_arrays
+            else:
+                return arrays
         else:
             return _array(self.fn, self.__class__, features, **kwargs)
+        raise ValueError
 
-    def local_coverage(self, *args, **kwargs):
-        return _local_coverage(self.adapter, *args, **kwargs)
+    def local_coverage(self, features, *args, **kwargs):
+        processes = kwargs.pop('processes', None)
+        if not processes:
+            return _local_coverage(self.adapter, features, *args, **kwargs)
+
+        if isinstance(features, (list, tuple)):
+            raise ValueError(
+                "only single features are supported for parallel "
+                "local_coverage")
+
+        # we don't want to have self.array do the binning
+        bins = kwargs.pop('bins', None)
+
+        # since if we got here processes is not None, then this will trigger
+        # a parallel array creation
+        features = helpers.tointerval(features)
+        x = np.arange(features.start, features.stop)
+        features = list(helpers.split_feature(features, processes))
+        print "from genomic signal:", features
+        ys = self.array(features, *args, bins=None, processes=processes, ragged=True, **kwargs)
+        # now we ravel() and re-bin
+        y = np.column_stack(ys).ravel()
+        if bins:
+            xi, yi = rebin.rebin(x, y, bins)
+            del x, y
+            return xi, yi
+        return x, y
 
     def __getitem__(self, key):
         return self.adapter[key]
@@ -140,13 +173,9 @@ class IntervalSignal(BaseSignal):
         """
         BaseSignal.__init__(self, fn)
 
-    def local_coverage(self, *args, **kwargs):
-        return _local_coverage(self.adapter, *args, **kwargs)
-
     def local_count(self, *args, **kwargs):
         return _local_count(self.adapter, *args, **kwargs)
 
-    local_coverage.__doc__ = _local_coverage.__doc__
     local_count.__doc__ = _local_count.__doc__
 
 
@@ -200,7 +229,7 @@ class BamSignal(IntervalSignal):
                 '-F', '0x4',
                 self.fn]
         p = subprocess.Popen(
-            cmds, stdout=subprocess.PIPE stderr=subprocess.PIPE)
+            cmds, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = p.communicate()
         if stderr:
             sys.stderr.write('samtools says: %s' % stderr)

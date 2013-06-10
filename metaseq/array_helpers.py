@@ -7,6 +7,7 @@ import genomic_signal
 import sys
 from rebin import rebin
 from helpers import chunker
+import helpers
 import filetype_adapters
 
 
@@ -129,11 +130,12 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
     Returns arrays `x` and `y`.  `x` is in genomic coordinates, and `y` is
     the coverage at each of those coordinates after extending fragments.
 
-    The total number of reads is guaranteed to be the same no matter how
-    it's binned.
+    The total number of reads is guaranteed to be the same no matter how it's
+    binned.
 
     (with ideas from
     http://www-huber.embl.de/users/anders/HTSeq/doc/tss.html)
+
     """
     if isinstance(features, basestring):
         # assume it's in chrom:start-stop format
@@ -149,10 +151,11 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
         features = [features]
         bins = [bins]
     else:
+        if bins is None:
+            bins = [None for i in features]
         if not len(bins) == len(features):
             raise ValueError(
                 "bins must have same length as feature list")
-
     # nomenclature:
     #   "window" is region we're getting data for
     #   "alignment" is one item in that region
@@ -160,6 +163,7 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
     profiles = []
     xs = []
     for window, nbin in zip(features, bins):
+        window = helpers.tointerval(window)
         chrom = window.chrom
         start = window.start
         stop = window.stop
@@ -277,16 +281,13 @@ def _array_parallel(fn, cls, genelist, chunksize=25, processes=1, **kwargs):
     # http://stackoverflow.com/questions/5442910/
     #               python-multiprocessing-pool-map-for-multiple-arguments
     #
-    arrays = pool.map(
+    return pool.map(
         _array_star,
         itertools.izip(
             itertools.repeat(fn),
             itertools.repeat(cls),
             chunks,
             itertools.repeat(kwargs)))
-    stacked_arrays = np.row_stack(arrays)
-    del arrays
-    return stacked_arrays
 
 
 def _array_star(args):
@@ -317,7 +318,7 @@ def _array(fn, cls, genelist, **kwargs):
         coverage_x, coverage_y = _local_coverage_func(
             reader, gene, **kwargs)
         biglist.append(coverage_y)
-    return np.array(biglist)
+    return biglist
 
 
 def _local_coverage_bigwig(bigwig, features, bins=None, accumulate=True,
