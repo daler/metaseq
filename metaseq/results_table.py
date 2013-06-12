@@ -1,3 +1,4 @@
+import pybedtools
 from textwrap import dedent
 import numpy as np
 import pandas
@@ -39,6 +40,7 @@ class ResultsTable(object):
 
         self._kwargs = dict(db=db, import_kwargs=import_kwargs)
         self.attach_db(db)
+        self._cached_features = None
 
     def __getattr__(self, attr):
         if attr in self.__dict__:
@@ -268,7 +270,10 @@ class ResultsTable(object):
         # ones that are not highlighted in genes_to_highlight.
         allind = np.zeros_like(xi) == 0
         for i in genes_to_highlight:
-            allind[i[0]] = False
+            this_ind = i[0]
+            if this_ind.dtype == 'bool':
+                this_ind = np.where(this_ind)[0]
+            allind[this_ind] = False
 
         # Plot everybody
         coll = ax.scatter(xi[allind], yi[allind], picker=5, **general_kwargs)
@@ -328,6 +333,44 @@ class ResultsTable(object):
                 pass
         ind = np.array(ind)
         return self.__class__(self.data.ix[ind], **self._kwargs)
+
+    def genes_with_peak(self, peaks, transform_func=None,
+                        intersect_kwargs=None, *args, **kwargs):
+        """
+        Returns a boolean index of genes that have a peak nearby.
+
+        Parameters
+        ----------
+        peaks : string or pybedtools.BedTool
+            If string, then assume it's a filename to a BED/GFF/GTF file of
+            intervals; otherwise use the pybedtools.BedTool object directly.
+
+        transform_func : callable
+            This function will be applied to each gene object returned by
+            self.features().  Additional args and kwargs are passed to
+            `transform_func`. For example, if you're looking for peaks within
+            1kb upstream of TSSs, then pybedtools.featurefuncs.TSS would be
+            a useful `transform_func`, and supply additional kwargs of
+            `upstream=1000` and `downstream=0`.
+
+        intersect_kwargs : dict
+            kwargs passed to pybedtools.BedTool.intersect.
+        """
+        intersect_kwargs = intersect_kwargs or {}
+        if not self._cached_features:
+            self._cached_features = pybedtools\
+                .BedTool(self.features())\
+                .saveas()
+
+        if transform_func:
+            features = self._cached_features\
+                .each(transform_func, *args, **kwargs)
+
+        else:
+            features = self._cached_features
+
+        hits = [i.name for i in features.intersect(peaks, **intersect_kwargs)]
+        return self.data.index.isin(hits)
 
 
 class DESeqResults(ResultsTable):
