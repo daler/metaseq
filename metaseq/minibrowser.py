@@ -232,8 +232,10 @@ class PeakMiniBrowser(SignalMiniBrowser):
     def __init__(self, genomic_signal_objs, bed, **kwargs):
         """
         Signal on the top panel, peaks in the bottom panel. `bed` is a filename
-        or BedTool object that will be used to make
+        or BedTool object (or list of these things) that will be used to make
         a pybedtools.contrib.plotting.Track.
+
+        If genomic_signal_objs is None, then only show the peaks axes
         """
         super(PeakMiniBrowser, self).__init__(genomic_signal_objs, **kwargs)
         self.bed = bed
@@ -250,6 +252,7 @@ class PeakMiniBrowser(SignalMiniBrowser):
         ax.add_collection(track)
         ax.axis('tight')
         return feature
+
 
 
 if __name__ == "__main__":
