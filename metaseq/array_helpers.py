@@ -252,8 +252,9 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
             profile = profile[::-1]
         xs.append(x)
         if preserve_total:
-            scale = window_size / float(nbin)
-            profile *= scale
+            if nbin is not None:
+                scale = window_size / float(nbin)
+                profile *= scale
         profiles.append(profile)
 
     return np.hstack(xs), np.hstack(profiles)
