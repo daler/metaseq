@@ -312,8 +312,8 @@ class ResultsTable(object):
 
         # one-to-one line, if kwargs were specified
         if one_to_one:
-            ax.plot([global_min, global_max],
-                    [global_min, global_max],
+            ax.plot([xmin, xmax],
+                    [ymin, ymax],
                     **one_to_one)
 
         # plot any specially-highlighted genes, and label if specified
