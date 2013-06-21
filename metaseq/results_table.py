@@ -304,9 +304,11 @@ class ResultsTable(object):
         # Remove any genes that are handled by genes_to_hightlight.
         for ind, _ in _genes_to_highlight:
             allind[ind] = False
+
+        # Plot
         coll = ax.scatter(xi[allind], yi[allind], picker=5, **general_kwargs)
-        coll.subdata = self
-        coll.subind = allind
+        coll.df = self.data
+        coll.ind = allind
 
         # one-to-one line, if kwargs were specified
         if one_to_one:
@@ -320,8 +322,9 @@ class ResultsTable(object):
             updated_kwargs = general_kwargs.copy()
             updated_kwargs.update(kwargs)
             coll = ax.scatter(xi[ind], yi[ind], picker=5, **updated_kwargs)
-            coll.subdata = self
-            coll.subind = ind
+            coll.df = self.data
+            coll.ind = ind
+
 
             if names:
                 transOffset = matplotlib.transforms.offset_copy(
