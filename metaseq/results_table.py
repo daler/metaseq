@@ -253,21 +253,40 @@ class ResultsTable(object):
                                           alpha=0.5))
 
         # ---------------------------------------------------------------------
-        xi = xfunc(x)
-        yi = yfunc(y)
+        xi = xfunc(_x)
+        yi = yfunc(_y)
 
-        xv = np.isfinite(xi.astype(float))
-        yv = np.isfinite(yi.astype(float))
+        # handle inf, -inf, and NaN
+        pos_xv = np.isinf(xi) & (xi > 0)
+        neg_xv = np.isinf(xi) & (xi < 0)
+        nan_xv = np.isnan(xi)
+        pos_yv = np.isinf(yi) & (yi > 0)
+        neg_yv = np.isinf(yi) & (yi < 0)
+        nan_yv = np.isnan(yi)
 
-        global_min = min(xi[xv].min(), yi[yv].min())
-        global_max = max(xi[xv].max(), yi[yv].max())
+        xv = ~(pos_xv | neg_xv | nan_xv)
+        yv = ~(pos_yv | neg_yv | nan_yv)
 
-        if marginal:
-            xi[~xv] = global_min
-            yi[~yv] = global_min
+        xmax = xi[xv].max()
+        xmin = xi[xv].min()
+        ymax = yi[yv].max()
+        ymin = yi[yv].min()
 
-        # Create an index of the 'non-interesting' features -- at least the
-        # ones that are not highlighted in genes_to_highlight.
+        xpad = (xmax - xmin) * 0.1
+        ypad = (ymax - ymin) * 0.1
+
+
+        global_min = min(xmin, ymin)
+        global_max = max(xmax, ymax)
+
+        # Include marginal data on global min/max
+        xi[pos_xv] = xmax + xpad
+        xi[neg_xv] = xmin - xpad
+        xi[nan_xv] = xmin - xpad
+
+        yi[pos_yv] = ymax + ypad
+        yi[neg_yv] = ymin - ypad
+        yi[nan_yv] = ymin - ypad
         allind = np.zeros_like(xi) == 0
         for i in genes_to_highlight:
             this_ind = i[0]
