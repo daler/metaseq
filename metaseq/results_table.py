@@ -339,12 +339,26 @@ class ResultsTable(object):
 
         # register callback
         if callback is not None:
-            ax.figure.canvas.mpl_connect('pick_event', callback)
+            def wrapped_callback(event):
+                return callback(self._id_callback(event))
+
+        else:
+            def wrapped_callback(event):
+                return self._default_callback(self._id_callback(event))
+
+        ax.figure.canvas.mpl_connect('pick_event', wrapped_callback)
 
         ax.set_xlabel(xlab)
         ax.set_ylabel(ylab)
 
         return ax
+
+    def _id_callback(self, event):
+        for i in event.ind:
+            return event.artist.df.ix[event.artist.ind].index[i]
+
+    def _default_callback(self, i):
+        print self.data.ix[i]
 
     def strip_unknown_features(self):
         """
@@ -492,10 +506,6 @@ class DESeqResults(ResultsTable):
         """
         return self.downregulated(thresh=thresh, idx=idx)
 
-    def _default_callback(self, event):
-        for i in event.ind:
-            print
-            print event.artist.subdata.ix[event.artist.subind].ix[i]
 
     def ma_plot(self, thresh, col='padj', up_kwargs=None, dn_kwargs=None,
                 zero_line=None, **kwargs):
