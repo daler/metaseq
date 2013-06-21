@@ -146,7 +146,8 @@ class ResultsTable(object):
         ----------
 
         x, y : array-like
-            Variables to plot -- say, "df.baseMeanA" and "df.baseMeanB"
+            Variables to plot.  Must be names in self.data's DataFrame.  For
+            example, "baseMeanA" and "baseMeanB"
 
         xfunc, yfunc : callable
             Functions to apply to `xvar` and `yvar` respectively. Default is
@@ -199,6 +200,9 @@ class ResultsTable(object):
             Optional label prefix that will be added to the beginning of `xlab`
             and/or `ylab`.
         """
+        _x = self.data[x]
+        _y = self.data[y]
+
         # Construct defaults---------------------------------------------------
         def identity(x):
             return x
