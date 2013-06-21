@@ -6,6 +6,8 @@ import gffutils
 from gffutils.helpers import asinterval
 import copy
 from matplotlib import pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+import matplotlib
 
 
 class ResultsTable(object):
@@ -700,25 +702,34 @@ if __name__ == "__main__":
 
     en = e.enriched()
 
-    def sizefunc(x):
-        return np.abs(x.log2FoldChange * 2)
-    general_kwargs = dict(color='k', s=e.log2FoldChange ** 2)
+
+    from metaseq.minibrowser import BaseMiniBrowser, GeneModelMiniBrowser
+    minibrowser = GeneModelMiniBrowser([], e.db)
+
+    def callback(i):
+        feature = asinterval(e.db[i])
+        print e.ix[i]
+        if feature.chrom =='chr2L':
+            minibrowser.plot(feature)
+
     e.scatter(
-        e.baseMeanA,
-        e.baseMeanB,
+        'baseMeanA',
+        'baseMeanB',
         genes_to_highlight=[
             (en, dict(color='r', alpha=1.0)),
         ],
-        general_kwargs=general_kwargs,
         xfunc=np.log1p,
         yfunc=np.log1p,
         one_to_one=dict(color='b', linestyle=':'),
-        callback=e._default_callback,
+        callback=callback,
     )
 
     e.ma_plot(
         0.05,
-        callback=e._default_callback,
         zero_line=dict(color='y', linestyle=':'),
-        general_kwargs=general_kwargs)
+        genes_to_highlight=[
+            (e.data.index.isin(['FBgn0041721']), dict(color='b', s=50))
+        ],
+    )
+
     plt.show()
