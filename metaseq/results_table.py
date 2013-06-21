@@ -4,6 +4,7 @@ import numpy as np
 import pandas
 import gffutils
 from gffutils.helpers import asinterval
+import copy
 from matplotlib import pyplot as plt
 
 
@@ -205,8 +206,9 @@ class ResultsTable(object):
 
         # Construct defaults---------------------------------------------------
         def identity(x):
-            return x
+            return x.copy()
 
+        # Axis label setup
         if xlab_prefix is None:
             xlab_prefix = ""
 
@@ -214,25 +216,19 @@ class ResultsTable(object):
             ylab_prefix = ""
 
         if xlab is None:
-            try:
-                xname = x.name
-            except AttributeError:
-                xname = 'x'
+            xlab = x
 
             if xfunc is not None:
-                xlab = xlab_prefix + "%s(%s)" % (xfunc.__name__, xname)
+                xlab = xlab_prefix + "%s(%s)" % (xfunc.__name__, x)
             else:
-                xlab = xlab_prefix + "%s" % xname
+                xlab = xlab_prefix + "%s" % x
 
         if ylab is None:
-            try:
-                yname = y.name
-            except AttributeError:
-                yname = 'y'
+            ylab = y
             if yfunc is not None:
-                ylab = ylab_prefix + "%s(%s)" % (yfunc.__name__, yname)
+                ylab = ylab_prefix + "%s(%s)" % (yfunc.__name__, y)
             else:
-                ylab = ylab_prefix + "%s" % yname
+                ylab = ylab_prefix + "%s" % y
 
         if xfunc is None:
             xfunc = identity
