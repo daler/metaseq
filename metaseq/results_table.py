@@ -351,6 +351,7 @@ class ResultsTable(object):
         ax.set_xlabel(xlab)
         ax.set_ylabel(ylab)
 
+        ax.axis((xmin - xpad, xmax + xpad, ymin - ypad, ymax + ypad))
         return ax
 
     def _id_callback(self, event):
