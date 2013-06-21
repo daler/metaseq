@@ -317,7 +317,7 @@ class ResultsTable(object):
                     **one_to_one)
 
         # plot any specially-highlighted genes, and label if specified
-        for ind, kwargs in genes_to_highlight:
+        for ind, kwargs in _genes_to_highlight:
             names = kwargs.pop('names', None)
             updated_kwargs = general_kwargs.copy()
             updated_kwargs.update(kwargs)
