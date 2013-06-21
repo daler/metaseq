@@ -52,7 +52,8 @@ interval, e.g.::
 from matplotlib import pyplot as plt
 from pybedtools.contrib.plotting import Track
 import pybedtools
-
+import gffutils
+from gffutils.helpers import asinterval
 
 class BaseMiniBrowser(object):
     """
@@ -74,6 +75,8 @@ class BaseMiniBrowser(object):
         :meth:`BaseMiniBrowser.make_fig` and plots data on panels according to
         `self.panels()`.
         """
+        if isinstance(feature, gffutils.Feature):
+            feature = asinterval(feature)
         self.make_fig()
         for ax, method in self.panels():
             feature = method(ax, feature)
@@ -250,7 +253,7 @@ class PeakMiniBrowser(SignalMiniBrowser):
         features = bedtool.intersect([feature], u=True)
         track = Track(features)
         ax.add_collection(track)
-        ax.axis('tight')
+        #ax.axis('tight')
         return feature
 
 
