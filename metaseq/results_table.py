@@ -287,14 +287,23 @@ class ResultsTable(object):
         yi[pos_yv] = ymax + ypad
         yi[neg_yv] = ymin - ypad
         yi[nan_yv] = ymin - ypad
-        allind = np.zeros_like(xi) == 0
-        for i in genes_to_highlight:
-            this_ind = i[0]
-            if this_ind.dtype == 'bool':
-                this_ind = np.where(this_ind)[0]
-            allind[this_ind] = False
 
-        # Plot everybody
+        # By default, use everything
+        allind = np.zeros_like(xi) == 0
+
+        # Convert any integer indexes into boolean
+        _genes_to_highlight = []
+        for ind, kwargs in genes_to_highlight:
+            if ind.dtype != 'bool':
+                new_ind = (np.zeros_like(xi) == 0)
+                new_ind[ind] = True
+                _genes_to_highlight.append((new_ind, kwargs))
+            else:
+                _genes_to_highlight.append((ind, kwargs))
+
+        # Remove any genes that are handled by genes_to_hightlight.
+        for ind, _ in _genes_to_highlight:
+            allind[ind] = False
         coll = ax.scatter(xi[allind], yi[allind], picker=5, **general_kwargs)
         coll.subdata = self
         coll.subind = allind
