@@ -544,15 +544,15 @@ class DESeqResults(ResultsTable):
              dn_kwargs or dict(color='b')))
         if zero_line is None:
             zero_line = {}
-        x = self.baseMean
-        y = self.log2FoldChange
+        x = 'baseMean'
+        y = 'log2FoldChange'
 
         if 'xfunc' not in kwargs:
             xfunc = np.log1p
-        x = xfunc(x)
         ax = self.scatter(
             x=x,
             y=y,
+            xfunc=xfunc,
             genes_to_highlight=genes_to_highlight,
             **kwargs)
         if zero_line:
