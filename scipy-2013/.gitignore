@@ -1,1 +1,13 @@
-data/*
+.RData
+.*
+ipython
+data/*.bam
+data/*.bai
+data/*.broad*
+data/*.big*
+data/counts*
+data/*.txt
+data/DESeq*
+data/*.scale
+data/*.g?f*
+
