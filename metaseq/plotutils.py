@@ -168,7 +168,7 @@ def clustered_sortind(x, k=10, scorefunc=None):
     try:
         from sklearn.cluster import MiniBatchKMeans
     except ImportError:
-        raise ImportError('please install scikits.learn for '
+        raise ImportError('please install scikit-learn for '
                           'clustering.')
 
     # If integer, do it once and we're done
