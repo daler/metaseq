@@ -201,7 +201,12 @@ value in the row:
 Colormap
 ~~~~~~~~
 
-Colormap choice is also important for interpretation.  The
+Colormap choice is also important for interpretation.  Often, values vary so
+widely that using a default linear colormap results in a washed-out heatmap.
+One option is to log-transform the data.  Another is to use
+a `matplotlib.colors.Normalize` instance, setting vmax to the 99th percentile.
+Or use a `matplotlib.colors.LogNorm` instance instead.
+
 :func:`metaseq.colormap_adjust.smart_colormap` function centers the colormap on
 zero and shows positive and negative values with different hues but equivalent
 saturation and value (see http://en.wikipedia.org/wiki/HSL_and_HSV).

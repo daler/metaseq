@@ -48,3 +48,4 @@ Contents:
 
     example_session
     autodocs
+    changelog
