@@ -221,16 +221,16 @@ class ResultsTable(object):
             xlab = x
 
             if xfunc is not None:
-                xlab = xlab_prefix + "%s(%s)" % (xfunc.__name__, x)
+                xlab = xlab_prefix + "%s(%s)" % (xfunc.__name__, str(x))
             else:
-                xlab = xlab_prefix + "%s" % x
+                xlab = xlab_prefix + "%s" % (str(x))
 
         if ylab is None:
             ylab = y
             if yfunc is not None:
-                ylab = ylab_prefix + "%s(%s)" % (yfunc.__name__, y)
+                ylab = ylab_prefix + "%s(%s)" % (yfunc.__name__, str(y))
             else:
-                ylab = ylab_prefix + "%s" % y
+                ylab = ylab_prefix + "%s" % (str(y))
 
         if xfunc is None:
             xfunc = identity
