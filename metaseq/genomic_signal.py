@@ -34,7 +34,7 @@ from bx.bbi.bigwig_file import BigWigFile
 import pybedtools
 
 from array_helpers import _array, _array_parallel, _local_coverage, \
-    _local_coverage_bigwig, _local_count
+    _local_count
 import filetype_adapters
 import rebin
 import helpers
