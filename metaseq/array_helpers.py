@@ -192,7 +192,7 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
             ):
                 raise ValueError("Argument %s not supported for "
                                  "bigWig" % check)
-        if method == 'ucsc_summarize'):
+        if method == 'ucsc_summarize':
             if preserve_total:
                 raise ValueError("preserve_total=True not supported when "
                                  "using method='ucsc_summarize'")
