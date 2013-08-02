@@ -10,6 +10,9 @@ import hashlib
 import gffutils
 import pybedtools
 import metaseq
+import logging
+logging.basicConfig(level=logging.DEBUG, format='[%(name)s] [%(asctime)s]: %(message)s')
+logger = logging.getLogger('metaseq data download')
 
 DATA_DIR = metaseq.data_dir()
 
@@ -84,13 +87,12 @@ db_fn, db_md5 = (os.path.join(DATA_DIR, 'Homo_sapiens.GRCh37.66.cleaned.gtf.db')
 
 def _up_to_date(md5, fn):
     if os.path.exists(fn):
-        print header, 'calculating md5 for %s...' % os.path.basename(fn),
-        sys.stdout.flush()
+        logger.info('calculating md5 for %s...' % os.path.basename(fn))
         if hashlib.md5(open(fn).read()).hexdigest() == md5:
-            print 'up to date'
+            logger.info('up to date')
             return True
         else:
-            print 'md5sum does not match.'
+            logger.info('md5sum does not match.')
             os.unlink(fn)
             return False
 
@@ -99,7 +101,7 @@ def _just_download():
     for md5, full_path in items:
         fn = os.path.join(DATA_DIR, os.path.basename(full_path))
         if not _up_to_date(md5, fn):
-            print header, fn, "downloading..."
+            logger.info('%s, downloading...' % fn)
             cmds = [
                     'wget',
                     full_path,
@@ -109,7 +111,7 @@ def _just_download():
 
 def _gffutils_prep():
     if not _up_to_date(cleaned_md5, cleaned_fn):
-        print header, "cleaning GTF..."
+        logger.info("cleaning GTF...")
         gffutils.clean_gff(fn=gtf_fn, newfn=cleaned_fn, addchr=True, sanity_check=True, chroms_to_ignore=chroms_to_ignore)
 
     if not _up_to_date(db_md5, db_fn):
@@ -129,7 +131,7 @@ def _cufflinks_conversion():
         fn = os.path.join(DATA_DIR, fn)
         table = fn.replace('.gtf.gz', '.table')
         if not _up_to_date(md5, table):
-            print header, "Converting Cufflinks GTF %s to table" % fn
+            logger.info("Converting Cufflinks GTF %s to table" % fn)
             fout = open(table, 'w')
             fout.write('id\tscore\tfpkm\n')
             x = pybedtools.BedTool(fn)
