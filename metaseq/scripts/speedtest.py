@@ -40,7 +40,7 @@ size = (args.stop - args.start) / args.n
 print size
 
 signals = [
-    metaseq.genomic_signal(args.prefix + '.' + ext, ext) for ext in ['bam', 'bigwig', 'bigbed']
+    metaseq.genomic_signal(args.prefix + '.' + ext, ext) for ext in ['bigwig', 'bam', 'bigbed']
 ]
 
 signals.append(metaseq.genomic_signal(args.prefix + '.bed.gz', 'bed'))
@@ -53,6 +53,9 @@ for x in signals:
     sys.stdout.flush()
     times = []
     for p in processes:
+        print p, 'processes'
+        if p == 1:
+            p = None
         t = []
         t0 = time.time()
         a = x.array(intervals, bins=100, processes=p,
