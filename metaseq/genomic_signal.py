@@ -39,6 +39,7 @@ import filetype_adapters
 import rebin
 import helpers
 
+
 def supported_formats():
     """
     Returns list of formats supported by metaseq's genomic signal objects.
@@ -81,24 +82,34 @@ class BaseSignal(object):
     def __init__(self, fn):
         self.fn = fn
 
-    def array(self, features, processes=None, chunksize=1, ragged=False, **kwargs):
+    def array(self, features, processes=None, chunksize=1, ragged=False,
+              **kwargs):
         """
         Creates an MxN NumPy array of genomic signal for the region defined by
-        each feature in `features`, where M=len(features) and N=bins.
+        each feature in `features`, where M=len(features) and N=(bins or
+        feature length)
 
-        :param features:
-            An iterable of pybedtools.Interval objects
+        Parameters
+        ----------
+        features : iterable of interval-like objects
+            An iterable of interval-like objects; see docstring for
+            `local_coverage` method for more details.
 
-        :param processes:
-            Integer or None. If not None, then create the array in
-            parallel, giving each process chunks of length `chunksize` to work
-            on.
+        processes : int or None
+            If not None, then create the array in parallel, giving each process
+            chunks of length `chunksize` to work on.
 
-        :param chunksize:
-            Integer.  `features` will be split into `chunksize` pieces, and
-            each piece will be given to a different process. The optimum value
-            is dependent on the size of the features and the underlying data
-            set, but `chunksize=100` is a good place to start.
+        chunksize : int
+            `features` will be split into `chunksize` pieces, and each piece
+            will be given to a different process. The optimum value is
+            dependent on the size of the features and the underlying data set,
+            but `chunksize=100` is a good place to start.
+
+        ragged : bool
+            If False (default), then return a 2-2D NumPy array.  This requires
+            all rows to have the same number of columns, which you get when
+            supplying `bins` or if all features are of uniform length.  If
+            True, then return a list of 1-D NumPy arrays
 
         Additional keyword args are passed to local_coverage() which performs
         the work for each feature; see that method for more details.
@@ -114,7 +125,9 @@ class BaseSignal(object):
             else:
                 return arrays
         else:
-            return np.array(_array(self.fn, self.__class__, features, **kwargs))
+            return np.array(
+                _array(
+                    self.fn, self.__class__, features, **kwargs))
         raise ValueError
 
     def local_coverage(self, features, *args, **kwargs):
@@ -135,7 +148,9 @@ class BaseSignal(object):
         features = helpers.tointerval(features)
         x = np.arange(features.start, features.stop)
         features = list(helpers.split_feature(features, processes))
-        ys = self.array(features, *args, bins=None, processes=processes, ragged=True, **kwargs)
+        ys = self.array(
+            features, *args, bins=None, processes=processes, ragged=True,
+            **kwargs)
         # now we ravel() and re-bin
         y = np.column_stack(ys).ravel()
         if bins:
@@ -155,35 +170,6 @@ class BigWigSignal(BaseSignal):
         """
         super(BigWigSignal, self).__init__(fn)
         self.adapter = filetype_adapters.BigWigAdapter(fn)
-
-    def local_coverage(self, features, *args, **kwargs):
-        processes = kwargs.pop('processes', None)
-        if not processes:
-            return _local_coverage_bigwig(self.adapter, features, *args, **kwargs)
-
-        if isinstance(features, (list, tuple)):
-            raise ValueError(
-                "only single features are supported for parallel "
-                "local_coverage")
-
-        # we don't want to have self.array do the binning
-        bins = kwargs.pop('bins', None)
-
-        # since if we got here processes is not None, then this will trigger
-        # a parallel array creation
-        features = helpers.tointerval(features)
-        x = np.arange(features.start, features.stop)
-        features = list(helpers.split_feature(features, processes))
-        ys = self.array(features, *args, bins=None, processes=processes, ragged=True, **kwargs)
-        # now we ravel() and re-bin
-        y = np.column_stack(ys).ravel()
-        if bins:
-            xi, yi = rebin.rebin(x, y, bins)
-            del x, y
-            return xi, yi
-        return x, y
-
-    local_coverage.__doc__ = _local_coverage_bigwig.__doc__
 
 
 class IntervalSignal(BaseSignal):

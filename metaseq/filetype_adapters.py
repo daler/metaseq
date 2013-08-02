@@ -124,18 +124,49 @@ class BigWigAdapter(BaseAdapter):
         raise NotImplementedError(
             "__getitem__ not implemented for %s" % self.__class__.__name__)
 
-    def summarize(self, interval, bins=None):
-        bw = BigWigFile(open(self.fn))
-        s = bw.get_as_array(
-            interval.chrom,
-            interval.start,
-            interval.stop,)
-        s[np.isnan(s)] = 0
+    def summarize(self, interval, bins=None, method='summarize'):
+
+        # We may be dividing by zero in some cases, which raises a warning in
+        # NumPy based on the IEEE 754 standard (see
+        # http://docs.scipy.org/doc/numpy/reference/generated/numpy.seterr.html)
+        #
+        # That's OK -- we're expecting that to happen sometimes. So temporarily
+        # disable this error reporting for the duration of this method.
+        orig = np.geterr()['invalid']
+        np.seterr(invalid='ignore')
+
+        if (bins is None) or (method == 'get_as_array'):
+            bw = BigWigFile(open(self.fn))
+            s = bw.get_as_array(
+                interval.chrom,
+                interval.start,
+                interval.stop,)
+            if s is None:
+                s = np.zeros((interval.stop - interval.start,))
+            else:
+                s[np.isnan(s)] = 0
+
+        elif method == 'ucsc_summarize':
+            return self.ucsc_summarize(interval, bins)
+
+        else:
+            bw = BigWigFile(open(self.fn))
+            s = bw.summarize(
+                interval.chrom,
+                interval.start,
+                interval.stop, bins)
+            if s is None:
+                s = np.zeros((interval.stop - interval.start,))
+            else:
+                s = s.sum_data / s.valid_count
+                s[np.isnan(s)] = 0
+
+        # Reset NumPy error reporting
+        np.seterr(divide=orig)
         return s
 
+
     def ucsc_summarize(self, interval, bins=None):
-        # if bins is none, then adaptively work something out...say, 100-bp
-        # bins
         if bins is None:
             bins = len(interval)
         y = np.zeros(bins)
