@@ -173,19 +173,19 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
     if isinstance(reader, filetype_adapters.BigWigAdapter):
         is_bigwig = True
         defaults = (
-            (read_strand, None),
-            (fragment_size, None),
-            (shift_width, 0),
-            (use_score, False),
+            ('read_strand', read_strand, None),
+            ('fragment_size', fragment_size, None),
+            ('shift_width', shift_width, 0),
+            ('use_score', use_score, False),
         )
-        for check, default in defaults:
+        for name, check, default in defaults:
             if (
                 ((default is None) and (check is not default))
                 or
                 (check != default)
             ):
                 raise ValueError("Argument %s not supported for "
-                                 "bigWig" % check)
+                                 "bigWig" % name)
         if method == 'ucsc_summarize':
             if preserve_total:
                 raise ValueError("preserve_total=True not supported when "
