@@ -290,22 +290,28 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
                 else:
                     profile[start_ind:stop_ind] = score
 
+
+
         else:  # it's a bigWig
             profile = reader.summarize(
                 window, method=method, bins=(nbin or len(window)))
 
         # If no bins, return genomic coords
-        if (nbin is None) or profile.shape[0] == nbin:
+        if (nbin is None):
             x = np.arange(start, stop)
 
         # Otherwise do the downsampling; resulting x is stll in genomic
         # coords
         else:
-            xi, profile = rebin(x=np.arange(start, stop), y=profile, nbin=nbin)
-            if not accumulate:
-                nonzero = profile != 0
-                profile[profile != 0] = 1
-            x = xi
+            if not is_bigwig or method == 'get_as_array':
+                xi, profile = rebin(x=np.arange(start, stop), y=profile, nbin=nbin)
+                if not accumulate:
+                    nonzero = profile != 0
+                    profile[profile != 0] = 1
+                x = xi
+
+            else:
+                x = np.linspace(start, stop - 1, nbin)
 
         # Minus-strand profiles should be flipped left-to-right.
         if strand == '-':
