@@ -1,4 +1,5 @@
 import metaseq
+from metaseq.array_helpers import ArgumentError
 import numpy as np
 from nose.tools import assert_raises
 gs = {}
@@ -23,8 +24,6 @@ def test_local_count():
             ('chr2L:75-76', 0, False),      #  pathological corner case
         ):
             yield check_local_count, kind, coord, expected, stranded
-
-
 
 
 def test_local_coverage_full():
@@ -53,6 +52,7 @@ def test_local_coverage_full():
             ),
         ):
             yield check_local_coverage, kind, coord, expected
+
 
 def test_local_coverage_binned():
     """generator of tests for local coverage
@@ -89,6 +89,30 @@ def test_local_coverage_binned():
             yield check_local_coverage, kind, coord, expected
 
 
+def test_bigwig_methods():
+    # y0 is identical to the above test, and should be the same as
+    # local_coverage for bam, bigbed, and bed as well.
+    #
+    # y1 may not always be identical . . . I think it's due to resolution of
+    # the summarized file, especially when working with such short genomic
+    # intervals?
+    x0 = np.array([1., 3.57142857, 6.14285714, 8.71428571, 11.28571429, 13.85714286, 16.42857143, 19.])
+    y0 = np.array([ 0., 0.,         0.,         0.,         1.,          1.,          0.,          0. ]),
+    y1 = np.array([ 0., 0.,         0.,         0.,         1.,          1.,          1.,          0. ]),
+    #                                                         note difference here ---^
+    x, y = gs['bigwig'].local_coverage('chr2L:1-20', bins=8, method='get_as_array')
+    assert np.allclose(x0, x)
+    assert np.allclose(y0, y)
+
+    x, y = gs['bigwig'].local_coverage('chr2L:1-20', bins=8, method='summarize')
+    assert np.allclose(x0, x)
+    assert np.allclose(y1, y)
+
+    x, y = gs['bigwig'].local_coverage('chr2L:1-20', bins=8, method='ucsc_summarize')
+    assert np.allclose(x0, x)
+    assert np.allclose(y0, y)
+
+
 def test_nonbigwig_kwargs():
     "exceptions raised when using non-bigwig kwargs with a bigwig file?"
     nonwigs = {
@@ -100,7 +124,23 @@ def test_nonbigwig_kwargs():
     for nw in nonwigs.items():
         kwargs = dict((nw,))
         try:
-            assert_raises(ValueError, gs['bigwig'].local_coverage, 'chr2L:1-20', **kwargs)
+            assert_raises(ArgumentError, gs['bigwig'].local_coverage, 'chr2L:1-20', **kwargs)
         except AssertionError:
             print kwargs
             raise
+
+    assert_raises(ArgumentError, gs['bigwig'].local_coverage, 'chr2L:1-20',
+                  method='ucsc_summarize', preserve_total=True)
+
+def test_local_coverage_kwarg_valueerrors():
+    items = [
+        ('bam', dict(bins='a')),
+    ]
+
+    for kind, kwargs in items:
+        assert_raises(
+            ArgumentError,
+            gs[kind].local_coverage,
+            'chr2L:1-20',
+            **kwargs)
+

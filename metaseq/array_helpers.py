@@ -11,6 +11,10 @@ import helpers
 import filetype_adapters
 
 
+class ArgumentError(Exception):
+    pass
+
+
 def _local_count(reader, feature, stranded=False):
     """
     The count of genomic signal (typcially BED features) found within an
@@ -184,11 +188,11 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
                 or
                 (check != default)
             ):
-                raise ValueError("Argument %s not supported for "
+                raise ArgumentError("Argument %s not supported for "
                                  "bigWig" % name)
         if method == 'ucsc_summarize':
             if preserve_total:
-                raise ValueError("preserve_total=True not supported when "
+                raise ArgumentError("preserve_total=True not supported when "
                                  "using method='ucsc_summarize'")
     else:
         is_bigwig = False
@@ -200,7 +204,7 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
     if not ((isinstance(features, list) or isinstance(features, tuple))):
         if bins is not None:
             if not isinstance(bins, int):
-                raise ValueError(
+                raise ArgumentError(
                     "bins must be an int, got %s" % type(bins))
         features = [features]
         bins = [bins]
@@ -290,8 +294,6 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
                 else:
                     profile[start_ind:stop_ind] = score
 
-
-
         else:  # it's a bigWig
             profile = reader.summarize(
                 window, method=method, bins=(nbin or len(window)))
@@ -304,7 +306,8 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
         # coords
         else:
             if not is_bigwig or method == 'get_as_array':
-                xi, profile = rebin(x=np.arange(start, stop), y=profile, nbin=nbin)
+                xi, profile = rebin(
+                    x=np.arange(start, stop), y=profile, nbin=nbin)
                 if not accumulate:
                     nonzero = profile != 0
                     profile[profile != 0] = 1
