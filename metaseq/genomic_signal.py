@@ -118,16 +118,14 @@ class BaseSignal(object):
             arrays = _array_parallel(
                 self.fn, self.__class__, features, processes=processes,
                 chunksize=chunksize, **kwargs)
-            if not ragged:
-                stacked_arrays = np.row_stack(arrays)
-                del arrays
-                return stacked_arrays
-            else:
-                return arrays
         else:
-            return np.array(
-                _array(
-                    self.fn, self.__class__, features, **kwargs))
+            arrays = _array(self.fn, self.__class__, features, **kwargs)
+        if not ragged:
+            stacked_arrays = np.row_stack(arrays)
+            del arrays
+            return stacked_arrays
+        else:
+            return arrays
         raise ValueError
 
     def local_coverage(self, features, *args, **kwargs):
@@ -159,8 +157,7 @@ class BaseSignal(object):
             return xi, yi
         return x, y
 
-    def __getitem__(self, key):
-        return self.adapter[key]
+
 
 
 class BigWigSignal(BaseSignal):
