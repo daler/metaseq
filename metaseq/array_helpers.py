@@ -3,7 +3,6 @@ import numpy as np
 import multiprocessing
 import itertools
 import pysam
-import genomic_signal
 import sys
 from rebin import rebin
 from helpers import chunker
