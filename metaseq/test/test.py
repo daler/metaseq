@@ -185,8 +185,8 @@ def test_local_coverage_full():
     ensures that all formats are consistent in their results when retrieving
     the full un-binned data.
     """
-    def check(kind, coord, expected):
-        result = gs[kind].local_coverage(coord)
+    def check(kind, coord, processes, expected):
+        result = gs[kind].local_coverage(coord, processes=processes)
         assert np.all(result[0] == expected[0]) and np.all(result[1] == expected[1]), (kind, coord, result)
 
     for kind in ['bam', 'bigbed', 'bed', 'bigwig']:
@@ -210,7 +210,9 @@ def test_local_coverage_full():
              ),
             ),
         ):
-            yield check, kind, coord, expected
+            for processes in [None, multiprocessing.cpu_count()]:
+
+                yield check, kind, coord, processes, expected
 
 
 def test_local_coverage_binned():
@@ -219,11 +221,11 @@ def test_local_coverage_binned():
     ensures that all formats are consistent in their results when retrieving
     binned data.
     """
-    def check(kind, coord, expected):
+    def check(kind, coord, processes, expected):
         if kind == 'bigwig':
-            result = gs[kind].local_coverage(coord, bins=8, method='get_as_array')
+            result = gs[kind].local_coverage(coord, bins=8, method='get_as_array', processes=processes)
         else:
-            result = gs[kind].local_coverage(coord, bins=8)
+            result = gs[kind].local_coverage(coord, bins=8, processes=processes)
         try:
             assert np.allclose(result[0], expected[0]) and np.allclose(result[1], expected[1])
         except:
@@ -245,16 +247,11 @@ def test_local_coverage_binned():
              ),
             ),
         ):
-            yield check, kind, coord, expected
-
+            for processes in [None, multiprocessing.cpu_count()]:
+                yield check, kind, coord, processes, expected
 
 
 def test_array_binned():
-    """generator of tests for local coverage
-
-    ensures that all formats are consistent in their results when retrieving
-    the full un-binned data.
-    """
     def check(kind, coord, processes, expected):
         if kind == 'bigwig':
             result = gs[kind].array(coord, bins=8, method='get_as_array', processes=processes)
@@ -278,6 +275,44 @@ def test_array_binned():
             (['chr2L:68-76'],
              np.array([[0., 0., 2., 2., 2., 2., 2., 0.]]),
              ),
+        ):
+            for processes in [None, multiprocessing.cpu_count()]:
+                yield check, kind, coord, processes, expected
+
+
+def test_array_ragged():
+    def check(kind, coord, processes, expected):
+        if kind == 'bigwig':
+            result = gs[kind].array(coord, method='get_as_array', ragged=True, processes=processes)
+        else:
+            result = gs[kind].array(coord, processes=processes, ragged=True)
+        try:
+            if isinstance(result, list):
+                for i, j in zip(result, expected):
+                    assert np.allclose(i, j)
+        except:
+            print (kind, coord, result, expected)
+            raise
+
+    for kind in ['bam', 'bigbed', 'bed', 'bigwig']:
+        for coord, expected in (
+            (['chr2L:1-20'],
+             np.array([[0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  1.,  1.,  1.,  1.,   1.,  0.,  0.,  0.,  0.,  0.]])
+            ),
+            (
+                [['chr2L:1-20'], ['chr2L:1-19']],
+                [
+                    np.array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  1.,  1.,  1.,  1.,   1.,  0.,  0.,  0.,  0.,  0.]),
+                    np.array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  1.,  1.,  1.,  1.,   1.,  0.,  0.,  0.,  0., ])
+                ]
+            ),
+
+            ([['chr2L:68-76', 'chr2L:68-76'], 'chr2L:68-76'],
+             [
+                 np.array([0., 0., 2., 2., 2., 2., 2., 0., 0., 0., 2., 2., 2., 2., 2., 0.]),
+                 np.array([0., 0., 2., 2., 2., 2., 2., 0.])
+             ],
+            ),
         ):
             for processes in [None, multiprocessing.cpu_count()]:
                 yield check, kind, coord, processes, expected
@@ -386,12 +421,30 @@ def test_errors():
     class X(metaseq.filetype_adapters.BaseAdapter):
         def make_fileobj(self):
             return None
-    x = X('nonexistent.txt')
 
     items = [
         (ValueError, metaseq.filetype_adapters.BaseAdapter, (metaseq.example_filename('gdc.bed'),), {}),
         (NotImplementedError, metaseq.filetype_adapters.BigWigAdapter(metaseq.example_filename('gdc.bigwig')).__getitem__, (0,), {}),
-        (ValueError, x.__getitem__, (0,), {}),
+        (ValueError, X("").__getitem__, (0,), {}),
+        (ValueError, gs['bam'].local_coverage, ['chr2L:1-5', 'chr2L:1-5'], dict(processes=multiprocessing.cpu_count())),
     ]
     for error, callable_obj, args, kwargs in items:
         yield check, error, callable_obj, args, kwargs
+
+def test_supported_formats():
+    assert set(metaseq._genomic_signal.supported_formats()) \
+        == set(['bam', 'bigwig', 'bed', 'gff', 'gtf', 'vcf', 'bigbed'])
+    assert_raises(ValueError, metaseq.genomic_signal, "", 'unsupported')
+
+def test_bam_genome():
+    assert gs['bam'].genome() == {'chr2L': (0, 23011544L)}
+
+def test_bam_mmr():
+    import os
+    fn = metaseq.example_filename('gdc.bam.scale')
+    if os.path.exists(fn):
+        os.unlink(fn)
+    assert gs['bam'].million_mapped_reads(force=True) == 8e-6
+    gs['bam']._readcount = None
+    assert gs['bam'].million_mapped_reads(force=False) == 8e-6
+
