@@ -106,7 +106,7 @@ class BaseSignal(object):
             but `chunksize=100` is a good place to start.
 
         ragged : bool
-            If False (default), then return a 2-2D NumPy array.  This requires
+            If False (default), then return a 2-D NumPy array.  This requires
             all rows to have the same number of columns, which you get when
             supplying `bins` or if all features are of uniform length.  If
             True, then return a list of 1-D NumPy arrays
