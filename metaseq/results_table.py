@@ -277,7 +277,6 @@ class ResultsTable(object):
         xpad = (xmax - xmin) * 0.1
         ypad = (ymax - ymin) * 0.1
 
-
         global_min = min(xmin, ymin)
         global_max = max(xmax, ymax)
 
@@ -326,7 +325,6 @@ class ResultsTable(object):
             coll = ax.scatter(xi[ind], yi[ind], picker=5, **updated_kwargs)
             coll.df = self.data
             coll.ind = ind
-
 
             if names:
                 transOffset = matplotlib.transforms.offset_copy(
@@ -508,7 +506,6 @@ class DESeqResults(ResultsTable):
         {threshdoc}
         """
         return self.downregulated(thresh=thresh, idx=idx)
-
 
     def ma_plot(self, thresh, col='padj', up_kwargs=None, dn_kwargs=None,
                 zero_line=None, **kwargs):
@@ -702,14 +699,13 @@ if __name__ == "__main__":
 
     en = e.enriched()
 
-
     from metaseq.minibrowser import BaseMiniBrowser, GeneModelMiniBrowser
     minibrowser = GeneModelMiniBrowser([], e.db)
 
     def callback(i):
         feature = asinterval(e.db[i])
         print e.ix[i]
-        if feature.chrom =='chr2L':
+        if feature.chrom == 'chr2L':
             minibrowser.plot(feature)
 
     e.scatter(

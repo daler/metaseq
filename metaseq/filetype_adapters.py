@@ -128,7 +128,8 @@ class BigWigAdapter(BaseAdapter):
 
         # We may be dividing by zero in some cases, which raises a warning in
         # NumPy based on the IEEE 754 standard (see
-        # http://docs.scipy.org/doc/numpy/reference/generated/numpy.seterr.html)
+        # http://docs.scipy.org/doc/numpy/reference/generated/
+        #       numpy.seterr.html)
         #
         # That's OK -- we're expecting that to happen sometimes. So temporarily
         # disable this error reporting for the duration of this method.
@@ -164,7 +165,6 @@ class BigWigAdapter(BaseAdapter):
         # Reset NumPy error reporting
         np.seterr(divide=orig)
         return s
-
 
     def ucsc_summarize(self, interval, bins=None):
         if bins is None:

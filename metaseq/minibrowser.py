@@ -55,6 +55,7 @@ import pybedtools
 import gffutils
 from gffutils.helpers import asinterval
 
+
 class BaseMiniBrowser(object):
     """
     Base class for plotting a genomic region.
@@ -255,7 +256,6 @@ class PeakMiniBrowser(SignalMiniBrowser):
         ax.add_collection(track)
         #ax.axis('tight')
         return feature
-
 
 
 if __name__ == "__main__":

@@ -20,7 +20,8 @@ import os
 
 ap = argparse.ArgumentParser()
 ap.add_argument('-n', type=int, help='Number of windows to make')
-ap.add_argument('-c', type=int, help='Number of windows to send to each process')
+ap.add_argument('-c', type=int,
+                help='Number of windows to send to each process')
 ap.add_argument('--start', type=int, help='start coord')
 ap.add_argument('--stop', type=int, help='stop coord')
 ap.add_argument('--chrom', help='chromsome')
@@ -34,13 +35,14 @@ plt.rcParams['font.size'] = 10
 
 intervals = pybedtools.BedTool().window_maker(
     genome={args.chrom: (args.start, args.stop)}, n=args.n)\
-        .shuffle(genome={args.chrom: (args.start, args.stop)}, seed=1)
+    .shuffle(genome={args.chrom: (args.start, args.stop)}, seed=1)
 
 size = (args.stop - args.start) / args.n
 print size
 
 signals = [
-    metaseq.genomic_signal(args.prefix + '.' + ext, ext) for ext in ['bigwig', 'bam', 'bigbed']
+    metaseq.genomic_signal(args.prefix + '.' + ext, ext)
+    for ext in ['bigwig', 'bam', 'bigbed']
 ]
 
 signals.append(metaseq.genomic_signal(args.prefix + '.bed.gz', 'bed'))
@@ -71,7 +73,7 @@ for k, t in d.items():
     ax = fig.add_subplot(2, len(signals), i)
     t = np.array(t) / (len(intervals) / 1000.)
     ax.plot(processes, t, 'k.-', label=k)
-    ax.plot(processes, 1/np.array(processes, dtype=float) * t[0], 'k:')
+    ax.plot(processes, 1 / np.array(processes, dtype=float) * t[0], 'k:')
     ax.set_title(k)
     plt.xlabel('# processes')
     plt.ylabel('time per 1k windows (s)')
@@ -83,5 +85,6 @@ for k, t in d.items():
     i += 1
 fig.subplots_adjust(left=0.1, right=0.95, wspace=0.5, hspace=0.5)
 fig.suptitle('%s features, %sbp each, chunksize=%s' % (args.n, size, args.c))
-fig.savefig('speedtest-%s_features-%s_bp_chunksize=%s.pdf' % (args.n, size, args.c))
+fig.savefig(
+    'speedtest-%s_features-%s_bp_chunksize=%s.pdf' % (args.n, size, args.c))
 plt.show()

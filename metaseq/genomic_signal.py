@@ -158,8 +158,6 @@ class BaseSignal(object):
         return x, y
 
 
-
-
 class BigWigSignal(BaseSignal):
     def __init__(self, fn):
         """
