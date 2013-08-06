@@ -188,14 +188,21 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
                 or
                 (check != default)
             ):
-                raise ArgumentError("Argument %s not supported for "
-                                 "bigWig" % name)
+                raise ArgumentError(
+                    "Argument '%s' not supported for bigWig" % name)
+
         if method == 'ucsc_summarize':
             if preserve_total:
-                raise ArgumentError("preserve_total=True not supported when "
-                                 "using method='ucsc_summarize'")
+                raise ArgumentError(
+                    "preserve_total=True not supported when using "
+                    "method='ucsc_summarize'")
     else:
         is_bigwig = False
+
+    if isinstance(reader, filetype_adapters.BamAdapter):
+        if use_score:
+            raise ArgumentError("Argument 'use_score' not supported for "
+                                "bam")
 
     # e.g., features = "chr1:1-1000"
     if isinstance(features, basestring):
@@ -212,7 +219,7 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
         if bins is None:
             bins = [None for i in features]
         if not len(bins) == len(features):
-            raise ValueError(
+            raise ArgumentError(
                 "bins must have same length as feature list")
 
     # nomenclature:
