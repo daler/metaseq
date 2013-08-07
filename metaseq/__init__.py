@@ -8,6 +8,7 @@ import genomic_signal as _genomic_signal
 from genomic_signal import genomic_signal
 import plotutils
 import integration
+import integration.chipseq
 import colormap_adjust
 import results_table
 from version import __version__
