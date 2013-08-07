@@ -157,7 +157,7 @@ class BigWigAdapter(BaseAdapter):
                 interval.start,
                 interval.stop, bins)
             if s is None:
-                s = np.zeros((interval.stop - interval.start,))
+                s = np.zeros((bins,))
             else:
                 s = s.sum_data / s.valid_count
                 s[np.isnan(s)] = 0
