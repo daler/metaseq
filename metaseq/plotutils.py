@@ -8,6 +8,32 @@ import numpy as np
 from scipy import stats
 from statsmodels.sandbox.stats.multicomp import fdrcorrection0
 
+def ci(arr, conf=0.95):
+    """
+    Column-wise confidence interval.
+
+    Parameters
+    ----------
+    arr : array-like
+
+    conf : float
+        Confidence interval
+
+    Returns
+    -------
+    m : array
+        column-wise mean
+    lower : array
+        lower column-wise confidence bound
+    upper : array
+        upper column-wise confidence bound
+    """
+    m = arr.mean(axis=0)
+    n = len(arr)
+    se = arr.std(axis=0) / np.sqrt(n)
+    h = se * stats.t._ppf((1 + conf) / 2., n - 1)
+    return m, m - h, m + h
+
 
 def nice_log(x):
     """
