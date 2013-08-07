@@ -149,8 +149,8 @@ class Chipseq(object):
         """
         self.features = list(features)
         self.browser_local_coverage_kwargs = array_kwargs.copy()
-        self.browser_local_coverage_kwargs.pop('processes')
-        self.browser_local_coverage_kwargs.pop('chunksize')
+        self.browser_local_coverage_kwargs.pop('processes', None)
+        self.browser_local_coverage_kwargs.pop('chunksize', 1)
 
         if (self.ip_array is None) or force:
             self.ip_array = self.ip.array(features, **array_kwargs)
