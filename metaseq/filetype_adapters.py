@@ -56,13 +56,19 @@ class BamAdapter(BaseAdapter):
             key.start,
             key.stop)
         for r in iterator:
-            interval = pybedtools.Interval(
-                self.fileobj.references[r.rname],
-                r.pos,
-                r.pos + r.qend,
-                strand=strand_lookup[r.flag & 0x0010])
-            interval.file_type = 'bed'
-            yield interval
+            start = r.pos
+            curr_end = r.pos
+            for op, bp in r.cigar:
+                start = curr_end
+                curr_end += bp
+                if op == 0:
+                    interval = pybedtools.Interval(
+                        self.fileobj.references[r.rname],
+                        start,
+                        curr_end,
+                        strand=strand_lookup[r.flag & 0x0010])
+                    interval.file_type = 'bed'
+                    yield interval
 
 
 class BedAdapter(BaseAdapter):
