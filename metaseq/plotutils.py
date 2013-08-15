@@ -6,7 +6,7 @@ import matplotlib
 from matplotlib import pyplot as plt
 import numpy as np
 from scipy import stats
-from statsmodels.sandbox.stats.multicomp import fdrcorrection0
+from statsmodels.stats.multitest import fdrcorrection
 
 def ci(arr, conf=0.95):
     """
@@ -72,7 +72,7 @@ def tip_fdr(a, alpha=0.05):
     """
     zscores = tip_zscores(a)
     pvals = stats.norm.pdf(zscores)
-    rejected, fdrs = fdrcorrection0(pvals)
+    rejected, fdrs = fdrcorrection(pvals)
     return fdrs
 
 
