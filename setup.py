@@ -20,16 +20,11 @@ setup(
         name='metaseq',
         version=version,
         long_description=long_description,
-<<<<<<< HEAD
-        ext_modules=exts,
-        install_requires=['bx-python', 'numpy', 'HTSeq', 'matplotlib', 'scipy', 'scikits.learn', 'pybedtools', 'gffutils'],
         packages=['metaseq', 'metaseq.test', 'metaseq.test.data', 'metaseq.integration'],
-=======
         install_requires=['bx-python', 'numpy', 'HTSeq', 'matplotlib', 'scipy',
                           'scikits.learn', 'pybedtools', 'gffutils',
                           'argparse'],
         packages=['metaseq', 'metaseq.test', 'metaseq.test.data',],
->>>>>>> a11f200a439cf36194b697e4ab6327e75840ccc1
         package_data={'metaseq':['test/data/*']},
         scripts=[
             'metaseq/scripts/download_metaseq_example_data.py',
