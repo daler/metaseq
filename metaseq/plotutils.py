@@ -6,7 +6,33 @@ import matplotlib
 from matplotlib import pyplot as plt
 import numpy as np
 from scipy import stats
-from statsmodels.sandbox.stats.multicomp import fdrcorrection0
+from statsmodels.stats.multitest import fdrcorrection
+
+def ci(arr, conf=0.95):
+    """
+    Column-wise confidence interval.
+
+    Parameters
+    ----------
+    arr : array-like
+
+    conf : float
+        Confidence interval
+
+    Returns
+    -------
+    m : array
+        column-wise mean
+    lower : array
+        lower column-wise confidence bound
+    upper : array
+        upper column-wise confidence bound
+    """
+    m = arr.mean(axis=0)
+    n = len(arr)
+    se = arr.std(axis=0) / np.sqrt(n)
+    h = se * stats.t._ppf((1 + conf) / 2., n - 1)
+    return m, m - h, m + h
 
 
 def nice_log(x):
@@ -46,7 +72,7 @@ def tip_fdr(a, alpha=0.05):
     """
     zscores = tip_zscores(a)
     pvals = stats.norm.pdf(zscores)
-    rejected, fdrs = fdrcorrection0(pvals)
+    rejected, fdrs = fdrcorrection(pvals)
     return fdrs
 
 
@@ -56,7 +82,7 @@ def prepare_logged(x, y):
 
     This function scales `x` and `y` such that the points that are zero in one
     array are set to the min of the other array.
-    
+
     When plotting expression data, frequently one sample will have reads in
     a particular feature but the other sample will not.  Expression data also
     tends to look better on a log scale, but log(0) is undefined and therefore
@@ -108,36 +134,36 @@ def matrix_and_line_shell(figsize=(5, 12), strip=False):
     LINE_ROWS = ROWS - MAT_ROWS
 
     mat_ax = plt.subplot2grid(
-            shape=(ROWS, COLS),
-            loc=(0, STRIP_COLS),
-            rowspan=MAT_ROWS,
-            colspan=MAT_COLS,
-            )
+        shape=(ROWS, COLS),
+        loc=(0, STRIP_COLS),
+        rowspan=MAT_ROWS,
+        colspan=MAT_COLS,
+    )
 
     line_ax = plt.subplot2grid(
-            shape=(ROWS, COLS),
-            loc=(MAT_ROWS, STRIP_COLS),
-            rowspan=LINE_ROWS,
-            colspan=MAT_COLS,
-            sharex=mat_ax)
+        shape=(ROWS, COLS),
+        loc=(MAT_ROWS, STRIP_COLS),
+        rowspan=LINE_ROWS,
+        colspan=MAT_COLS,
+        sharex=mat_ax)
 
     if strip:
         strip_ax = plt.subplot2grid(
-                shape=(ROWS, COLS),
-                loc=(0, 0),
-                rowspan=MAT_ROWS,
-                colspan=STRIP_COLS,
-                sharey=mat_ax,
-                )
+            shape=(ROWS, COLS),
+            loc=(0, 0),
+            rowspan=MAT_ROWS,
+            colspan=STRIP_COLS,
+            sharey=mat_ax,
+        )
     else:
         strip_ax = None
 
     cax = plt.subplot2grid(
-            shape=(ROWS, COLS),
-            loc=(ROWS - MAT_ROWS, MAT_COLS + STRIP_COLS),
-            rowspan=1,
-            colspan=1,
-            )
+        shape=(ROWS, COLS),
+        loc=(ROWS - MAT_ROWS, MAT_COLS + STRIP_COLS),
+        rowspan=1,
+        colspan=1,
+    )
 
     fig.subplots_adjust(hspace=0.1, wspace=0.2, right=0.88, left=0.23)
     return fig, mat_ax, line_ax, strip_ax, cax
@@ -208,17 +234,105 @@ def clustered_sortind(x, k=10, scorefunc=None):
     return ind, breaks
 
 
+def new_clustered_sortind(x, k=10, row_key=None, cluster_key=None):
+    """
+    Uses MiniBatch k-means clustering to cluster matrix into groups.
+
+    Each cluster of rows is then sorted by `scorefunc` -- by default, the max
+    peak height when all rows in a cluster are averaged, or
+    cluster.mean(axis=0).max().
+
+    Returns the index that will sort the rows of `x` and a list of "breaks".
+    `breaks` is essentially a cumulative row count for each cluster boundary.
+    In other words, after plotting the array you can use axhline on each
+    "break" to plot the cluster boundary.
+
+    If `k` is a list or tuple, iteratively try each one and select the best
+    with the lowest mean distance from cluster centers.
+
+    :param x: Matrix whose rows are to be clustered
+    :param k: Number of clusters to create or a list of potential clusters; the
+        optimum will be chosen from the list
+    :param row_key:
+        Optional function to act as a sort key for sorting rows within
+        clusters.  Signature should be `scorefunc(a)` where `a` is a 1-D NumPy
+        array.
+    :param cluster_key:
+        Optional function for sorting clusters.  Signature is `clusterfunc(a)`
+        where `a` is a NumPy array containing all rows of `x` for cluster `i`.
+        It must return a single value.
+    """
+    try:
+        from sklearn.cluster import MiniBatchKMeans
+    except ImportError:
+        raise ImportError('please install scikits.learn for '
+                          'clustering.')
+
+    # If integer, do it once and we're done
+    if isinstance(k, int):
+        best_k = k
+
+    else:
+        mean_dists = {}
+        for _k in k:
+            mbk = MiniBatchKMeans(init='k-means++', n_clusters=_k)
+            mbk.fit(x)
+            mean_dists[_k] = mbk.transform(x).mean()
+        best_k = sorted(mean_dists.items(), key=lambda x: x[1])[-1][0]
+
+    mbk = MiniBatchKMeans(init='k-means++', n_clusters=best_k)
+    mbk.fit(x)
+    k = best_k
+    labels = mbk.labels_
+    scores = np.zeros(labels.shape, dtype=float)
+
+    if cluster_key:
+        # It's easier for calling code to provide something that operates on
+        # a cluster level, but here it's converted to work on a label level
+        # that looks in to the array `x`.
+        def _cluster_key(i):
+            return cluster_key(x[labels == i, :])
+        sorted_labels = sorted(range(k), key=_cluster_key)
+    else:
+        # Otherwise just use them as-is.
+        sorted_labels = range(k)
+
+    if row_key:
+        # Again, easier to provide a function to operate on a row.  But here we
+        # need it to accept an index
+        def _row_key(i):
+            return row_key(x[i, :])
+
+    final_ind = []
+    breaks = []
+    pos = 0
+    for label in sorted_labels:
+        # which rows in `x` have this label
+        label_inds = np.nonzero(labels == label)[0]
+        if row_key:
+            label_sort_ind = sorted(label_inds, key=_row_key)
+        else:
+            label_sort_ind = label_inds
+        for li in label_sort_ind:
+            final_ind.append(li)
+        pos += len(label_inds)
+        breaks.append(pos)
+
+    return np.array(final_ind), np.array(breaks)
+
+
 def input_ip_plots(iparr, inputarr, diffed, x, sort_ind,
                    prefix=None, limits1=(None, None), limits2=(None, None),
                    hlines=None, vlines=None):
 
     """
     All-in-one plotting function to make a 5-panel figure.
-    
+
     Panels are IP, input, and diffed; plus 2 line plots showing averages.
-    
+
     :param iparr, inputarr: NumPy arrays constructed by a genomic_signal object
-    :param diffed: Difference of `iparr` and `inputarr`, but can be some other transformation.
+    :param diffed: Difference of `iparr` and `inputarr`, but can be some other
+                   transformation.
     :param x: Extent to use -- for TSSs, maybe something like
         np.linspace(-1000, 1000, bins), or for just bin IDs, something like
         `np.arange(bins)`.
@@ -247,12 +361,12 @@ def input_ip_plots(iparr, inputarr, diffed, x, sort_ind,
     # axes that make sense
     #
     # 3 arrays
-    ax1 = plt.subplot2grid((9, 9), (0, 0),
-            colspan=3, rowspan=6)
-    ax2 = plt.subplot2grid((9, 9), (0, 3),
-            colspan=3, rowspan=6, sharex=ax1, sharey=ax1)
-    ax3 = plt.subplot2grid((9, 9), (0, 6),
-            colspan=3, rowspan=6, sharex=ax1, sharey=ax1)
+    ax1 = plt.subplot2grid(
+        (9, 9), (0, 0), colspan=3, rowspan=6)
+    ax2 = plt.subplot2grid(
+        (9, 9), (0, 3), colspan=3, rowspan=6, sharex=ax1, sharey=ax1)
+    ax3 = plt.subplot2grid(
+        (9, 9), (0, 6), colspan=3, rowspan=6, sharex=ax1, sharey=ax1)
 
     # 2 line plots
     ax4 = plt.subplot2grid((9, 9), (6, 3), colspan=3, rowspan=3, sharex=ax1)
@@ -277,26 +391,26 @@ def input_ip_plots(iparr, inputarr, diffed, x, sort_ind,
 
     if limits1[0] is None:
         limits1[0] = stats.scoreatpercentile(
-                all_base, 1. / all_base.size)
+            all_base, 1. / all_base.size)
     if limits1[1] is None:
         limits1[1] = stats.scoreatpercentile(
-                all_base, 100 - 1. / all_base.size)
+            all_base, 100 - 1. / all_base.size)
     if limits2[0] is None:
         limits2[0] = stats.scoreatpercentile(
-                diffed.ravel(), 1. / all_base.size)
+            diffed.ravel(), 1. / all_base.size)
     if limits2[1] is None:
         limits2[1] = stats.scoreatpercentile(
-                diffed.ravel(), 100 - 1. / all_base.size)
+            diffed.ravel(), 100 - 1. / all_base.size)
 
     del all_base
 
     imshow_kwargs = dict(
-                        interpolation='nearest',
-                        aspect='auto',
-                        cmap=cm,
-                        norm=matplotlib.colors.Normalize(*limits1),
-                        extent=extent,
-                        origin='lower')
+        interpolation='nearest',
+        aspect='auto',
+        cmap=cm,
+        norm=matplotlib.colors.Normalize(*limits1),
+        extent=extent,
+        origin='lower')
 
     # modify kwargs for diffed (by changing the normalization)
     diffed_kwargs = imshow_kwargs.copy()
@@ -313,7 +427,7 @@ def input_ip_plots(iparr, inputarr, diffed, x, sort_ind,
 
     # IP and input line plot with vertical line
     ax4.plot(x, inputarr.mean(axis=0), color='k', linestyle='--',
-            label='input')
+             label='input')
     ax4.plot(x, iparr.mean(axis=0), color='k', label='ip')
     ax4.axvline(0, color='k', linestyle=':')
 

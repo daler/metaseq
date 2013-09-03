@@ -45,7 +45,7 @@ def smart_colormap(vmin, vmax, color_high='#b11902', hue_low=0.6):
     """
     # first go from white to color_high
     orig_cmap = matplotlib.colors.LinearSegmentedColormap.from_list(
-            'test', ['#FFFFFF', color_high], N=2048)
+        'test', ['#FFFFFF', color_high], N=2048)
 
     # For example, say vmin=-3 and vmax=9.  If vmin were positive, what would
     # its color be?
@@ -66,9 +66,11 @@ def smart_colormap(vmin, vmax, color_high='#b11902', hue_low=0.6):
 
     # Create a new colormap using the new hue-shifted color as the low end
     new_cmap = matplotlib.colors.LinearSegmentedColormap.from_list(
-            'test', [(0, new_rgb), (zeropoint, '#FFFFFF'), (1, color_high)], N=2048)
+        'test', [(0, new_rgb), (zeropoint, '#FFFFFF'), (1, color_high)],
+        N=2048)
 
     return new_cmap
+
 
 def cmap_discretize(cmap, N):
     """
@@ -156,7 +158,8 @@ def cmap_center_point_adjust(cmap, range, center):
     """
     if not ((range[0] < center) and (center < range[1])):
         return cmap
-    return cmap_center_adjust(cmap,
+    return cmap_center_adjust(
+        cmap,
         abs(center - range[0]) / abs(range[1] - range[0]))
 
 
@@ -171,10 +174,10 @@ if __name__ == '__main__':
     extent = [x[0], x[-1], y[0], y[-1]]
 
     plotkwargs = {
-             'extent': extent,
-             'origin': 'lower',
-      'interpolation': 'nearest',
-             'aspect': 'auto'}
+        'extent': extent,
+        'origin': 'lower',
+        'interpolation': 'nearest',
+        'aspect': 'auto'}
 
     fig = pyplot.figure(figsize=(8, 3))
     fig.subplots_adjust(left=.05, bottom=.11, right=.94, top=.83, wspace=.35)
@@ -190,8 +193,10 @@ if __name__ == '__main__':
     cb = ax[1].figure.colorbar(plt, ax=ax[1])
     ax[1].set_title('center raised by 25%')
 
-    plt = ax[2].imshow(Z,
-        cmap=cmap_center_point_adjust(cmap, [numpy.min(Z), numpy.max(Z)], 0),
+    plt = ax[2].imshow(
+        Z,
+        cmap=cmap_center_point_adjust(
+            cmap, [numpy.min(Z), numpy.max(Z)], 0),
         **plotkwargs)
     cb = ax[2].figure.colorbar(plt, ax=ax[2])
     ax[2].set_title('center set to 0')

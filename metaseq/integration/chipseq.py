@@ -14,7 +14,8 @@ import matplotlib
 
 class GeneChipseqMiniBrowser(GeneModelMiniBrowser):
     def __init__(self, genomic_signal_objs, db, **kwargs):
-        super(GeneChipseqMiniBrowser, self).__init__(genomic_signal_objs, db, **kwargs)
+        super(GeneChipseqMiniBrowser, self).__init__(
+            genomic_signal_objs, db, **kwargs)
 
     def plot(self, feature):
         super(GeneChipseqMiniBrowser, self).plot(feature)
@@ -22,21 +23,21 @@ class GeneChipseqMiniBrowser(GeneModelMiniBrowser):
         ax1.legend(loc='best')
         ax1.set_ylabel('RPMMR')
         ax1.xaxis.set_visible(False)
-        ax2.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%d'))
+        ax2.xaxis.set_major_formatter(
+            matplotlib.ticker.FormatStrFormatter('%d'))
         ax2.set_xlabel(feature.chrom)
 
 
 class SignalChipseqMiniBrowser(SignalMiniBrowser):
     def __init__(self, genomic_signal_objs, **kwargs):
-        super(SignalChipseqMiniBrowser, self).__init__(genomic_signal_objs, **kwargs)
+        super(SignalChipseqMiniBrowser, self).__init__(
+            genomic_signal_objs, **kwargs)
 
     def plot(self, feature):
         super(SignalChipseqMiniBrowser, self).plot(feature)
         ax1, = self.fig.axes
         ax1.legend(loc='best')
         ax1.set_ylabel('RPMMR')
-        #ax1.xaxis.set_visible(False)
-        #ax2.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%d'))
         ax1.set_xlabel(feature.chrom)
 
 
@@ -113,15 +114,16 @@ class Chipseq(object):
         self.ip_array = None
         self.control_array = None
 
-        self._strip_kwargs = dict(color='.5', markeredgewidth=0, marker='o',
-                linestyle='None', picker=5)
+        self._strip_kwargs = dict(
+            color='.5', markeredgewidth=0, marker='o', linestyle='None',
+            picker=5)
         self.browser_plotting_kwargs = [
-                dict(color='r', label='IP'),
-                dict(color='k', linestyle=':', label='control')
-                ]
+            dict(color='r', label='IP'),
+            dict(color='k', linestyle=':', label='control')
+        ]
 
     def diff_array(self, features, force=True, func=None,
-            array_kwargs=dict()):
+                   array_kwargs=dict()):
         """
         Scales the control and IP data to million mapped reads, then subtracts
         scaled control from scaled IP, applies `func(diffed)` to the diffed
@@ -147,8 +149,8 @@ class Chipseq(object):
         """
         self.features = list(features)
         self.browser_local_coverage_kwargs = array_kwargs.copy()
-        self.browser_local_coverage_kwargs.pop('processes')
-        self.browser_local_coverage_kwargs.pop('chunksize')
+        self.browser_local_coverage_kwargs.pop('processes', None)
+        self.browser_local_coverage_kwargs.pop('chunksize', 1)
 
         if (self.ip_array is None) or force:
             self.ip_array = self.ip.array(features, **array_kwargs)
@@ -159,8 +161,10 @@ class Chipseq(object):
             self.control_array /= self.control.million_mapped_reads()
 
         if func is None:
-            func = metaseq.plotutils.nice_log
-        self.diffed_array = func(self.ip_array - self.control_array)
+            #func = metaseq.plotutils.nice_log
+            self.diffed_array = self.ip_array - self.control_array
+        else:
+            self.diffed_array = func(self.ip_array - self.control_array)
 
     def plot(self, x, row_order=None, imshow_kwargs=None, strip=True):
         """
@@ -180,7 +184,7 @@ class Chipseq(object):
         axes_info = metaseq.plotutils.matrix_and_line_shell(strip=strip)
         fig, matrix_ax, line_ax, strip_ax, cbar_ax = axes_info
         _imshow_kwargs = dict(
-                aspect='auto', extent=extent, interpolation='nearest')
+            aspect='auto', extent=extent, interpolation='nearest')
         if imshow_kwargs:
             _imshow_kwargs.update(imshow_kwargs)
 
@@ -190,13 +194,13 @@ class Chipseq(object):
                 self.diffed_array.max()
             )
         mappable = matrix_ax.imshow(
-                self.diffed_array[row_order],
-                **_imshow_kwargs)
+            self.diffed_array[row_order],
+            **_imshow_kwargs)
         plt.colorbar(mappable, cbar_ax)
         line_ax.plot(x, self.diffed_array.mean(axis=0))
         if strip_ax:
             line, = strip_ax.plot(np.zeros((nrows,)), np.arange(nrows) + 0.5,
-                    **self._strip_kwargs)
+                                  **self._strip_kwargs)
             line.features = self.features
             line.ind = row_order
 
@@ -209,25 +213,25 @@ class Chipseq(object):
 
         if self.db:
             self.minibrowser = GeneChipseqMiniBrowser(
-                    [self.ip, self.control],
-                    db=self.db,
-                    plotting_kwargs=self.browser_plotting_kwargs,
-                    local_coverage_kwargs=self.browser_local_coverage_kwargs)
+                [self.ip, self.control],
+                db=self.db,
+                plotting_kwargs=self.browser_plotting_kwargs,
+                local_coverage_kwargs=self.browser_local_coverage_kwargs)
         else:
             self.minibrowser = SignalChipseqMiniBrowser(
-                    [self.ip, self.control],
-                    plotting_kwargs=self.browser_plotting_kwargs,
-                    local_coverage_kwargs=self.browser_local_coverage_kwargs)
+                [self.ip, self.control],
+                plotting_kwargs=self.browser_plotting_kwargs,
+                local_coverage_kwargs=self.browser_local_coverage_kwargs)
 
         fig.canvas.mpl_connect('pick_event', self.callback)
 
         self.fig = fig
         self.axes = {
-                'matrix_ax': matrix_ax,
-                 'strip_ax': strip_ax,
-                  'line_ax': line_ax,
-                  'cbar_ax': cbar_ax
-                }
+            'matrix_ax': matrix_ax,
+            'strip_ax': strip_ax,
+            'line_ax': line_ax,
+            'cbar_ax': cbar_ax
+        }
 
     def callback(self, event):
         """
@@ -248,7 +252,8 @@ class Chipseq(object):
 
 
 def estimate_shift(signal, genome=None, windowsize=5000, thresh=None,
-        nwindows=1000, maxlag=500, array_kwargs=None, verbose=False):
+                   nwindows=1000, maxlag=500, array_kwargs=None,
+                   verbose=False):
     """
     Experimental: cross-correlation to estimate the shift width of ChIP-seq
     data
@@ -316,39 +321,39 @@ def estimate_shift(signal, genome=None, windowsize=5000, thresh=None,
         return pybedtools.create_interval_from_list(fields)
 
     windows = pybedtools.BedTool()\
-            .window_maker(genome=genome, w=windowsize)
+        .window_maker(genome=genome, w=windowsize)
 
     random_subset = pybedtools.BedTool(windows[:nwindows])\
-            .shuffle(genome=genome).saveas()
+        .shuffle(genome=genome).saveas()
 
     if verbose:
-        sys.stderr.write("Getting plus-strand signal for %s regions...\n"\
-                % nwindows)
+        sys.stderr.write("Getting plus-strand signal for %s regions...\n"
+                         % nwindows)
         sys.stderr.flush()
 
     plus = signal.array(
-            features=random_subset,
-            read_strand="+",
-            **array_kwargs).astype(float)
+        features=random_subset,
+        read_strand="+",
+        **array_kwargs).astype(float)
 
     if verbose:
-        sys.stderr.write("Getting minus-strand signal for %s regions...\n"\
-                % nwindows)
+        sys.stderr.write("Getting minus-strand signal for %s regions...\n"
+                         % nwindows)
         sys.stderr.flush()
 
     minus = signal.array(
-            features=random_subset,
-            read_strand="-",
-            **array_kwargs).astype(float)
+        features=random_subset,
+        read_strand="-",
+        **array_kwargs).astype(float)
 
     # only do cross-correlation if you have enough reads to do so
     enough = ((plus.sum(axis=1) / windowsize) > thresh) \
-            & ((minus.sum(axis=1) / windowsize) > thresh)
+        & ((minus.sum(axis=1) / windowsize) > thresh)
 
     if verbose:
         sys.stderr.write(
-                "Running cross-correlation on %s regions that passed "
-                "threshold\n" % sum(enough))
+            "Running cross-correlation on %s regions that passed "
+            "threshold\n" % sum(enough))
     results = np.zeros((sum(enough), 2 * maxlag + 1))
     for i, xy in enumerate(izip(plus[enough], minus[enough])):
         x, y = xy
@@ -396,34 +401,34 @@ if __name__ == "__main__":
 
     if 'xcorr' in examples:
         ip = metaseq.genomic_signal(
-                metaseq.example_filename(
-                    'wgEncodeUwTfbsK562CtcfStdAlnRep1.bam'), 'bam')
+            metaseq.example_filename(
+                'wgEncodeUwTfbsK562CtcfStdAlnRep1.bam'), 'bam')
 
         NWINDOWS = 5000
         FRAGMENT_SIZE = 1
         WINDOWSIZE = 5000
         THRESH = FRAGMENT_SIZE / float(WINDOWSIZE) * 10
         lags, shift = estimate_shift(
-                ip, nwindows=NWINDOWS, maxlag=500, thresh=THRESH,
-                array_kwargs=dict(
-                    processes=8, chunksize=100,
-                    fragment_size=FRAGMENT_SIZE),
-                verbose=True)
+            ip, nwindows=NWINDOWS, maxlag=500, thresh=THRESH,
+            array_kwargs=dict(
+                processes=8, chunksize=100,
+                fragment_size=FRAGMENT_SIZE),
+            verbose=True)
         plt.plot(lags, shift.mean(axis=0))
         plt.axvline(
-                lags[np.argmax(shift.mean(axis=0))],
-                linestyle='--', color='k')
+            lags[np.argmax(shift.mean(axis=0))],
+            linestyle='--', color='k')
 
     if 'chipseq' in examples:
         # Example files...
         dbfn = metaseq.example_filename(
-                'Homo_sapiens.GRCh37.66.cleaned.gtf.db')
+            'Homo_sapiens.GRCh37.66.cleaned.gtf.db')
         C = Chipseq(
-                ip_bam=metaseq.example_filename(
-                    'wgEncodeUwTfbsK562CtcfStdAlnRep1.bam'),
-                control_bam=metaseq.example_filename(
-                    'wgEncodeUwTfbsK562InputStdAlnRep1.bam'),
-                dbfn=dbfn)
+            ip_bam=metaseq.example_filename(
+                'wgEncodeUwTfbsK562CtcfStdAlnRep1.bam'),
+            control_bam=metaseq.example_filename(
+                'wgEncodeUwTfbsK562InputStdAlnRep1.bam'),
+            dbfn=dbfn)
 
         # Make some features to use (TSS +/- 1kb)
         def generator():
@@ -434,20 +439,21 @@ if __name__ == "__main__":
 
         from pybedtools.featurefuncs import TSS
         features = pybedtools.BedTool(generator())\
-                .each(TSS, upstream=1000, downstream=1000)\
-                .saveas()
+            .each(TSS, upstream=1000, downstream=1000)\
+            .saveas()
 
         # x-axis for plots
         x = np.linspace(-500, 500, 100)
 
         # Create the array
-        C.diff_array(features=features,
-                array_kwargs=dict(
-                    fragment_size=200, bins=100, chunksize=50, processes=6))
+        C.diff_array(
+            features=features,
+            array_kwargs=dict(
+                fragment_size=200, bins=100, chunksize=50, processes=6))
 
         # sort genes by TIP zscore
         row_order = np.argsort(
-                metaseq.plotutils.tip_zscores(C.diffed_array))[::-1]
+            metaseq.plotutils.tip_zscores(C.diffed_array))[::-1]
 
         # Plot 'em using a nice red-to-blue colormap
         from metaseq.colormap_adjust import smart_colormap

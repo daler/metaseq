@@ -204,11 +204,23 @@ Colormap
 Colormap choice is also important for interpretation.  The
 :func:`metaseq.colormap_adjust.smart_colormap` function centers the colormap on
 zero and shows positive and negative values with different hues but equivalent
-saturation and value (see http://en.wikipedia.org/wiki/HSL_and_HSV);
+saturation and value (see http://en.wikipedia.org/wiki/HSL_and_HSV).
+
+But first, let's put the array on a log scale, but in such a way that the
+negative numbers (that is, disenriched regions) stay negative.  The
+`metaseq.plotutils.nice_log` is useful for this:
 
 .. ipython::
 
     In [1]: from metaseq.colormap_adjust import smart_colormap
+
+    In [1]: from metaseq.plotutils import nice_log
+
+    In [1]: # make a copy of the diffed array
+
+    In [1]: backup = chip.diffed_array.copy()
+
+    In [1]: chip.diffed_array = nice_log(chip.diffed_array)
 
     In [1]: cmap = smart_colormap(chip.diffed_array.min(), chip.diffed_array.max())
 

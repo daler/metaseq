@@ -29,7 +29,7 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest',
 'sphinx.ext.intersphinx', 'sphinx.ext.autosummary', 'sphinx.ext.todo',
 'sphinx.ext.coverage', 'sphinx.ext.pngmath', 'sphinx.ext.ifconfig',
 'sphinx.ext.viewcode', 'matplotlib.sphinxext.plot_directive',
-'matplotlib.sphinxext.ipython_console_highlighting', 'ipython_directive']
+'matplotlib.sphinxext.ipython_console_highlighting', 'ipython_directive', 'numpydoc']
 
 autosummary_generate = True
 autoclass_content = "both"
