@@ -13,8 +13,13 @@ Subclasses must define make_fileobj(), which returns an object to be iterated
 over in __getitem__
 """
 from bx.bbi.bigbed_file import BigBedFile
+from bx.bbi.bigwig_file import BigWigFile
+import numpy as np
+import subprocess
 import pysam
 import pybedtools
+import os
+import sys
 
 strand_lookup = {16: '-', 0: '+'}
 
@@ -47,17 +52,23 @@ class BamAdapter(BaseAdapter):
 
     def __getitem__(self, key):
         iterator = self.fileobj.fetch(
-                key.chrom,
-                key.start,
-                key.stop)
+            key.chrom,
+            key.start,
+            key.stop)
         for r in iterator:
-            interval = pybedtools.Interval(
-                self.fileobj.references[r.rname],
-                r.pos,
-                r.pos + r.qend,
-                strand=strand_lookup[r.flag & 0x0010])
-            interval.file_type = 'bed'
-            yield interval
+            start = r.pos
+            curr_end = r.pos
+            for op, bp in r.cigar:
+                start = curr_end
+                curr_end += bp
+                if op == 0:
+                    interval = pybedtools.Interval(
+                        self.fileobj.references[r.rname],
+                        start,
+                        curr_end,
+                        strand=strand_lookup[r.flag & 0x0010])
+                    interval.file_type = 'bed'
+                    yield interval
 
 
 class BedAdapter(BaseAdapter):
@@ -70,13 +81,13 @@ class BedAdapter(BaseAdapter):
     def make_fileobj(self):
         obj = pybedtools.BedTool(self.fn)
         if not obj._tabixed():
-            obj = obj.sort().tabix(in_place=True, force=True)
+            obj = obj.sort().tabix(in_place=False, force=False, is_sorted=True)
             self.fn = obj.fn
         return obj
 
     def __getitem__(self, key):
         bt = self.fileobj.tabix_intervals(
-                '%s:%s-%s' % (key.chrom, key.start, key.stop))
+            '%s:%s-%s' % (key.chrom, key.start, key.stop))
         for i in bt:
             yield i
         del bt
@@ -84,7 +95,7 @@ class BedAdapter(BaseAdapter):
 
 class BigBedAdapter(BaseAdapter):
     """
-    Adapter that provids random access to bigBed files via bx-python
+    Adapter that provides random access to bigBed files via bx-python
     """
     def __init__(self, fn):
         super(BigBedAdapter, self).__init__(fn)
@@ -103,3 +114,106 @@ class BigBedAdapter(BaseAdapter):
             interval = pybedtools.create_interval_from_list(i.fields)
             interval.file_type = 'bed'
             yield interval
+
+
+class BigWigAdapter(BaseAdapter):
+    """
+    Adapter that provides random access to bigWig files bia bx-python
+    """
+    def __init__(self, fn):
+        super(BigWigAdapter, self).__init__(fn)
+
+    def make_fileobj(self):
+        return self.fn
+
+    def __getitem__(self, key):
+        raise NotImplementedError(
+            "__getitem__ not implemented for %s" % self.__class__.__name__)
+
+    def summarize(self, interval, bins=None, method='summarize'):
+
+        # We may be dividing by zero in some cases, which raises a warning in
+        # NumPy based on the IEEE 754 standard (see
+        # http://docs.scipy.org/doc/numpy/reference/generated/
+        #       numpy.seterr.html)
+        #
+        # That's OK -- we're expecting that to happen sometimes. So temporarily
+        # disable this error reporting for the duration of this method.
+        orig = np.geterr()['invalid']
+        np.seterr(invalid='ignore')
+
+        if (bins is None) or (method == 'get_as_array'):
+            bw = BigWigFile(open(self.fn))
+            s = bw.get_as_array(
+                interval.chrom,
+                interval.start,
+                interval.stop,)
+            if s is None:
+                s = np.zeros((interval.stop - interval.start,))
+            else:
+                s[np.isnan(s)] = 0
+
+        elif method == 'ucsc_summarize':
+            return self.ucsc_summarize(interval, bins)
+
+        else:
+            bw = BigWigFile(open(self.fn))
+            s = bw.summarize(
+                interval.chrom,
+                interval.start,
+                interval.stop, bins)
+            if s is None:
+                s = np.zeros((bins,))
+            else:
+                s = s.sum_data / s.valid_count
+                s[np.isnan(s)] = 0
+
+        # Reset NumPy error reporting
+        np.seterr(divide=orig)
+        return s
+
+    def ucsc_summarize(self, interval, bins=None):
+        if bins is None:
+            bins = len(interval)
+        y = np.zeros(bins)
+
+        cmds = [
+            'bigWigSummary',
+            self.fn,
+            interval.chrom,
+            str(interval.start),
+            str(interval.stop),
+            str(bins),
+            '-type=mean']
+        p = subprocess.Popen(
+            cmds,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+
+        def gen():
+            try:
+                for line in p.stdout:
+                    yield line
+            finally:
+                if p.poll() is None:
+                    return
+                else:
+                    p.wait()
+                    err = p.stderr.read().strip()
+                    if p.returncode not in (0, None):
+                        if err.startswith('no data'):
+                            return
+                        raise ValueError(
+                            "cmds: %s: %s" %
+                            (' '.join(cmds), p.stderr.read()))
+                    if len(err) != 0:
+                        sys.stderr.write(err)
+
+        for line in gen():
+            for i, x in enumerate(line.split('\t')):
+                try:
+                    y[i] = float(x)
+                except ValueError:
+                    pass
+        return np.array(y)

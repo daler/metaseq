@@ -1,0 +1,125 @@
+#!/usr/bin/python
+"""
+Still in development
+"""
+import sys
+import metaseq
+import pybedtools
+import argparse
+import numpy as np
+import tempfile
+from matplotlib import pyplot as plt
+
+
+ap = argparse.ArgumentParser(
+    description="""
+    **Still in development -- the API will probably change; this is mostly
+    provided as an example for how to use metaseq in general...**
+
+    Given two files -- one with data to summarize (`datafile`), and another
+    with windows in which that data will be summarized (`windows`) -- return
+    either an average density or a full array of data.
+
+    For example, say "reads.bam" is a BAM file of ChIP-seq reads, and
+    "tsses.bed" is a BED file of transcript TSSs, +/- 1kb.
+
+    The following command will plot the average read density around TSSs, with
+    data binned into 100 bins.  Eight CPUs will be used to calculate the full
+    array, which will then be averaged to give the final read density.  If each
+    feature in "tsses.bed" is 2kb, then the bin sizes will be 20bp.  Results
+    will be saved to "avgdensity.txt" for use by other programs.
+
+    metaseq-cli avgdensity \\
+        reads.bam bam \\
+        tsses.bed \\
+        --bins=100 \\
+        --plot \\
+        --output avgdensity.txt \\
+        --processes=8
+
+    """, formatter_class=argparse.RawDescriptionHelpFormatter)
+ap.add_argument('action',
+                help="""
+                One of (avgdensity, array)
+                """)
+ap.add_argument('datafile', help='Data file to use.')
+ap.add_argument('type', help='Type of data file. One of (bam, bed, bigwig, bigbed, gff, gtf, vcf)')
+ap.add_argument('windows',
+                help="""
+                Windows within which to get data from `datafile`.  Can be
+                a filename of intervals (bam, bed, gff, gtf, vcf), or, if
+                `--fromstring` is specified, a coord of the form
+                "chrom:start-stop", which only works for a single interval')""")
+ap.add_argument('--fromstring', action='store_true',
+                help="""Assume `windows` specifies a genomic coordinate of the
+                form 'chrom:start-stop' or 'chrom:start-stop[strand]""")
+ap.add_argument('--bins', default=None, type=int,
+                help="""
+                Number of bins to divide each window into
+                """)
+ap.add_argument('--output', default=None,
+                help="""
+                Results will be saved to this file; default is to print to stdout.
+                """)
+ap.add_argument('--plot', action='store_true',
+                help='Create a simple plot of the results')
+ap.add_argument('--processes', type=int, default=None,
+                help='Number of processes to use')
+ap.add_argument('--fragmentsize', default=None, type=int,
+                help="""
+                Each interval in `datafile` will be extended 3' to a total of
+                `fragmentsize` bp.  This can have a dramatic smoothing
+                effect.""")
+
+args = ap.parse_args()
+
+# Construct the genomic signal object, using the right type
+g = metaseq.genomic_signal(args.datafile, args.type)
+
+# Construct the array
+if args.fromstring:
+    xi, arr = g.local_coverage(
+        args.windows, bins=args.bins, processes=args.processes,
+        fragment_size=args.fragmentsize)
+    arr = np.array(arr)
+    print arr.shape
+
+else:
+    arr = g.array(pybedtools.BedTool(args.windows),
+                  bins=args.bins, processes=args.processes, fragment_size=args.fragmentsize)
+
+# Take the mean if that's what was requested
+if args.action == 'avgdensity':
+    if args.fromstring:
+        result = arr
+    else:
+        result = arr.mean(axis=0)
+
+
+# otherwise use the whole thing
+elif args.action == 'array':
+    result = arr
+
+# output to file or stdout
+if args.output is None:
+    output = tempfile.NamedTemporaryFile(delete=False).name
+    np.savetxt(output, result)
+    print open(output).read()
+else:
+    np.savetxt(args.output, result)
+
+# do some plotting
+if args.plot:
+    if args.action == 'avgdensity':
+        plt.plot(result)
+        plt.xlabel('Bins')
+        plt.ylabel('Avg. density')
+        plt.show()
+    if args.action == 'array':
+        plt.imshow(result, interpolation='nearest', aspect='auto')
+        plt.xlabel('Bins')
+        plt.ylabel('Features')
+        plt.colorbar()
+        plt.show()
+
+

@@ -31,9 +31,13 @@ import subprocess
 import numpy as np
 from bx.bbi.bigwig_file import BigWigFile
 
+import pybedtools
+
 from array_helpers import _array, _array_parallel, _local_coverage, \
-    _local_coverage_bigwig, _local_count
+    _local_count
 import filetype_adapters
+import rebin
+import helpers
 
 
 def supported_formats():
@@ -43,7 +47,7 @@ def supported_formats():
     return _registry.keys()
 
 
-def genomic_signal(fn, kind='bam'):
+def genomic_signal(fn, kind):
     """
     Factory function that makes the right class for the file format.
 
@@ -51,13 +55,16 @@ def genomic_signal(fn, kind='bam'):
     object.
 
     :param fn: Filename
-    :param kind: String.  Format of the file; see metaseq.genomic_signal._registry.keys()
+    :param kind:
+        String.  Format of the file; see
+        metaseq.genomic_signal._registry.keys()
     """
     try:
         klass = _registry[kind.lower()]
     except KeyError:
-        raise ValueError('No support for %s format, choices are %s' \
-                % (kind, _registry.keys()))
+        raise ValueError(
+            'No support for %s format, choices are %s'
+            % (kind, _registry.keys()))
     m = klass(fn)
     m.kind = kind
     return m
@@ -75,37 +82,80 @@ class BaseSignal(object):
     def __init__(self, fn):
         self.fn = fn
 
-    def array(self, features, processes=None, chunksize=None, **kwargs):
+    def array(self, features, processes=None, chunksize=1, ragged=False,
+              **kwargs):
         """
         Creates an MxN NumPy array of genomic signal for the region defined by
-        each feature in `features`, where M=len(features) and N=bins.
+        each feature in `features`, where M=len(features) and N=(bins or
+        feature length)
 
-        :param features:
-            An iterable of pybedtools.Interval objects
+        Parameters
+        ----------
+        features : iterable of interval-like objects
+            An iterable of interval-like objects; see docstring for
+            `local_coverage` method for more details.
 
-        :param processes:
-            Integer or None. If not None, then create the array in
-            parallel, giving each process chunks of length `chunksize` to work
-            on.
+        processes : int or None
+            If not None, then create the array in parallel, giving each process
+            chunks of length `chunksize` to work on.
 
-        :param chunksize:
-            Integer.  `features` will be split into `chunksize` pieces, and
-            each piece will be given to a different process. The optimum value
-            is dependent on the size of the features and the underlying data
-            set, but `chunksize=100` is a good place to start.
+        chunksize : int
+            `features` will be split into `chunksize` pieces, and each piece
+            will be given to a different process. The optimum value is
+            dependent on the size of the features and the underlying data set,
+            but `chunksize=100` is a good place to start.
+
+        ragged : bool
+            If False (default), then return a 2-D NumPy array.  This requires
+            all rows to have the same number of columns, which you get when
+            supplying `bins` or if all features are of uniform length.  If
+            True, then return a list of 1-D NumPy arrays
 
         Additional keyword args are passed to local_coverage() which performs
         the work for each feature; see that method for more details.
         """
         if processes is not None:
-            return _array_parallel(
-                    self.fn, self.__class__, features, processes=processes,
-                    chunksize=chunksize, **kwargs)
+            arrays = _array_parallel(
+                self.fn, self.__class__, features, processes=processes,
+                chunksize=chunksize, **kwargs)
         else:
-            return _array(self.fn, self.__class__, features, **kwargs)
+            arrays = _array(self.fn, self.__class__, features, **kwargs)
+        if not ragged:
+            stacked_arrays = np.row_stack(arrays)
+            del arrays
+            return stacked_arrays
+        else:
+            return arrays
+        raise ValueError
 
-    def __getitem__(self, key):
-        return self.adapter[key]
+    def local_coverage(self, features, *args, **kwargs):
+        processes = kwargs.pop('processes', None)
+        if not processes:
+            return _local_coverage(self.adapter, features, *args, **kwargs)
+
+        if isinstance(features, (list, tuple)):
+            raise ValueError(
+                "only single features are supported for parallel "
+                "local_coverage")
+
+        # we don't want to have self.array do the binning
+        bins = kwargs.pop('bins', None)
+
+        # since if we got here processes is not None, then this will trigger
+        # a parallel array creation
+        features = helpers.tointerval(features)
+        x = np.arange(features.start, features.stop)
+        features = list(helpers.split_feature(features, processes))
+        ys = self.array(
+            features, *args, bins=None, processes=processes, ragged=True,
+            **kwargs)
+        # now we ravel() and re-bin
+        y = np.column_stack(ys).ravel()
+        if bins:
+            xi, yi = rebin.rebin(x, y, bins)
+            del x, y
+            return xi, yi
+        return x, y
 
 
 class BigWigSignal(BaseSignal):
@@ -113,16 +163,8 @@ class BigWigSignal(BaseSignal):
         """
         Class for operating on bigWig files
         """
-        BaseSignal.__init__(self, fn)
-        self.bigwig = BigWigFile(open(fn))
-        import warnings
-        warnings.warn('BigWigSignal not well supported '
-                      '-- please test and submit bug reports')
-
-    def local_coverage(self, *args, **kwargs):
-        return _local_coverage_bigwig(self.bigwig, *args, **kwargs)
-
-    local_coverage.__doc__ = _local_coverage_bigwig.__doc__
+        super(BigWigSignal, self).__init__(fn)
+        self.adapter = filetype_adapters.BigWigAdapter(fn)
 
 
 class IntervalSignal(BaseSignal):
@@ -132,13 +174,9 @@ class IntervalSignal(BaseSignal):
         """
         BaseSignal.__init__(self, fn)
 
-    def local_coverage(self, *args, **kwargs):
-        return _local_coverage(self.adapter, *args, **kwargs)
-
     def local_count(self, *args, **kwargs):
         return _local_count(self.adapter, *args, **kwargs)
 
-    local_coverage.__doc__ = _local_coverage.__doc__
     local_count.__doc__ = _local_count.__doc__
 
 
@@ -183,7 +221,7 @@ class BamSignal(IntervalSignal):
             for line in open(self.fn + '.scale'):
                 if line.startswith('#'):
                     continue
-                self._readcount = float(line.strip())
+                self._readcount = float(line.strip()) / 1e6
                 return self._readcount
 
         cmds = ['samtools',
@@ -191,8 +229,8 @@ class BamSignal(IntervalSignal):
                 '-c',
                 '-F', '0x4',
                 self.fn]
-        p = subprocess.Popen(cmds, stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE)
+        p = subprocess.Popen(
+            cmds, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = p.communicate()
         if stderr:
             sys.stderr.write('samtools says: %s' % stderr)
@@ -229,8 +267,11 @@ class BedSignal(IntervalSignal):
 
 
 _registry = {
-        'bam': BamSignal,
-        'bed': BedSignal,
-     'bigwig': BigWigSignal,
-     'bigbed': BigBedSignal,
-     }
+    'bam': BamSignal,
+    'bed': BedSignal,
+    'gff': BedSignal,
+    'gtf': BedSignal,
+    'vcf': BedSignal,
+    'bigwig': BigWigSignal,
+    'bigbed': BigBedSignal,
+}

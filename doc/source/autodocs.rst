@@ -35,23 +35,20 @@ API docs
 
 ----
 
-:mod:`metaseq.tables`
----------------------
-.. automodule:: metaseq.tables
+:mod:`metaseq.results_table`
+----------------------------
+.. automodule:: metaseq.results_table
 
-.. rubric:: Functions
+.. rubric:: Classes
+
 
 .. autosummary::
-    :nosignatures:
-    :toctree: autodocs
+   :nosignatures:
+   :toctree: autodocs
+   :template: auto_template.rst
 
-    metaseq.tables.dataframe_features
-    metaseq.tables.deseq_dataframe
-    metaseq.tables.panel_splom
-    metaseq.tables.scatter
-    metaseq.tables.enriched
-    metaseq.tables.clean_unknown
-    metaseq.tables.skiprows
+   metaseq.results_table.ResultsTable
+   metaseq.results_table.DESeqResults
 
 ----
 

@@ -52,6 +52,8 @@ interval, e.g.::
 from matplotlib import pyplot as plt
 from pybedtools.contrib.plotting import Track
 import pybedtools
+import gffutils
+from gffutils.helpers import asinterval
 
 
 class BaseMiniBrowser(object):
@@ -74,6 +76,8 @@ class BaseMiniBrowser(object):
         :meth:`BaseMiniBrowser.make_fig` and plots data on panels according to
         `self.panels()`.
         """
+        if isinstance(feature, gffutils.Feature):
+            feature = asinterval(feature)
         self.make_fig()
         for ax, method in self.panels():
             feature = method(ax, feature)
@@ -110,7 +114,7 @@ class BaseMiniBrowser(object):
 
 class SignalMiniBrowser(BaseMiniBrowser):
     def __init__(self, genomic_signal_objs, local_coverage_kwargs=None,
-            plotting_kwargs=None):
+                 plotting_kwargs=None):
         """
         Base class for plotting genomic signal.
 
@@ -132,7 +136,8 @@ class SignalMiniBrowser(BaseMiniBrowser):
 
         """
         super(SignalMiniBrowser, self).__init__(genomic_signal_objs)
-        self.plotting_kwargs = plotting_kwargs or [{} for i in genomic_signal_objs]
+        self.plotting_kwargs = \
+            plotting_kwargs or [{} for i in genomic_signal_objs]
         self.local_coverage_kwargs = local_coverage_kwargs or {}
 
     def panels(self):
@@ -157,13 +162,14 @@ class SignalMiniBrowser(BaseMiniBrowser):
 class GeneModelMiniBrowser(SignalMiniBrowser):
     def __init__(self, genomic_signal_objs, db, **kwargs):
         """
-        Mini-browser to show a signal panel on top and gene models on the bottom.
+        Mini-browser to show a signal panel on top and gene models on the
+        bottom.
 
         :param genomic_signal_objs: a list of genomic_signals objects
         :param db: a `gffutils.FeatureDB`
         """
         super(GeneModelMiniBrowser, self).__init__(
-                genomic_signal_objs, **kwargs)
+            genomic_signal_objs, **kwargs)
         self.db = db
 
     def panels(self):
@@ -187,20 +193,20 @@ class GeneModelMiniBrowser(SignalMiniBrowser):
         from gffutils.contrib.plotting import Gene
         extent = [feature.start, feature.stop]
         nearby_genes = self.db.overlapping_features(
-                feature.chrom, feature.start, feature.stop, featuretype='gene')
+            feature.chrom, feature.start, feature.stop, featuretype='gene')
         ybase = 0
         ngenes = 0
         for nearby_gene in nearby_genes:
             ngenes += 1
             extent.extend([nearby_gene.start, nearby_gene.stop])
             gene_collection = Gene(
-                    self.db,
-                    nearby_gene,
-                    transcripts=['mRNA'],
-                    cds=['CDS'],
-                    utrs=['exon'],
-                    ybase=ybase,
-                    color="0.5", picker=5)
+                self.db,
+                nearby_gene,
+                transcripts=['mRNA'],
+                cds=['CDS'],
+                utrs=['exon'],
+                ybase=ybase,
+                color="0.5", picker=5)
             gene_collection.name = nearby_gene.id
             gene_collection.add_to_ax(ax)
             ybase += gene_collection.max_y
@@ -230,8 +236,10 @@ class PeakMiniBrowser(SignalMiniBrowser):
     def __init__(self, genomic_signal_objs, bed, **kwargs):
         """
         Signal on the top panel, peaks in the bottom panel. `bed` is a filename
-        or BedTool object that will be used to make
+        or BedTool object (or list of these things) that will be used to make
         a pybedtools.contrib.plotting.Track.
+
+        If genomic_signal_objs is None, then only show the peaks axes
         """
         super(PeakMiniBrowser, self).__init__(genomic_signal_objs, **kwargs)
         self.bed = bed
@@ -246,7 +254,7 @@ class PeakMiniBrowser(SignalMiniBrowser):
         features = bedtool.intersect([feature], u=True)
         track = Track(features)
         ax.add_collection(track)
-        ax.axis('tight')
+        #ax.axis('tight')
         return feature
 
 
@@ -256,34 +264,39 @@ if __name__ == "__main__":
     import pybedtools
 
     G = gffutils.FeatureDB(
-            metaseq.example_filename('Homo_sapiens.GRCh37.66.cleaned.gtf.db'))
+        metaseq.example_filename('Homo_sapiens.GRCh37.66.cleaned.gtf.db'))
 
     ip = metaseq.genomic_signal(
-            metaseq.example_filename('wgEncodeUwTfbsK562CtcfStdAlnRep1.bam'),
-            'bam')
+        metaseq.example_filename('wgEncodeUwTfbsK562CtcfStdAlnRep1.bam'),
+        'bam')
     inp = metaseq.genomic_signal(
-            metaseq.example_filename('wgEncodeUwTfbsK562InputStdAlnRep1.bam'),
-            'bam')
+        metaseq.example_filename('wgEncodeUwTfbsK562InputStdAlnRep1.bam'),
+        'bam')
     peaks = pybedtools.BedTool(metaseq.example_filename(
-            'wgEncodeUwTfbsK562CtcfStdPkRep1.narrowPeak.gz'))
+        'wgEncodeUwTfbsK562CtcfStdPkRep1.narrowPeak.gz'))
 
     plotting_kwargs = [
-                dict(color='r', label='IP'),
-                dict(color='k', linestyle=':', label='input')]
+        dict(color='r', label='IP'),
+        dict(color='k', linestyle=':', label='input')]
 
     local_coverage_kwargs = dict(fragment_size=200)
 
-    b = SignalMiniBrowser([ip, inp],
-            plotting_kwargs=plotting_kwargs,
-            local_coverage_kwargs=local_coverage_kwargs)
+    b = SignalMiniBrowser(
+        [ip, inp],
+        plotting_kwargs=plotting_kwargs,
+        local_coverage_kwargs=local_coverage_kwargs)
 
-    g = GeneModelMiniBrowser([ip, inp], G,
-            plotting_kwargs=plotting_kwargs,
-            local_coverage_kwargs=local_coverage_kwargs)
+    g = GeneModelMiniBrowser(
+        [ip, inp],
+        G,
+        plotting_kwargs=plotting_kwargs,
+        local_coverage_kwargs=local_coverage_kwargs)
 
-    p = PeakMiniBrowser([ip, inp], peaks,
-            plotting_kwargs=plotting_kwargs,
-            local_coverage_kwargs=local_coverage_kwargs)
+    p = PeakMiniBrowser(
+        [ip, inp],
+        peaks,
+        plotting_kwargs=plotting_kwargs,
+        local_coverage_kwargs=local_coverage_kwargs)
 
     feature = peaks[3]
 
