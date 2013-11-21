@@ -21,7 +21,7 @@ setup(
         version=version,
         long_description=long_description,
         install_requires=['bx-python', 'numpy', 'HTSeq', 'matplotlib', 'scipy',
-                          'scikits.learn', 'pybedtools', 'gffutils',
+                          'scikit-learn', 'pybedtools', 'gffutils',
                           'argparse'],
         packages=['metaseq', 'metaseq.test', 'metaseq.test.data', 'metaseq.integration'],
         package_data={'metaseq':['test/data/*']},
