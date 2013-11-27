@@ -192,8 +192,8 @@ class GeneModelMiniBrowser(SignalMiniBrowser):
         """
         from gffutils.contrib.plotting import Gene
         extent = [feature.start, feature.stop]
-        nearby_genes = self.db.overlapping_features(
-            feature.chrom, feature.start, feature.stop, featuretype='gene')
+        nearby_genes = self.db.region(
+            (feature.chrom, feature.start, feature.stop), featuretype='gene')
         ybase = 0
         ngenes = 0
         for nearby_gene in nearby_genes:
