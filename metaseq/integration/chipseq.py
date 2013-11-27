@@ -10,7 +10,39 @@ from metaseq.minibrowser import SignalMiniBrowser, GeneModelMiniBrowser
 import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib
+import yaml
 
+def save(c, prefix):
+    pybedtools.BedTool(c.features).saveas(prefix + '.intervals')
+
+    with open(prefix + '.info', 'w') as fout:
+        info = {
+            'ip_bam': c.ip.fn,
+            'control_bam': c.control.fn,
+            'array_kwargs': c.array_kwargs,
+            'dbfn': c.dbfn,
+            'browser_local_coverage_kwargs': c.browser_local_coverage_kwargs,
+        }
+        fout.write(yaml.dump(info, default_flow_style=False))
+    np.savez(
+        prefix,
+        diffed_array=c.diffed_array,
+        ip_array=c.ip_array,
+        control_array=c.control_array
+    )
+
+def load(prefix):
+    info = yaml.load(open(prefix + '.info'))
+    c = Chipseq(ip_bam=info['ip_bam'], control_bam=info['control_bam'],
+                dbfn=info['dbfn'])
+    npz = np.load(prefix + '.npz', mmap_mode='r')
+    c.ip_array = npz['ip_array']
+    c.control_array = npz['control_array']
+    c.diffed_array = npz['diffed_array']
+    c.array_kwargs = info['array_kwargs']
+    c.features = pybedtools.BedTool(prefix + '.intervals')
+    c.browser_local_coverage_kwargs = info['browser_local_coverage_kwargs']
+    return c
 
 class GeneChipseqMiniBrowser(GeneModelMiniBrowser):
     def __init__(self, genomic_signal_objs, db, **kwargs):
@@ -122,8 +154,9 @@ class Chipseq(object):
             dict(color='k', linestyle=':', label='control')
         ]
 
+
     def diff_array(self, features, force=True, func=None,
-                   array_kwargs=dict()):
+                   array_kwargs=dict(), cache=None):
         """
         Scales the control and IP data to million mapped reads, then subtracts
         scaled control from scaled IP, applies `func(diffed)` to the diffed
@@ -151,6 +184,8 @@ class Chipseq(object):
         self.browser_local_coverage_kwargs = array_kwargs.copy()
         self.browser_local_coverage_kwargs.pop('processes', None)
         self.browser_local_coverage_kwargs.pop('chunksize', 1)
+
+        self.array_kwargs = array_kwargs.copy()
 
         if (self.ip_array is None) or force:
             self.ip_array = self.ip.array(features, **array_kwargs)
