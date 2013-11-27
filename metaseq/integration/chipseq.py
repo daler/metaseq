@@ -280,7 +280,7 @@ class Chipseq(object):
             print "more than %s genes selected; not spawning browsers" % limit
             browser = False
         for i in event.ind:
-            feature = artist.features[ind[::-1][i]]
+            feature = artist.features[ind[i]]
             print feature,
             if browser:
                 self.minibrowser.plot(feature)

@@ -7,3 +7,4 @@ scikits.learn
 pybedtools
 statsmodels
 gffutils
+pysam
