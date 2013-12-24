@@ -8,6 +8,19 @@ import numpy as np
 from scipy import stats
 from statsmodels.stats.multitest import fdrcorrection
 
+def ci_plot(x, arr, conf=0.95, ax=None, line_kwargs=None, fill_kwargs=None):
+    if ax is None:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+
+    line_kwargs = line_kwargs or {}
+    fill_kwargs = fill_kwargs or {}
+
+    m, lo, hi = ci(arr, conf)
+    ax.plot(x, m, **line_kwargs)
+    ax.fill_between(x, lo, hi, **fill_kwargs)
+    return ax
+
 def ci(arr, conf=0.95):
     """
     Column-wise confidence interval.
