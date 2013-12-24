@@ -1,3 +1,4 @@
+import copy
 import pybedtools
 from textwrap import dedent
 import numpy as np
@@ -61,6 +62,10 @@ class ResultsTable(object):
         indexing (like .ix, .iloc, etc).
         """
         return self.__class__(dataframe, **self._kwargs)
+
+    def copy(self):
+        data = self.data.copy(deep=True)
+        return self.__class__(data, db=self.db, import_kwargs=self._kwargs)
 
     def __repr__(self):
         s = []
