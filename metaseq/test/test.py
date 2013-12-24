@@ -446,5 +446,5 @@ def test_bam_mmr():
         os.unlink(fn)
     assert gs['bam'].million_mapped_reads(force=True) == 8e-6
     gs['bam']._readcount = None
-    assert gs['bam'].million_mapped_reads(force=False) == 8e-6
+    assert gs['bam'].million_mapped_reads(force=False) == 8e-6, gs['bam'].million_mapped_reads(force=False)
 

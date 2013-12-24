@@ -221,7 +221,7 @@ class BamSignal(IntervalSignal):
             for line in open(self.fn + '.scale'):
                 if line.startswith('#'):
                     continue
-                self._readcount = float(line.strip()) / 1e6
+                self._readcount = float(line.strip())
                 return self._readcount
 
         cmds = ['samtools',
