@@ -684,6 +684,92 @@ class DESeqResults(ResultsTable):
     downregulated.__doc__ = downregulated.__doc__.format(threshdoc=threshdoc)
 
 
+class LazyDict(object):
+    def __init__(self, fn_dict, dbfn, index_file, extra=None, cls=DESeqResults, modifier=None):
+        """
+        Dictionary-like object that lazily-loads ResultsTable objects.
+
+        Parameters
+        ----------
+        fn_dict : dict
+            Keys of `fn_dict` will be the keys of this LazyDict object.  Values
+            should be filenames which will be loaded into ResultsTable object
+            upon access for the first time.
+
+        index_file : str
+            Path to a file that contains one ID per line.  This file is used to
+            ensure all ResultsTable objects are aligned to the same index.
+
+        dbfn : str
+            Filename to a gffutils database.  This enables gene info to be
+            attached to the dataframe.
+
+        extra : pandas.dataframe
+            This dataframe hat will be merged into the data in each file.  This
+            is useful for attaching things like gene lengths, alt names, etc.
+            In order for it to work, this dataframe must be indexed the same
+            way the ResultsTable files are indexed.
+
+        cls : ResultsTable class or subclass
+            Each filename in `fn_dict` will be converted using this class.
+
+        modifier : callable
+            Upon first access, each newly-constructed ResultsTable will first
+            have the `extra` data attached, and then will be provided as this
+            callable's only argument.  The callable can make any modifications
+            to the ResultsTable, and return a new version that will be used in
+            the future when the same key is accessed.  For example, exonic bp
+            data can be provided as part of the `extra` dataframe, and then the
+            `modifier` can be a function that adds an RPKM column.
+
+        Notes
+        -----
+        When a key is provided for the first time, the workflow is
+        ResultsTable(fn, **kwargs) -> attach `extra` -> send to `modifier` ->
+        return extended and modified ResultsTable.  Subsequent access of the
+        same key will immediately return the extended-and-modified
+        ResultsTable.
+
+        """
+        self.fn_dict = fn_dict
+        self._dict = {}
+        self.dbfn = dbfn
+        self.index = [i.strip() for i in open(index_file)]
+        self.extra = extra
+        self.modifier = modifier
+        self._cls = cls
+
+    def __getitem__(self, key):
+        if key not in self._dict:
+            fn = self.fn_dict[key]
+            obj = self._cls(fn, db=self.dbfn)
+            obj.data = obj.data.reindex(self.index)
+            if self.extra:
+                obj.data = pandas.merge(obj.data, self.extra, left_index=True,
+                                        right_index=True)
+            if self.modifier:
+                obj = self.modifier(obj)
+
+            self._dict[key] = obj
+
+        return self._dict[key]
+
+    def __repr__(self):
+        s = "<%s> with possible keys\n:%s\n" \
+            % (self.__class__.__name__, self.fn_dict.keys())
+        s += "and existing keys:\n"
+        s += repr(self._dict)
+        return s
+
+    def keys(self):
+        return self.fn_dict.keys()
+
+    def values(self):
+        return [self._dict[key] for key in self.keys()]
+
+    def items(self):
+        return list((key, self._dict[key]) for key in self.keys())
+
 if __name__ == "__main__":
     import metaseq
     from matplotlib import pyplot as plt
