@@ -1,6 +1,7 @@
 """
 This module integrates parts of metaseq that are useful for ChIP-seq analysis.
 """
+import os
 from itertools import izip
 import gffutils
 from gffutils.helpers import asinterval
@@ -12,16 +13,56 @@ from matplotlib import pyplot as plt
 import matplotlib
 import yaml
 
-def save(c, prefix):
+def save(c, prefix, relative_paths=True):
+    """
+    Save data from a Chipseq object.
+
+
+    Parameters
+    ----------
+    c : Chipseq object
+        Chipseq object, most likely after calling the `diffed_array` method
+
+    prefix : str
+        Prefix, including any leading directory paths, to save the data.
+
+    relative_paths : bool
+        If True (default), then the path names in the `prefix.info` file will
+        be relative to `prefix`.  Otherwise, they will be absolute.
+
+    The following files will be created:
+
+    :prefix.intervals:
+        A BED file (or GFF, GTF, or VCF as appropriate) of the features used for the array
+
+    :prefix.info:
+        A YAML-format file indicating the IP and control BAM files, any array
+        kwargs, the database filename, and any minibrowser local coverage args.
+        These are all needed to reconstruct a new Chipseq object. Path names
+        will be relative to `prefix`.
+
+    :prefix.npz:
+        A NumPy .npz file with keys 'diffed_array', 'ip_array', and 'control_array'
+
+    """
+    dirname = os.path.dirname(prefix)
+
     pybedtools.BedTool(c.features).saveas(prefix + '.intervals')
+
+    def usepath(f):
+        if relative_paths:
+            return os.path.relpath(f, start=dirname)
+        else:
+            return os.path.abspath(f)
 
     with open(prefix + '.info', 'w') as fout:
         info = {
-            'ip_bam': c.ip.fn,
-            'control_bam': c.control.fn,
+            'ip_bam': usepath(c.ip.fn),
+            'control_bam': usepath(c.control.fn),
             'array_kwargs': c.array_kwargs,
-            'dbfn': c.dbfn,
+            'dbfn': usepath(c.dbfn),
             'browser_local_coverage_kwargs': c.browser_local_coverage_kwargs,
+            'relative_paths': relative_paths,
         }
         fout.write(yaml.dump(info, default_flow_style=False))
     np.savez(
