@@ -200,10 +200,9 @@ class BamSignal(IntervalSignal):
             d[ref] = (0, length)
         return d
 
-    def million_mapped_reads(self, force=False):
+    def mapped_read_count(self, force=False):
         """
-        Counts total reads in a BAM file and returns the result in millions of
-        reads.
+        Counts total reads in a BAM file.
 
         If a file self.bam + '.scale' exists, then just read the first line of
         that file that doesn't start with a "#".  If such a file doesn't exist,
@@ -212,6 +211,12 @@ class BamSignal(IntervalSignal):
 
         The result is also stored in self._readcount so that the time-consuming
         part only runs once; use force=True to force re-count.
+
+        Parameters
+        ----------
+        force : bool
+            If True, then force a re-count; otherwise use cached data if
+            available.
         """
         # Already run?
         if self._readcount and not force:
@@ -235,16 +240,16 @@ class BamSignal(IntervalSignal):
         if stderr:
             sys.stderr.write('samtools says: %s' % stderr)
             return None
-        mmr = int(stdout) / 1e6
+        mapped_reads = int(stdout)
 
         # write to file so the next time you need the lib size you can access
         # it quickly
         if not os.path.exists(self.fn + '.scale'):
             fout = open(self.fn + '.scale', 'w')
-            fout.write(str(mmr) + '\n')
+            fout.write(str(mapped_reads) + '\n')
             fout.close()
 
-        self._readcount = mmr
+        self._readcount = mapped_reads
         return self._readcount
 
 
