@@ -1,14 +1,15 @@
 import copy
-import pybedtools
 from textwrap import dedent
 import numpy as np
 import pandas
-import gffutils
-from gffutils.helpers import asinterval
-import copy
 from matplotlib import pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib
+import plotutils
+from matplotlib.transforms import blended_transform_factory
+from matplotlib.collections import EventCollection
+import gffutils
+import pybedtools
 
 
 class ResultsTable(object):
@@ -112,7 +113,7 @@ class ResultsTable(object):
             raise ValueError("Please attach a gffutils.FeatureDB")
         for i in self.data.index:
             try:
-                yield asinterval(self.db[i])
+                yield gffutils.helpers.asinterval(self.db[i])
             except gffutils.FeatureNotFoundError:
                 if ignore_unknown:
                     continue
