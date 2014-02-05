@@ -333,16 +333,22 @@ class ResultsTable(object):
 
         # Convert any integer indexes into boolean
         _genes_to_highlight = []
-        for ind, kwargs in genes_to_highlight:
+        for block in genes_to_highlight:
+            ind = block[0]
             if ind.dtype != 'bool':
                 new_ind = (np.zeros_like(xi) == 0)
                 new_ind[ind] = True
-                _genes_to_highlight.append((new_ind, kwargs))
+                _genes_to_highlight.append(
+                    tuple([new_ind] + list(block[1:]))
+                )
             else:
-                _genes_to_highlight.append((ind, kwargs))
+                _genes_to_highlight.append(
+                    tuple([ind] + list(block[1:]))
+                )
 
         # Remove any genes that are handled by genes_to_hightlight.
-        for ind, _ in _genes_to_highlight:
+        for block in _genes_to_highlight:
+            ind = block[0]
             allind[ind] = False
 
         # Plot
@@ -359,7 +365,15 @@ class ResultsTable(object):
                     **one_to_one)
 
         # plot any specially-highlighted genes, and label if specified
-        for ind, kwargs in _genes_to_highlight:
+        for block in _genes_to_highlight:
+            ind = block[0]
+            kwargs = block[1]
+
+            if len(block) == 3:
+                hist_kwargs = block[2]
+            else:
+                hist_kwargs = {}
+
             names = kwargs.pop('names', None)
             updated_kwargs = general_kwargs.copy()
             updated_kwargs.update(kwargs)
