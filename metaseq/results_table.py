@@ -632,7 +632,8 @@ class DESeqResults(ResultsTable):
                 if lfc < 0:
                     score *= -1
                 feature.score = str(score)
-                feature = extend_fields(gff2bed(asinterval(feature)), 9)
+                feature = extend_fields(
+                    gff2bed(gffutils.helpers.asinterval(feature)), 9)
                 fields = feature.fields[:]
                 fields[6] = fields[1]
                 fields[7] = fields[2]
@@ -719,7 +720,8 @@ class DESeqResults(ResultsTable):
 
 
 class LazyDict(object):
-    def __init__(self, fn_dict, dbfn, index_file, extra=None, cls=DESeqResults, modifier=None):
+    def __init__(self, fn_dict, dbfn, index_file, extra=None, cls=DESeqResults,
+                 modifier=None):
         """
         Dictionary-like object that lazily-loads ResultsTable objects.
 
@@ -830,7 +832,7 @@ if __name__ == "__main__":
     minibrowser = GeneModelMiniBrowser([], e.db)
 
     def callback(i):
-        feature = asinterval(e.db[i])
+        feature = gffutils.helpers.asinterval(e.db[i])
         print e.ix[i]
         if feature.chrom == 'chr2L':
             minibrowser.plot(feature)
