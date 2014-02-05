@@ -389,15 +389,13 @@ class ResultsTable(object):
         # a converter here.
         color_converter = matplotlib.colors.ColorConverter().to_rgb
 
-        # one-to-one line, if kwargs were specified
+        # Plot the one-to-one line, if kwargs were specified
         if one_to_one:
-            gmin = max(xmin, ymin)
-            gmax = min(xmax, ymax)
             ax.plot([gmin, gmax],
                     [gmin, gmax],
                     **one_to_one)
 
-        # plot any specially-highlighted genes, and label if specified
+        # Plot any specially-highlighted genes, and label if specified
         for block in _genes_to_highlight:
             ind = block[0]
             kwargs = block[1]
@@ -475,6 +473,7 @@ class ResultsTable(object):
 
         ax.set_xlabel(xlab)
         ax.set_ylabel(ylab)
+        ax.axis('tight')
 
         #ax.axis((xmin - xpad, xmax + xpad, ymin - ypad, ymax + ypad))
         return ax
