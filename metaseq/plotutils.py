@@ -497,3 +497,27 @@ def input_ip_plots(iparr, inputarr, diffed, x, sort_ind,
     fig.subplots_adjust(bottom=0.05, top=0.95, hspace=0.75, wspace=0.9)
 
     return fig
+
+
+def _updatecopy(orig, update_with, keys=None):
+    """
+    Update a copy of dest with source.  If `keys` is a list, then only update
+    with those keys.
+    """
+    d = orig.copy()
+    if keys:
+        for k in keys:
+            if k in update_with:
+                d[k] = update_with[k]
+    else:
+        d.update(update_with)
+    return d
+
+
+def _clean(z):
+    """
+    Return a version of z that only has finite values
+    """
+    return z[np.isfinite(z)]
+
+
