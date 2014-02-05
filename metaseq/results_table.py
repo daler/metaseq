@@ -372,6 +372,49 @@ class ResultsTable(object):
         coll.df = self.data
         coll.ind = allind
 
+        rug_x_kwargs = dict(
+            linelength=linelength,
+            transform=blended_transform_factory(ax.transData, ax.transAxes))
+        rug_y_kwargs = dict(
+            linelength=linelength,
+            transform=blended_transform_factory(ax.transAxes, ax.transData))
+
+        color = color_converter(general_kwargs['color'])
+        rug_x_kwargs['color'] = color
+        rug_y_kwargs['color'] = color
+
+        rug_x_pos = EventCollection(
+            xi[allind & xv & pos_yv],
+            lineoffset=pos_offset,
+            **rug_x_kwargs)
+        rug_x_nan = EventCollection(
+            xi[allind & xv & nan_yv],
+            lineoffset=nan_offset,
+            **rug_x_kwargs)
+        rug_x_neg = EventCollection(
+            xi[allind & xv & neg_yv],
+            lineoffset=neg_offset,
+            **rug_x_kwargs)
+        rug_y_pos = EventCollection(
+            yi[allind & yv & pos_xv],
+            lineoffset=pos_offset,
+            **rug_y_kwargs)
+        rug_y_nan = EventCollection(
+            yi[allind & yv & nan_xv],
+            lineoffset=nan_offset,
+            **rug_y_kwargs)
+        rug_y_neg = EventCollection(
+            yi[allind & yv & neg_xv],
+            lineoffset=neg_offset,
+            **rug_y_kwargs)
+
+        ax.add_collection(rug_x_pos)
+        ax.add_collection(rug_x_neg)
+        ax.add_collection(rug_x_nan)
+        ax.add_collection(rug_y_pos)
+        ax.add_collection(rug_y_neg)
+        ax.add_collection(rug_y_nan)
+
         # one-to-one line, if kwargs were specified
         if one_to_one:
             gmin = max(xmin, ymin)
@@ -413,6 +456,30 @@ class ResultsTable(object):
             coll = m.scatter_ax.collections[-1]
             coll.df = self.data
             coll.ind = ind
+
+            color = color_converter(updated_kwargs['color'])
+            rug_x_kwargs['color'] = color
+            rug_y_kwargs['color'] = color
+
+            rug_x_pos = EventCollection(xi[ind & xv & pos_yv],
+                                        lineoffset=pos_offset, **rug_x_kwargs)
+            rug_x_nan = EventCollection(xi[ind & xv & nan_yv],
+                                        lineoffset=nan_offset, **rug_x_kwargs)
+            rug_x_neg = EventCollection(xi[ind & xv & neg_yv],
+                                        lineoffset=neg_offset, **rug_x_kwargs)
+            rug_y_pos = EventCollection(yi[ind & yv & pos_xv],
+                                        lineoffset=pos_offset, **rug_y_kwargs)
+            rug_y_nan = EventCollection(yi[ind & yv & nan_xv],
+                                        lineoffset=nan_offset, **rug_y_kwargs)
+            rug_y_neg = EventCollection(yi[ind & yv & neg_xv],
+                                        lineoffset=neg_offset, **rug_y_kwargs)
+
+            ax.add_collection(rug_x_pos)
+            ax.add_collection(rug_x_neg)
+            ax.add_collection(rug_x_nan)
+            ax.add_collection(rug_y_pos)
+            ax.add_collection(rug_y_neg)
+            ax.add_collection(rug_y_nan)
 
             if names:
                 transOffset = matplotlib.transforms.offset_copy(
