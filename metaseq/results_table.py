@@ -176,11 +176,14 @@ class ResultsTable(object):
 
     def scatter(self, x, y, xfunc=None, yfunc=None, xscale=None, yscale=None,
                 xlab=None, ylab=None, genes_to_highlight=None,
-                label_genes=False,
+                label_genes=False, marginal_histograms=False,
                 general_kwargs=dict(color="k", alpha=0.2, linewidths=0),
-                marginal=False, offset_kwargs={}, label_kwargs=None, ax=None,
+                general_hist_kwargs=None,
+                offset_kwargs={}, label_kwargs=None, ax=None,
                 one_to_one=None, callback=None, xlab_prefix=None,
-                ylab_prefix=None, sizefunc=None):
+                ylab_prefix=None, sizefunc=None, hist_size=0.3, hist_pad=0.0,
+                nan_offset=0.015, pos_offset=0.99, linelength=0.01,
+                neg_offset=0.05):
         """
         Do-it-all method for making annotated scatterplots.
 
@@ -215,10 +218,6 @@ class ResultsTable(object):
             the same length as `ind`.  It will be used to label the genes in
             `ind` using `label_kwargs`.
 
-        marginal : bool
-            Toggles display of non-finite cases where `x` or `y` is
-            nonzero but the other one is zero (and `xfunc` or `yfunc` are log)
-
         callback : callable
             Function to call upon clicking a point. Default is to print the
             gene name, but an example of another useful callback would be
@@ -241,6 +240,20 @@ class ResultsTable(object):
         xlab_prefix, ylab_prefix : str
             Optional label prefix that will be added to the beginning of `xlab`
             and/or `ylab`.
+
+        hist_size : float
+            Size of marginal histograms
+
+        hist_pad : float
+            Spacing between marginal histograms
+
+        nan_offset, pos_offset, neg_offset : float
+            Offset, in units of "fraction of axes" for the NaN, +inf, and -inf
+            "rug plots"
+
+        linelength : float
+            Line length for the rug plots
+
         """
         _x = self.data[x]
         _y = self.data[y]
@@ -279,6 +292,9 @@ class ResultsTable(object):
 
         if general_kwargs is None:
             general_kwargs = {}
+
+        if general_hist_kwargs is None:
+            general_hist_kwargs = {}
 
         if genes_to_highlight is None:
             genes_to_highlight = []
