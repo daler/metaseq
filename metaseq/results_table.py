@@ -321,28 +321,9 @@ class ResultsTable(object):
         neg_yv = np.isinf(yi) & (yi < 0)
         nan_yv = np.isnan(yi)
 
+        # Indexes for valid values
         xv = ~(pos_xv | neg_xv | nan_xv)
         yv = ~(pos_yv | neg_yv | nan_yv)
-
-        xmax = xi[xv].max()
-        xmin = xi[xv].min()
-        ymax = yi[yv].max()
-        ymin = yi[yv].min()
-
-        xpad = (xmax - xmin) * 0.1
-        ypad = (ymax - ymin) * 0.1
-
-        global_min = min(xmin, ymin)
-        global_max = max(xmax, ymax)
-
-        # Include marginal data on global min/max
-        xi[pos_xv] = xmax + xpad
-        xi[neg_xv] = xmin - xpad
-        xi[nan_xv] = xmin - xpad
-
-        yi[pos_yv] = ymax + ypad
-        yi[neg_yv] = ymin - ypad
-        yi[nan_yv] = ymin - ypad
 
         # By default, use everything
         allind = np.zeros_like(xi) == 0
