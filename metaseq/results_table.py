@@ -413,13 +413,14 @@ class ResultsTable(object):
                 marginal_histograms)
 
             updated_kwargs = plotutils._updatecopy(
-                orig=general_kwargs, update_with=kwargs)
+                orig=kwargs, update_with=general_kwargs)
+
 
             updated_hist_kwargs = plotutils._updatecopy(
-                orig=general_hist_kwargs, update_with=hist_kwargs)
+                orig=hist_kwargs, update_with=general_hist_kwargs)
             updated_hist_kwargs = plotutils._updatecopy(
                 orig=updated_hist_kwargs, update_with=kwargs,
-                keys=['color', 'alpha'])
+                keys=['color', 'alpha'], override=True)
 
             self.marginal.append(
                 xi[ind & xv & yv],
