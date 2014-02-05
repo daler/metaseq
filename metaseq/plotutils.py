@@ -664,3 +664,18 @@ class MarginalHistScatter(object):
         for txt in axhisty.get_xticklabels():
             txt.set_rotation(-90)
 
+
+    def add_legends(self, xhists=True, yhists=False, scatter=True, **kwargs):
+        """
+        Add legends to axes.
+        """
+        axs = []
+        if xhists:
+            axs.extend(self.hxs)
+        if yhists:
+            axs.extend(self.hys)
+        if scatter:
+            axs.extend(self.ax)
+
+        for ax in axs:
+            ax.legend(**kwargs)
