@@ -309,7 +309,8 @@ class ResultsTable(object):
                                 bbox=dict(facecolor='w', edgecolor='None',
                                           alpha=0.5))
 
-        # ---------------------------------------------------------------------
+        # Clean data ---------------------------------------------------------
+
         xi = xfunc(_x)
         yi = yfunc(_y)
 
@@ -348,8 +349,26 @@ class ResultsTable(object):
             ind = block[0]
             allind[ind] = False
 
+        color_converter = matplotlib.colors.ColorConverter().to_rgb
+
+        marginal_histograms = (
+            general_kwargs.pop('marginal_histograms', False)
+            or marginal_histograms)
+
         # Plot
-        coll = ax.scatter(xi[allind], yi[allind], picker=5, **general_kwargs)
+        general_hist_kwargs = plotutils._updatecopy(
+            orig=general_hist_kwargs, update_with=general_kwargs,
+            keys=['color', 'alpha'])
+        m = plotutils.MarginalHistScatter(
+            ax, hist_size=hist_size, pad=hist_pad)
+        m.append(
+            xi[allind & xv & yv],
+            yi[allind & xv & yv],
+            scatter_kwargs=dict(picker=5, **general_kwargs),
+            hist_kwargs=general_hist_kwargs,
+            marginal_histograms=marginal_histograms)
+
+        coll = m.scatter_ax.collections[-1]
         coll.df = self.data
         coll.ind = allind
 
@@ -372,9 +391,26 @@ class ResultsTable(object):
                 hist_kwargs = {}
 
             names = kwargs.pop('names', None)
-            updated_kwargs = general_kwargs.copy()
-            updated_kwargs.update(kwargs)
-            coll = ax.scatter(xi[ind], yi[ind], picker=5, **updated_kwargs)
+            _marginal_histograms = (
+                kwargs.pop('marginal_histograms', False) or
+                marginal_histograms)
+
+            updated_kwargs = plotutils._updatecopy(
+                orig=general_kwargs, update_with=kwargs)
+
+            updated_hist_kwargs = plotutils._updatecopy(
+                orig=general_hist_kwargs, update_with=hist_kwargs)
+            updated_hist_kwargs = plotutils._updatecopy(
+                orig=updated_hist_kwargs, update_with=kwargs,
+                keys=['color', 'alpha'])
+
+            m.append(
+                xi[ind & xv & yv],
+                yi[ind & xv & yv],
+                scatter_kwargs=dict(picker=5, **updated_kwargs),
+                hist_kwargs=updated_hist_kwargs,
+                marginal_histograms=_marginal_histograms)
+            coll = m.scatter_ax.collections[-1]
             coll.df = self.data
             coll.ind = ind
 
@@ -403,7 +439,7 @@ class ResultsTable(object):
         ax.set_xlabel(xlab)
         ax.set_ylabel(ylab)
 
-        ax.axis((xmin - xpad, xmax + xpad, ymin - ypad, ymax + ypad))
+        #ax.axis((xmin - xpad, xmax + xpad, ymin - ypad, ymax + ypad))
         return ax
 
     def _id_callback(self, event):
