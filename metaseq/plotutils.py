@@ -7,6 +7,8 @@ from matplotlib import pyplot as plt
 import numpy as np
 from scipy import stats
 from statsmodels.stats.multitest import fdrcorrection
+from matplotlib.ticker import MaxNLocator
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 def ci_plot(x, arr, conf=0.95, ax=None, line_kwargs=None, fill_kwargs=None):
     if ax is None:
@@ -520,4 +522,145 @@ def _clean(z):
     """
     return z[np.isfinite(z)]
 
+
+
+class MarginalHistScatter(object):
+    def __init__(self, ax, hist_size=0.6, pad=0.05):
+        """
+        Class to enable incremental appending of scatterplots, each of which
+        generate additional marginal histograms.
+        """
+        self.scatter_ax = ax
+        self.fig = ax.figure
+
+        self.divider = make_axes_locatable(self.scatter_ax)
+
+        self.top_hists = []
+        self.right_hists = []
+        self.hist_size = hist_size
+        self.pad = pad
+        self.xfirst_ax = None
+        self.yfirst_ax = None
+
+        # will hold histogram data
+        self.hxs = []
+        self.hys = []
+
+    @property
+    def xmax(self):
+        return self.scatter_ax.dataLim.xmax
+
+    @property
+    def ymax(self):
+        return self.scatter_ax.dataLim.ymax
+
+    @property
+    def xmin(self):
+        return self.scatter_ax.dataLim.xmin
+
+    @property
+    def ymin(self):
+        return self.scatter_ax.dataLim.ymin
+
+    def append(self, x, y, scatter_kwargs, hist_kwargs=None, xhist_kwargs=None,
+               yhist_kwargs=None, num_ticks=3, labels=None, hist_share=False,
+               marginal_histograms=True):
+        """
+        Adds a new scatter to self.scatter_ax as well as marginal histograms
+        for the same data, borrowing addtional room from the axes.
+
+        Parameters
+        ----------
+
+        x, y : array-like
+            Data to be plotted
+
+        scatter_kwargs : dict
+            Keyword arguments that are passed directly to scatter().
+
+        hist_kwargs : dict
+            Keyword arguments that are passed directly to hist(), for both the top and side histograms.
+
+        xhist_kwargs, yhist_kwargs : dict
+            Additional, margin-specific kwargs for the x or y histograms
+            respectively.  These are used to update `hist_kwargs`
+
+        num_ticks : int
+            How many tick marks to use in each histogram's y-axis
+
+        labels : array-like
+            Optional NumPy array of labels that will be set on the collection
+            so that they can be accessed by a callback function.
+
+        hist_share : bool
+            If True, then all histograms will share the same frequency axes.
+            Useful for showing relative heights if you don't want to use the
+            hist_kwarg `normed=True`
+
+        marginal_histograms : bool
+            Set to False in order to disable marginal histograms and just use
+            as a normal scatterplot.
+        """
+        scatter_kwargs = scatter_kwargs or {}
+        hist_kwargs = hist_kwargs or {}
+        xhist_kwargs = xhist_kwargs or {}
+        yhist_kwargs = yhist_kwargs or {}
+        yhist_kwargs.update(dict(orientation='horizontal'))
+
+        # Plot the scatter
+        self.scatter_ax.scatter(x, y, **scatter_kwargs)
+        self.scatter_ax.collections[-1].labels = labels
+
+        if not marginal_histograms:
+            return
+
+        xhk = _updatecopy(hist_kwargs, xhist_kwargs)
+        yhk = _updatecopy(hist_kwargs, yhist_kwargs)
+
+        axhistx = self.divider.append_axes(
+            'top', size=self.hist_size,
+            pad=self.pad, sharex=self.scatter_ax, sharey=self.xfirst_ax)
+
+        axhisty = self.divider.append_axes(
+            'right', size=self.hist_size,
+            pad=self.pad, sharey=self.scatter_ax, sharex=self.yfirst_ax)
+
+        axhistx.yaxis.set_major_locator(
+            MaxNLocator(nbins=num_ticks, prune='both'))
+
+        axhisty.xaxis.set_major_locator(
+            MaxNLocator(nbins=num_ticks, prune='both'))
+
+        if not self.xfirst_ax and hist_share:
+            self.xfirst_ax = axhistx
+
+        if not self.yfirst_ax and hist_share:
+            self.yfirst_ax = axhisty
+
+        # Keep track of which axes are which, because looking into fig.axes
+        # list will get awkward....
+        self.top_hists.append(axhistx)
+        self.right_hists.append(axhisty)
+
+        # Scatter will deal with NaN, but hist will not.  So clean the data
+        # here.
+        hx = _clean(x)
+        hy = _clean(y)
+
+        self.hxs.append(hx)
+        self.hys.append(hy)
+
+        # Only plot hists if there's valid data
+        if len(hx) > 0:
+            axhistx.hist(hx, **xhk)
+        if len(hy) > 0:
+            axhisty.hist(hy, **yhk)
+
+        # Turn off unnecessary labels -- for these, use the scatter's axes
+        # labels
+        for txt in axhisty.get_yticklabels() + axhistx.get_xticklabels():
+            txt.set_visible(False)
+
+        for txt in axhisty.get_xticklabels():
+            txt.set_rotation(-90)
 
