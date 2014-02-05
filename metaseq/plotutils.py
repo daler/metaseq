@@ -10,6 +10,7 @@ from statsmodels.stats.multitest import fdrcorrection
 from matplotlib.ticker import MaxNLocator
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
+
 def ci_plot(x, arr, conf=0.95, ax=None, line_kwargs=None, fill_kwargs=None):
     if ax is None:
         fig = plt.figure()
@@ -22,6 +23,7 @@ def ci_plot(x, arr, conf=0.95, ax=None, line_kwargs=None, fill_kwargs=None):
     ax.plot(x, m, **line_kwargs)
     ax.fill_between(x, lo, hi, **fill_kwargs)
     return ax
+
 
 def ci(arr, conf=0.95):
     """
@@ -501,18 +503,19 @@ def input_ip_plots(iparr, inputarr, diffed, x, sort_ind,
     return fig
 
 
-def _updatecopy(orig, update_with, keys=None):
+def _updatecopy(orig, update_with, keys=None, override=False):
     """
     Update a copy of dest with source.  If `keys` is a list, then only update
     with those keys.
     """
     d = orig.copy()
-    if keys:
-        for k in keys:
-            if k in update_with:
-                d[k] = update_with[k]
-    else:
-        d.update(update_with)
+    if keys is None:
+        keys = update_with.keys()
+    for k in keys:
+        if k in update_with:
+            if k in d and not override:
+                continue
+            d[k] = update_with[k]
     return d
 
 
@@ -521,7 +524,6 @@ def _clean(z):
     Return a version of z that only has finite values
     """
     return z[np.isfinite(z)]
-
 
 
 class MarginalHistScatter(object):
@@ -579,7 +581,8 @@ class MarginalHistScatter(object):
             Keyword arguments that are passed directly to scatter().
 
         hist_kwargs : dict
-            Keyword arguments that are passed directly to hist(), for both the top and side histograms.
+            Keyword arguments that are passed directly to hist(), for both the
+            top and side histograms.
 
         xhist_kwargs, yhist_kwargs : dict
             Additional, margin-specific kwargs for the x or y histograms
@@ -663,7 +666,6 @@ class MarginalHistScatter(object):
 
         for txt in axhisty.get_xticklabels():
             txt.set_rotation(-90)
-
 
     def add_legends(self, xhists=True, yhists=False, scatter=True, **kwargs):
         """
