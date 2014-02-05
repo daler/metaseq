@@ -363,18 +363,18 @@ class ResultsTable(object):
         general_hist_kwargs = plotutils._updatecopy(
             orig=general_hist_kwargs, update_with=general_kwargs,
             keys=['color', 'alpha'])
-        m = plotutils.MarginalHistScatter(
-            ax, hist_size=hist_size, pad=hist_pad)
-        m.append(
-            xi[allind & xv & yv],
-            yi[allind & xv & yv],
-            scatter_kwargs=dict(picker=5, **general_kwargs),
-            hist_kwargs=general_hist_kwargs,
-            marginal_histograms=marginal_histograms)
 
-        coll = m.scatter_ax.collections[-1]
-        coll.df = self.data
-        coll.ind = allind
+        # Put the non-highlighted genes at the beginning of _genes_to_highlight
+        # so we can just iterate over that.
+        _genes_to_highlight.insert(
+            0,
+            (allind, general_kwargs, general_hist_kwargs)
+        )
+
+        # Set up the object that will handle the marginal histograms
+        self.marginal = plotutils.MarginalHistScatter(
+            ax, hist_size=hist_size, pad=hist_pad)
+
 
         # Set up kwargs for x and y rug plots
         rug_x_kwargs = dict(
@@ -382,46 +382,12 @@ class ResultsTable(object):
             transform=blended_transform_factory(ax.transData, ax.transAxes))
         rug_y_kwargs = dict(
             linelength=linelength,
-            transform=blended_transform_factory(ax.transAxes, ax.transData))
+            transform=blended_transform_factory(ax.transAxes, ax.transData), orientation='vertical')
 
-        color = color_converter(general_kwargs['color'])
-        rug_x_kwargs['color'] = color
-        rug_y_kwargs['color'] = color
 
-        rug_x_pos = EventCollection(
-            xi[allind & xv & pos_yv],
-            lineoffset=pos_offset,
-            **rug_x_kwargs)
-        rug_x_nan = EventCollection(
-            xi[allind & xv & nan_yv],
-            lineoffset=nan_offset,
-            **rug_x_kwargs)
-        rug_x_neg = EventCollection(
-            xi[allind & xv & neg_yv],
-            lineoffset=neg_offset,
-            **rug_x_kwargs)
-        rug_y_pos = EventCollection(
-            yi[allind & yv & pos_xv],
-            lineoffset=pos_offset,
-            **rug_y_kwargs)
-        rug_y_nan = EventCollection(
-            yi[allind & yv & nan_xv],
-            lineoffset=nan_offset,
-            **rug_y_kwargs)
-        rug_y_neg = EventCollection(
-            yi[allind & yv & neg_xv],
-            lineoffset=neg_offset,
-            **rug_y_kwargs)
         # EventCollection objects need a color as a 3-tuple, so set up
         # a converter here.
         color_converter = matplotlib.colors.ColorConverter().to_rgb
-
-        ax.add_collection(rug_x_pos)
-        ax.add_collection(rug_x_neg)
-        ax.add_collection(rug_x_nan)
-        ax.add_collection(rug_y_pos)
-        ax.add_collection(rug_y_neg)
-        ax.add_collection(rug_y_nan)
 
         # one-to-one line, if kwargs were specified
         if one_to_one:
@@ -455,13 +421,13 @@ class ResultsTable(object):
                 orig=updated_hist_kwargs, update_with=kwargs,
                 keys=['color', 'alpha'])
 
-            m.append(
+            self.marginal.append(
                 xi[ind & xv & yv],
                 yi[ind & xv & yv],
                 scatter_kwargs=dict(picker=5, **updated_kwargs),
                 hist_kwargs=updated_hist_kwargs,
                 marginal_histograms=_marginal_histograms)
-            coll = m.scatter_ax.collections[-1]
+            coll = self.marginal.scatter_ax.collections[-1]
             coll.df = self.data
             coll.ind = ind
 
@@ -469,25 +435,20 @@ class ResultsTable(object):
             rug_x_kwargs['color'] = color
             rug_y_kwargs['color'] = color
 
-            rug_x_pos = EventCollection(xi[ind & xv & pos_yv],
-                                        lineoffset=pos_offset, **rug_x_kwargs)
-            rug_x_nan = EventCollection(xi[ind & xv & nan_yv],
-                                        lineoffset=nan_offset, **rug_x_kwargs)
-            rug_x_neg = EventCollection(xi[ind & xv & neg_yv],
-                                        lineoffset=neg_offset, **rug_x_kwargs)
-            rug_y_pos = EventCollection(yi[ind & yv & pos_xv],
-                                        lineoffset=pos_offset, **rug_y_kwargs)
-            rug_y_nan = EventCollection(yi[ind & yv & nan_xv],
-                                        lineoffset=nan_offset, **rug_y_kwargs)
-            rug_y_neg = EventCollection(yi[ind & yv & neg_xv],
-                                        lineoffset=neg_offset, **rug_y_kwargs)
-
-            ax.add_collection(rug_x_pos)
-            ax.add_collection(rug_x_neg)
-            ax.add_collection(rug_x_nan)
-            ax.add_collection(rug_y_pos)
-            ax.add_collection(rug_y_neg)
-            ax.add_collection(rug_y_nan)
+            items = [
+                (xi, ind & xv & pos_yv, pos_offset, rug_x_kwargs),
+                (xi, ind & xv & nan_yv, nan_offset, rug_x_kwargs),
+                (xi, ind & xv & neg_yv, neg_offset, rug_x_kwargs),
+                (yi, ind & yv & pos_xv, pos_offset, rug_y_kwargs),
+                (yi, ind & yv & nan_xv, nan_offset, rug_y_kwargs),
+                (yi, ind & yv & neg_xv, neg_offset, rug_y_kwargs),
+            ]
+            for values, index, offset, kwargs in items:
+                coll = EventCollection(
+                    values[index], lineoffset=offset, **kwargs)
+                coll.df = self.data
+                coll.ind = index
+                ax.add_collection(coll)
 
             if names:
                 transOffset = matplotlib.transforms.offset_copy(
