@@ -310,7 +310,6 @@ class ResultsTable(object):
                                           alpha=0.5))
 
         # Clean data ---------------------------------------------------------
-
         xi = xfunc(_x)
         yi = yfunc(_y)
 
@@ -326,7 +325,10 @@ class ResultsTable(object):
         xv = ~(pos_xv | neg_xv | nan_xv)
         yv = ~(pos_yv | neg_yv | nan_yv)
 
-        # By default, use everything
+        gmin = max(xi[xv].min(), yi[yv].min())
+        gmax = min(xi[xv].max(), yi[yv].max())
+
+
         # Convert any integer indexes into boolean, and create a new list of
         # genes to highlight.  This handles optional hist kwargs.
         allind = np.zeros_like(xi) == 0
