@@ -183,7 +183,7 @@ class ResultsTable(object):
                 one_to_one=None, callback=None, xlab_prefix=None,
                 ylab_prefix=None, sizefunc=None, hist_size=0.3, hist_pad=0.0,
                 nan_offset=0.015, pos_offset=0.99, linelength=0.01,
-                neg_offset=0.05):
+                neg_offset=0.005):
         """
         Do-it-all method for making annotated scatterplots.
 
