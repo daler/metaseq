@@ -352,7 +352,6 @@ class ResultsTable(object):
             ind = block[0]
             allind[ind] = False
 
-        color_converter = matplotlib.colors.ColorConverter().to_rgb
 
         # Marginal histograms can be controlled either in the general kwargs or
         # overridden using the `marginal_histograms` kwarg.
@@ -413,6 +412,9 @@ class ResultsTable(object):
             yi[allind & yv & neg_xv],
             lineoffset=neg_offset,
             **rug_y_kwargs)
+        # EventCollection objects need a color as a 3-tuple, so set up
+        # a converter here.
+        color_converter = matplotlib.colors.ColorConverter().to_rgb
 
         ax.add_collection(rug_x_pos)
         ax.add_collection(rug_x_neg)
