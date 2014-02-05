@@ -327,9 +327,9 @@ class ResultsTable(object):
         yv = ~(pos_yv | neg_yv | nan_yv)
 
         # By default, use everything
+        # Convert any integer indexes into boolean, and create a new list of
+        # genes to highlight.  This handles optional hist kwargs.
         allind = np.zeros_like(xi) == 0
-
-        # Convert any integer indexes into boolean
         _genes_to_highlight = []
         for block in genes_to_highlight:
             ind = block[0]
@@ -344,18 +344,21 @@ class ResultsTable(object):
                     tuple([ind] + list(block[1:]))
                 )
 
-        # Remove any genes that are handled by genes_to_hightlight.
+        # Remove any genes that will be plotted by genes_to_highlight.  This
+        # avoids double-plotting.
         for block in _genes_to_highlight:
             ind = block[0]
             allind[ind] = False
 
         color_converter = matplotlib.colors.ColorConverter().to_rgb
 
+        # Marginal histograms can be controlled either in the general kwargs or
+        # overridden using the `marginal_histograms` kwarg.
         marginal_histograms = (
             general_kwargs.pop('marginal_histograms', False)
             or marginal_histograms)
 
-        # Plot
+        # Copy over the color and alpha if they're not specified
         general_hist_kwargs = plotutils._updatecopy(
             orig=general_hist_kwargs, update_with=general_kwargs,
             keys=['color', 'alpha'])
@@ -372,6 +375,7 @@ class ResultsTable(object):
         coll.df = self.data
         coll.ind = allind
 
+        # Set up kwargs for x and y rug plots
         rug_x_kwargs = dict(
             linelength=linelength,
             transform=blended_transform_factory(ax.transData, ax.transAxes))
