@@ -564,6 +564,10 @@ class MarginalHistScatter(object):
     def ymin(self):
         return self.scatter_ax.dataLim.ymin
 
+    @property
+    def limits(self):
+        return (self.xmin, self.xmax, self.ymin, self.ymax)
+
     def append(self, x, y, scatter_kwargs, hist_kwargs=None, xhist_kwargs=None,
                yhist_kwargs=None, num_ticks=3, labels=None, hist_share=False,
                marginal_histograms=True):
