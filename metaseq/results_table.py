@@ -379,11 +379,13 @@ class ResultsTable(object):
         # Set up kwargs for x and y rug plots
         rug_x_kwargs = dict(
             linelength=linelength,
-            transform=blended_transform_factory(ax.transData, ax.transAxes))
+            transform=blended_transform_factory(ax.transData, ax.transAxes),
+        )
         rug_y_kwargs = dict(
             linelength=linelength,
-            transform=blended_transform_factory(ax.transAxes, ax.transData), orientation='vertical')
-
+            transform=blended_transform_factory(ax.transAxes, ax.transData),
+            orientation='vertical',
+        )
 
         # EventCollection objects need a color as a 3-tuple, so set up
         # a converter here.
