@@ -1,7 +1,7 @@
 language: python
 install:
-    - "pip install cython"
-    - "pip install scipy"
+    - "pip install -q cython"
+    - "sudo apt-get update && sudo-apt-get -qq install inkscape python-scipy libatlas-dev libatlas3-base"
     - "pip install -r requirements.txt --use-mirrors"
 
 script: ./.travis-test.sh
