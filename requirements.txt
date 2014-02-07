@@ -3,7 +3,7 @@ numpy
 HTSeq
 matplotlib
 scipy
-scikits.learn
+scikit-learn
 pybedtools
 statsmodels
 gffutils
