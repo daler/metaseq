@@ -10,6 +10,7 @@ from matplotlib.transforms import blended_transform_factory
 from matplotlib.collections import EventCollection
 import gffutils
 import pybedtools
+from pybedtools import featurefuncs
 
 
 class ResultsTable(object):
@@ -120,7 +121,7 @@ class ResultsTable(object):
                 else:
                     raise gffutils.FeatureNotFoundError('%s not found' % i)
 
-    def five_prime(self, upstream=0, downstream=0):
+    def five_prime(self, upstream=1, downstream=0):
         """
         Creates a BED/GFF file of the 5' end of each feature represented in the
         table and returns the resulting pybedtools.BedTool object. Needs an
@@ -132,10 +133,10 @@ class ResultsTable(object):
             Number of basepairs up and downstream to include
         """
         return pybedtools.BedTool(self.features())\
-            .each(pybedtools.featurefuncs.five_prime, upstream, downstream)\
+            .each(featurefuncs.five_prime, upstream, downstream)\
             .saveas()
 
-    def three_prime(self, upstream=0, downstream=0):
+    def three_prime(self, upstream=0, downstream=1):
         """
         Creates a BED/GFF file of the 3' end of each feature represented in the
         table and returns the resulting pybedtools.BedTool object. Needs an
@@ -147,7 +148,7 @@ class ResultsTable(object):
             Number of basepairs up and downstream to include
         """
         return pybedtools.BedTool(self.features())\
-            .each(pybedtools.featurefuncs.three_prime, upstream, downstream)\
+            .each(featurefuncs.three_prime, upstream, downstream)\
             .saveas()
 
     TSS = five_prime
