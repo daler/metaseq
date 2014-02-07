@@ -126,7 +126,6 @@ class BaseSignal(object):
             return stacked_arrays
         else:
             return arrays
-        raise ValueError
 
     def local_coverage(self, features, *args, **kwargs):
         processes = kwargs.pop('processes', None)
