@@ -280,6 +280,36 @@ def test_array_binned():
                 yield check, kind, coord, processes, expected
 
 
+def test_array_binned_preserve_total():
+    def check(kind, coord, processes, expected):
+        kwargs = dict(features=coord, bins=8, processes=processes, preserve_total=True)
+        if kind == 'bigwig':
+            assert_raises(ArgumentError, gs[kind].array, method='get_as_array', **kwargs)
+            return
+        else:
+            result = gs[kind].array(**kwargs)
+        try:
+            assert np.allclose(result, expected)
+        except:
+            print (kind, coord, result, expected)
+            raise
+
+    for kind in ['bam', 'bigbed', 'bed', 'bigwig']:
+        for coord, expected in (
+            (['chr2L:1-20'],
+             np.array([[0., 0., 0., 0., .5, .5, 0., 0. ]]),
+            ),
+            (['chr2L:1-20', 'chr2L:1-20[-]'],
+             np.array([[0., 0., 0., 0., .5, .5, 0., 0. ],
+                       [0., 0., .5, .5, 0., 0., 0., 0. ]]),
+            ),
+            (['chr2L:68-76'],
+             np.array([[0., 0., .4, .4, .4, .4, .4, 0.]]),
+             ),
+        ):
+            for processes in [None, multiprocessing.cpu_count()]:
+                yield check, kind, coord, processes, expected
+
 def test_array_ragged():
     def check(kind, coord, processes, expected):
         if kind == 'bigwig':

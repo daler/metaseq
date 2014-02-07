@@ -180,6 +180,7 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
             ('fragment_size', fragment_size, None),
             ('shift_width', shift_width, 0),
             ('use_score', use_score, False),
+            ('preserve_total', preserve_total, False),
         )
         for name, check, default in defaults:
             if (
@@ -294,9 +295,11 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
                     score = 1
 
                 if accumulate:
-                    if verbose:
-                        print '%s-%s += %s' % (start_ind, stop_ind, score)
-                    profile[start_ind:stop_ind] += score
+                    if preserve_total:
+                        profile[start_ind:stop_ind] += (score / float((stop_ind - start_ind)))
+                    else:
+                        profile[start_ind:stop_ind] += score
+
                 else:
                     profile[start_ind:stop_ind] = score
 
@@ -311,6 +314,8 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
         # Otherwise do the downsampling; resulting x is stll in genomic
         # coords
         else:
+            if preserve_total:
+                total = float(profile.sum())
             if not is_bigwig or method == 'get_as_array':
                 xi, profile = rebin(
                     x=np.arange(start, stop), y=profile, nbin=nbin)
@@ -327,9 +332,8 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
             profile = profile[::-1]
         xs.append(x)
         if preserve_total:
-            if nbin is not None:
-                scale = window_size / float(nbin)
-                profile *= scale
+            scale = profile.sum() / total
+            profile /= scale
         profiles.append(profile)
 
     return np.hstack(xs), np.hstack(profiles)
