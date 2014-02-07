@@ -1,3 +1,4 @@
+cython
 bx-python
 numpy
 HTSeq
