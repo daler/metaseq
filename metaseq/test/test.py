@@ -310,6 +310,33 @@ def test_array_binned_preserve_total():
             for processes in [None, multiprocessing.cpu_count()]:
                 yield check, kind, coord, processes, expected
 
+
+def test_invalid_arguments():
+    def check(kind, kw):
+        assert_raises(ArgumentError, gs[kind].array, **kw)
+
+    default_kwargs = dict(features='chr2L:1-20', bins=8)
+    # List the kinds of args that should return ArgumentErrors.
+    invalid_kwargs = {
+        'bam': (
+            dict(use_score=True),
+        ),
+
+        'bigwig': (
+            dict(read_strand=True),
+            dict(fragment_size=100),
+            dict(shift_width=100), 
+            dict(use_score=True),
+            dict(preserve_total=True),
+        ),
+    }
+    for kind, kwarg_list in sorted(invalid_kwargs.items()):
+        for kwargs in kwarg_list:
+            default_kwargs_copy = default_kwargs.copy()
+            default_kwargs_copy.update(kwargs)
+            yield check, kind, default_kwargs_copy
+
+
 def test_array_ragged():
     def check(kind, coord, processes, expected):
         if kind == 'bigwig':
@@ -477,4 +504,13 @@ def test_bam_mmr():
     assert gs['bam'].million_mapped_reads(force=True) == 8e-6
     gs['bam']._readcount = None
     assert gs['bam'].million_mapped_reads(force=False) == 8e-6, gs['bam'].million_mapped_reads(force=False)
+
+def test_bigwig_out_of_range():
+    x, y = gs['bigwig'].local_coverage('chr1:1-100', bins=None)
+    assert y.sum() == 0
+    x, y = gs['bigwig'].local_coverage('chr1:1-100', bins=None, method='ucsc_summarize')
+    assert y.sum() == 0
+
+    x, y = gs['bigwig'].local_coverage('chr2L:1-100', bins=None, method='ucsc_summarize')
+
 
