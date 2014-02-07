@@ -2,8 +2,7 @@ import os
 import sys
 import time
 import helpers
-from helpers import data_dir, example_filename, \
-    gfffeature_to_interval
+from helpers import data_dir, example_filename
 from _genomic_signal import genomic_signal
 import plotutils
 import integration

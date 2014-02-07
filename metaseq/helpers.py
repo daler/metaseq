@@ -9,10 +9,6 @@ import subprocess
 import re
 
 
-def gfffeature_to_interval(feature):
-    return pybedtools.create_interval_from_list(feature.tostring().split('\t'))
-
-
 def chunker(f, n):
     """
     Utility function to split iterable `f` into `n` chunks
@@ -30,60 +26,6 @@ def chunker(f, n):
         else:
             yield tuple(x)
             x = []
-
-
-def bam2bigwig(bam, bigwig, genome, scale=1e6, verbose=False):
-    """
-    Uses BEDTools to go from BAM to bedgraph, then bedGraphToBigWig to get the
-    final bigwig.
-    """
-    if scale is not None:
-        cmds = ['samtools', 'view', '-F', '0x4', '-c', bam]
-        p = subprocess.Popen(
-            cmds, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = p.communicate()
-        total_reads = float(stdout)
-        reads_per_scale = total_reads / scale
-        if verbose:
-            sys.stderr.write('%s total reads\n' % total_reads)
-            sys.stderr.flush()
-
-    chromsizes = pybedtools.chromsizes_to_file(pybedtools.chromsizes(genome))
-
-    t0 = time.time()
-    bedgraph = pybedtools.BedTool(bam)\
-        .genome_coverage(bg=True, g=chromsizes, scale=scale)\
-        .moveto('bedgraph.bedgraph')
-    print bedgraph.fn
-    if verbose:
-        sys.stderr.write('Completed bedGraph in %.1fs\n' % (time.time() - t0))
-        sys.stderr.flush()
-
-    cmds = ['bedGraphToBigWig', bedgraph.fn, chromsizes, bigwig]
-    p = subprocess.Popen(cmds, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = p.communicate()
-
-    if verbose:
-        sys.stderr.write('Completed bigWig %s\n' % bigwig)
-        sys.stderr.flush()
-
-
-def bedgraph2bigwig(bedgraph, bigwig, genome, verbose=False):
-    """
-    Create a bigWig from `bedgraph`.
-
-    :param bedgraph: Input filename of bedgraph
-    :param bigwig: Output filename of bigWig to create
-    :param genome: String assembly name of genome
-    :param verbose: Print messages to stderr
-    """
-    chromsizes = pybedtools.chromsizes_to_file(pybedtools.chromsizes(genome))
-    cmds = ['bedGraphToBigWig', bedgraph, chromsizes, bigwig]
-    p = subprocess.Popen(cmds, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = p.communicate()
-    if verbose:
-        sys.stderr.write('Completed bigWig %s\n' % bigwig)
-        sys.stderr.flush()
 
 
 def data_dir():
