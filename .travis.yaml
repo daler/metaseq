@@ -1,9 +1,0 @@
-language: python
-install:
-    - "pip install -r requirements.txt --use-mirrors"
-
-script: ./.travis-test.sh
-
-branches:
-    only:
-        - docs

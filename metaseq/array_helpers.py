@@ -43,7 +43,7 @@ def _local_count(reader, feature, stranded=False):
 def _local_coverage(reader, features, read_strand=None, fragment_size=None,
                     shift_width=0, bins=None, use_score=False, accumulate=True,
                     preserve_total=False, method=None, processes=None,
-                    verbose=False):
+                    stranded=True, verbose=False):
     """
     Computes a 1D vector of coverage at the coordinates for each feature in
     `features`, extending each read by `fragmentsize` bp.
@@ -112,6 +112,10 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
         signal (e.g., reads from a BAM file) on that strand will be considered
         and reads on the opposite strand ignored.  Useful for plotting genomic
         signal for stranded libraries. Not available for bigWig.
+
+    stranded : bool
+        If True, then the profile will be reversed for features whose strand
+        attribute is "-".
 
     use_score : bool
         If True, then each bin will contain the sum of the *score* attribute of
@@ -328,7 +332,7 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
                 x = np.linspace(start, stop - 1, nbin)
 
         # Minus-strand profiles should be flipped left-to-right.
-        if strand == '-':
+        if stranded and strand == '-':
             profile = profile[::-1]
         xs.append(x)
         if preserve_total:
