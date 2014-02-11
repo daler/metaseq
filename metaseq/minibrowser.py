@@ -48,13 +48,15 @@ interval, e.g.::
     s.plot(feature)
 
 """
-
+from copy import copy
 from matplotlib import pyplot as plt
 from pybedtools.contrib.plotting import Track
 import pybedtools
 import gffutils
 from gffutils.helpers import asinterval
-
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+import matplotlib.gridspec as gridspec
+from matplotlib.ticker import FormatStrFormatter
 
 class BaseMiniBrowser(object):
     """
@@ -63,8 +65,17 @@ class BaseMiniBrowser(object):
     This class is designed to be sub-classed, so it really just a shell with
     some example methods filled in.
     """
+    _all_figures = []
+
     def __init__(self, genomic_signal_objs):
         self.genomic_signal_objs = genomic_signal_objs
+
+    def close_all(self):
+        """
+        Close all figures spawned by this class.
+        """
+        for f in self._all_figures:
+            plt.close(f)
 
     def plot(self, feature):
         """
@@ -79,14 +90,18 @@ class BaseMiniBrowser(object):
         if isinstance(feature, gffutils.Feature):
             feature = asinterval(feature)
         self.make_fig()
+        axes = []
         for ax, method in self.panels():
             feature = method(ax, feature)
+            axes.append(ax)
+        return axes
 
     def make_fig(self):
         """
         Figure constructor, called before `self.plot()`
         """
         self.fig = plt.figure(figsize=(8, 4))
+        self._all_figures.append(self.fig)
 
     def panels(self):
         """
@@ -110,6 +125,217 @@ class BaseMiniBrowser(object):
         txt = '%s:%s-%s' % (feature.chrom, feature.start, feature.stop)
         ax.text(0.5, 0.5, txt, transform=ax.transAxes)
         return feature
+
+
+class ChIPSeqMiniBrowser(BaseMiniBrowser):
+    def __init__(self, ip_bam, control_bam, db=None,
+                 local_coverage_kwargs=dict(stranded=False), ip_style=None,
+                 control_style=None, peaks=None):
+
+        super(ChIPSeqMiniBrowser, self).__init__([ip_bam, control_bam])
+        self.local_coverage_kwargs = local_coverage_kwargs or {}
+        self.ip_bam = ip_bam
+        self.control_bam = control_bam
+        self.db = db
+        self.ip_style = ip_style or {}
+        self.control_style = control_style or {}
+        self.peaks = peaks
+
+        self.settings = {
+            'transcripts': None,
+            'cds': ['CDS'],
+            'utrs': ['exon'],
+            'color': '0.5',
+            'featuretype': 'gene',
+        }
+
+    def panels(self):
+
+        def peaks_prep(ax):
+            for txt in ax.get_yticklabels():
+                txt.set_visible(False)
+            for tick in ax.get_yticklines():
+                tick.set_visible(False)
+            ax.set_ylabel('Peaks')
+
+        def gene_prep(ax):
+            for txt in ax.get_yticklabels():
+                txt.set_visible(False)
+            for tick in ax.get_yticklines():
+                tick.set_visible(False)
+            ax.set_ylabel('Genes')
+
+        if self.db and self.peaks:
+            gs = gridspec.GridSpec(4, 1, height_ratios=[1, 1, .3, .5])
+            ip_ax = plt.subplot(gs[0])
+            control_ax = plt.subplot(gs[1], sharex=ip_ax, sharey=ip_ax)
+            peaks_ax = plt.subplot(gs[2], sharex=ip_ax)
+            gene_ax = plt.subplot(gs[3], sharex=ip_ax)
+            peaks_prep(peaks_ax)
+            gene_prep(gene_ax)
+
+        elif self.db and self.peaks is None:
+            gs = gridspec.GridSpec(3, 1, height_ratios=[1, 1, .5])
+            ip_ax = plt.subplot(gs[0])
+            control_ax = plt.subplot(gs[1], sharex=ip_ax, sharey=ip_ax)
+            gene_ax = plt.subplot(gs[2], sharex=ip_ax)
+            gene_prep(gene_ax)
+
+        elif self.db is None and self.peaks:
+            gs = gridspec.GridSpec(3, 1, height_ratios=[1, 1, .3])
+            ip_ax = plt.subplot(gs[0])
+            control_ax = plt.subplot(gs[1], sharex=ip_ax, sharey=ip_ax)
+            peaks_ax = plt.subplot(gs[2], sharex=ip_ax)
+            peaks_prep(peaks_ax)
+
+        elif self.db is None and self.peaks is None:
+            gs = gridspec.GridSpec(2, 1, height_ratios=[1, 1])
+            ip_ax = plt.subplot(gs[0])
+            control_ax = plt.subplot(gs[1], sharex=ip_ax, sharey=ip_ax)
+
+        if self.db and self.peaks:
+            axes = [
+                (ip_ax, self.ip_panel),
+                (control_ax, self.control_panel),
+                (peaks_ax, self.peaks_panel),
+                (gene_ax, self.gene_panel),
+            ]
+
+        elif self.db and self.peaks is None:
+            axes = [
+                (ip_ax, self.ip_panel),
+                (control_ax, self.control_panel),
+                (gene_ax, self.gene_panel),
+            ]
+
+        elif self.db is None and self.peaks:
+            axes = [
+                (ip_ax, self.ip_panel),
+                (control_ax, self.control_panel),
+                (peaks_ax, self.peaks_panel),
+            ]
+        else:
+            axes = [
+                (ip_ax, self.ip_panel),
+                (control_ax, self.control_panel),
+            ]
+
+        self._first_ax = axes[0][0]
+        self._last_ax = axes[-1][0]
+
+        return axes
+
+    def _bins(self, feature):
+        return min(len(feature), 5000)
+
+    def _zoomed_feature(self, feature):
+        extra = int(self.settings['zoom'] * len(feature) / 2)
+        feature = copy(feature)
+        feature.start -= extra
+        feature.stop += extra
+        return feature
+
+    def ip_panel(self, ax, feature):
+        bins = self._bins(feature)
+        x, y = self.ip_bam.local_coverage(feature, bins=bins,
+                                          **self.local_coverage_kwargs)
+        y /= (self.ip_bam.million_mapped_reads() / 1e6)
+        ax.fill_between(x, y, y2=0, **self.ip_style)
+        ax.axis('tight')
+        return feature
+
+    def control_panel(self, ax, feature):
+        bins = self._bins(feature)
+        x, y = self.control_bam.local_coverage(feature, bins=bins,
+                                               **self.local_coverage_kwargs)
+        y /= (self.control_bam.million_mapped_reads() / 1e6)
+        ax.fill_between(x, y, y2=0, **self.control_style)
+        ax.axis('tight')
+        return feature
+
+    def peaks_panel(self, ax, feature):
+        hits = self.peaks.intersect([feature], u=True)
+        print len(hits)
+        track = Track(hits)
+        ax.add_collection(track)
+        return feature
+
+    def plot(self, feature):
+        self._current_feature = feature
+        axes = super(ChIPSeqMiniBrowser, self).plot(feature)
+        for ax in self.fig.axes:
+            if ax is not self._last_ax:
+                for txt in ax.get_xticklabels():
+                    txt.set_visible(False)
+        self.fig.subplots_adjust(wspace=0.05)
+        self._first_ax.axis(xmin=feature.start, xmax=feature.stop)
+        self._last_ax.set_xlabel(feature.chrom)
+        self._last_ax.xaxis.set_major_formatter(FormatStrFormatter("%d"))
+        return axes
+
+    def coords(self):
+        chrom = self._current_feature.chrom
+        start, stop, _, _ = self._first_ax.axis()
+        return '%s:%s-%s' % (chrom, int(start), int(stop))
+
+    def gene_panel(self, ax, feature):
+        """
+        Plots gene models on an Axes.
+
+        Queries the database
+
+        :param ax: matplotlib.Axes object
+        :param feature: pybedtools.Interval
+
+        """
+        from gffutils.contrib.plotting import Gene
+        extent = [feature.start, feature.stop]
+        nearby_genes = self.db.region(
+            (feature.chrom, feature.start, feature.stop), featuretype='gene')
+        ybase = 0
+        ngenes = 0
+        for nearby_gene in nearby_genes:
+            # TODO: there should be a better way of identifying which gene is
+            # the same as the feature requested.  Might need to expose an "ID"
+            # kwarg.
+            try:
+                if nearby_gene['ID'][0] == feature['ID']:
+                    color = '0.2'
+                else:
+                    color = '0.5'
+            except KeyError:
+                color = '0.5'
+            ngenes += 1
+            extent.extend([nearby_gene.start, nearby_gene.stop])
+            gene_collection = Gene(
+                self.db,
+                nearby_gene,
+                transcripts=None,
+                cds=['CDS'],
+                utrs=['exon'],
+                ybase=ybase,
+                color=color)
+            gene_collection.name = nearby_gene.id
+            gene_collection.add_to_ax(ax)
+            ybase += gene_collection.max_y
+
+        xmin = min(extent)
+        xmax = max(extent)
+        ymax = ngenes
+
+        # 1% padding seems to work well
+        padding = (xmax - xmin) * 0.01
+        ax.axis('tight')
+
+        # add lines indicating extent of current feature
+        vline_kwargs = dict(color='k', linestyle='--')
+        ax.axvline(feature.start, **vline_kwargs)
+        ax.axvline(feature.stop, **vline_kwargs)
+
+        # Make a new feature to represent the region plus surrounding genes
+        interval = pybedtools.create_interval_from_list(feature.fields)
+        interval.strand = '.'
+        return interval
 
 
 class SignalMiniBrowser(BaseMiniBrowser):
