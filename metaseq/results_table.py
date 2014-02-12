@@ -507,7 +507,7 @@ class ResultsTable(object):
         ind = np.array(ind)
         return self.__class__(self.data.ix[ind], **self._kwargs)
 
-    def genes_with_peak(self, peaks, transform_func=None,
+    def genes_with_peak(self, peaks, transform_func=None, split=False,
                         intersect_kwargs=None, *args, **kwargs):
         """
         Returns a boolean index of genes that have a peak nearby.
@@ -547,6 +547,7 @@ class ResultsTable(object):
                 if i:
                     yield result
 
+
         intersect_kwargs = intersect_kwargs or {}
         if not self._cached_features:
             self._cached_features = pybedtools\
@@ -554,8 +555,12 @@ class ResultsTable(object):
                 .saveas()
 
         if transform_func:
-            features = self._cached_features\
-                .split(transform_func, *args, **kwargs)
+            if split:
+                features = self._cached_features\
+                    .split(_transform_func, *args, **kwargs)
+            else:
+                features = self._cached_features\
+                    .each(transform_func, *args, **kwargs)
 
         else:
             features = self._cached_features
