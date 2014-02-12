@@ -246,7 +246,7 @@ class BamSignal(IntervalSignal):
         # it quickly
         if not os.path.exists(self.fn + '.mmr'):
             fout = open(self.fn + '.mmr', 'w')
-            fout.write(str(mmr) + '\n')
+            fout.write(str(mapped_reads) + '\n')
             fout.close()
 
         self._readcount = mapped_reads

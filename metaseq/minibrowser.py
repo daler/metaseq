@@ -279,7 +279,7 @@ class ChIPSeqMiniBrowser(BaseMiniBrowser):
         x, y = self.ip.local_coverage(feature, bins=bins,
                                           **self.local_coverage_kwargs)
         if isinstance(self.ip, _genomic_signal.BamSignal):
-            y /= self.ip.million_mapped_reads()
+            y /= (self.ip.mapped_read_count() / 1e6)
         ax.fill_between(x, y, y2=0, **self.ip_style)
         ax.axis('tight')
         ax.spines['right'].set_color('None')
@@ -293,7 +293,7 @@ class ChIPSeqMiniBrowser(BaseMiniBrowser):
         x, y = self.control.local_coverage(feature, bins=bins,
                                                **self.local_coverage_kwargs)
         if isinstance(self.control, _genomic_signal.BamSignal):
-            y /= self.control.million_mapped_reads()
+            y /= (self.control.mapped_read_count() / 1e6)
         ax.fill_between(x, y, y2=0, **self.control_style)
         ax.axis('tight')
         ax.spines['right'].set_color('None')
