@@ -133,8 +133,53 @@ class ChIPSeqMiniBrowser(BaseMiniBrowser):
     def __init__(self, ip, control, db=None, peaks=None,
                  local_coverage_kwargs=dict(stranded=False), ip_style=None,
                  control_style=None, peaks_style=None, max_bins=500):
+        """
+        Mini-browser to show IP and control signal, along with optional peaks
+        and gene models.  See module-level documentation for details.
 
-        super(ChIPSeqMiniBrowser, self).__init__([ip_bam, control_bam])
+        Parameters
+        ----------
+        ip, control : genomic_signal object
+            These can be any kind of genomic signal object.  If BamSignal, then
+            the signal will be scaled by million mapped reads.
+
+        db : filename or gffutils.FeatureDB
+            Optional database of annotations.  If provided, gene models will be
+            plotted on an additional axes.
+
+        peaks : filename or pybedtools.BedTool object
+            Optional file of called peaks.  If provided, will be plotted on an
+            additional axes.
+
+        local_coverage_kwargs : dict
+            Kwargs to pass on to the local_coverage method of `ip` and
+            `control`.  It is recommended that at least `stranded=False` is
+            included, since the mini-browser always displays the plus strand.
+
+        ip_style, control_style : dict
+            Kwargs to pass to Axes.fill_between (e.g. colors, alpha, line styles)
+
+        peaks_style : dict
+            Kwargs to pass to PolyCollection (e.g., face_color, edgewidth)
+
+        max_bins : int
+            Maximum number of bins to use when getting genomic_signal.  This can
+            be overridden by providing the `bins` kwarg in
+            `local_coverage_kwargs`.
+
+        Notes
+        -----
+        After creation, settings can be changed in between calls to the
+        `plot()` method.
+
+        For example, the self.settings dictionary, which
+        contains arguments passed to the gffutils.contrib.plotting.Gene class,
+        can be modified to specify which kinds of features should be plotted.
+        The `gs` attribute contains the matplotlib.gridspec.GridSpec object,
+        which can be used to modify the relative sizes of the subplots.
+
+
+        """
         super(ChIPSeqMiniBrowser, self).__init__([ip, control])
         self.local_coverage_kwargs = local_coverage_kwargs or {}
         self.ip = ip
