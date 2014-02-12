@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """
 Benchmarking script to decide how many processors are optimal to use.
 
