@@ -57,6 +57,8 @@ from gffutils.helpers import asinterval
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.gridspec as gridspec
 from matplotlib.ticker import FormatStrFormatter
+import _genomic_signal
+
 
 class BaseMiniBrowser(object):
     """
@@ -128,18 +130,23 @@ class BaseMiniBrowser(object):
 
 
 class ChIPSeqMiniBrowser(BaseMiniBrowser):
-    def __init__(self, ip_bam, control_bam, db=None,
+    def __init__(self, ip, control, db=None, peaks=None,
                  local_coverage_kwargs=dict(stranded=False), ip_style=None,
-                 control_style=None, peaks=None):
+                 control_style=None, peaks_style=None, max_bins=500):
 
         super(ChIPSeqMiniBrowser, self).__init__([ip_bam, control_bam])
+        super(ChIPSeqMiniBrowser, self).__init__([ip, control])
         self.local_coverage_kwargs = local_coverage_kwargs or {}
-        self.ip_bam = ip_bam
-        self.control_bam = control_bam
+        self.ip = ip
+        self.control = control
+        if isinstance(db, basestring):
+            db = gffutils.FeatureDB(db)
         self.db = db
         self.ip_style = ip_style or {}
+        self.peaks_style = peaks_style or {}
         self.control_style = control_style or {}
-        self.peaks = peaks
+        self.peaks = pybedtools.BedTool(peaks)
+        self.max_bins = max_bins
 
         self.settings = {
             'transcripts': None,
@@ -237,26 +244,27 @@ class ChIPSeqMiniBrowser(BaseMiniBrowser):
 
     def ip_panel(self, ax, feature):
         bins = self._bins(feature)
-        x, y = self.ip_bam.local_coverage(feature, bins=bins,
+        x, y = self.ip.local_coverage(feature, bins=bins,
                                           **self.local_coverage_kwargs)
-        y /= (self.ip_bam.million_mapped_reads() / 1e6)
+        if isinstance(self.ip, _genomic_signal.BamSignal):
+            y /= self.ip.million_mapped_reads()
         ax.fill_between(x, y, y2=0, **self.ip_style)
         ax.axis('tight')
         return feature
 
     def control_panel(self, ax, feature):
         bins = self._bins(feature)
-        x, y = self.control_bam.local_coverage(feature, bins=bins,
+        x, y = self.control.local_coverage(feature, bins=bins,
                                                **self.local_coverage_kwargs)
-        y /= (self.control_bam.million_mapped_reads() / 1e6)
+        if isinstance(self.control, _genomic_signal.BamSignal):
+            y /= self.control.million_mapped_reads()
         ax.fill_between(x, y, y2=0, **self.control_style)
         ax.axis('tight')
         return feature
 
     def peaks_panel(self, ax, feature):
         hits = self.peaks.intersect([feature], u=True)
-        print len(hits)
-        track = Track(hits)
+        track = Track(hits, **self.peaks_style)
         ax.add_collection(track)
         return feature
 
