@@ -216,8 +216,8 @@ class BamSignal(IntervalSignal):
         if self._readcount and not force:
             return self._readcount
 
-        if os.path.exists(self.fn + '.scale') and not force:
-            for line in open(self.fn + '.scale'):
+        if os.path.exists(self.fn + '.mmr') and not force:
+            for line in open(self.fn + '.mmr'):
                 if line.startswith('#'):
                     continue
                 self._readcount = float(line.strip())
@@ -238,8 +238,8 @@ class BamSignal(IntervalSignal):
 
         # write to file so the next time you need the lib size you can access
         # it quickly
-        if not os.path.exists(self.fn + '.scale'):
-            fout = open(self.fn + '.scale', 'w')
+        if not os.path.exists(self.fn + '.mmr'):
+            fout = open(self.fn + '.mmr', 'w')
             fout.write(str(mmr) + '\n')
             fout.close()
 
