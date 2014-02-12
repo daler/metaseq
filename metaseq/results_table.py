@@ -403,12 +403,30 @@ class ResultsTable(object):
             self.features().  Additional args and kwargs are passed to
             `transform_func`. For example, if you're looking for peaks within
             1kb upstream of TSSs, then pybedtools.featurefuncs.TSS would be
-            a useful `transform_func`, and supply additional kwargs of
-            `upstream=1000` and `downstream=0`.
+            a useful `transform_func`, and you could supply additional kwargs
+            of `upstream=1000` and `downstream=0`.
+
+            This function can return iterables of features, too. For example,
+            you might want to look for peaks falling within the exons of
+            a gene.  In this case, `transform_func` should return an iterable
+            of pybedtools.Interval objects.  The only requirement is that the
+            `name` field of any feature matches the index of the dataframe.
 
         intersect_kwargs : dict
             kwargs passed to pybedtools.BedTool.intersect.
         """
+        def _transform_func(x):
+            """
+            In order to support transform funcs that return a single feature or
+            an iterable of features, we need to wrap it
+            """
+            result = transform_func(x)
+            if isinstance(result, pybedtools.Interval):
+                result = [result]
+            for i in result:
+                if i:
+                    yield result
+
         intersect_kwargs = intersect_kwargs or {}
         if not self._cached_features:
             self._cached_features = pybedtools\
@@ -417,12 +435,12 @@ class ResultsTable(object):
 
         if transform_func:
             features = self._cached_features\
-                .each(transform_func, *args, **kwargs)
+                .split(transform_func, *args, **kwargs)
 
         else:
             features = self._cached_features
 
-        hits = [i.name for i in features.intersect(peaks, **intersect_kwargs)]
+        hits = list(set([i.name for i in features.intersect(peaks, **intersect_kwargs)]))
         return self.data.index.isin(hits)
 
 
