@@ -157,43 +157,25 @@ class ChIPSeqMiniBrowser(BaseMiniBrowser):
         }
 
     def panels(self):
-
-        def peaks_prep(ax):
-            for txt in ax.get_yticklabels():
-                txt.set_visible(False)
-            for tick in ax.get_yticklines():
-                tick.set_visible(False)
-            ax.set_ylabel('Peaks')
-
-        def gene_prep(ax):
-            for txt in ax.get_yticklabels():
-                txt.set_visible(False)
-            for tick in ax.get_yticklines():
-                tick.set_visible(False)
-            ax.set_ylabel('Genes')
-
+        self.fig.set_facecolor('w')
         if self.db and self.peaks:
             gs = gridspec.GridSpec(4, 1, height_ratios=[1, 1, .3, .5])
             ip_ax = plt.subplot(gs[0])
             control_ax = plt.subplot(gs[1], sharex=ip_ax, sharey=ip_ax)
             peaks_ax = plt.subplot(gs[2], sharex=ip_ax)
             gene_ax = plt.subplot(gs[3], sharex=ip_ax)
-            peaks_prep(peaks_ax)
-            gene_prep(gene_ax)
 
         elif self.db and self.peaks is None:
             gs = gridspec.GridSpec(3, 1, height_ratios=[1, 1, .5])
             ip_ax = plt.subplot(gs[0])
             control_ax = plt.subplot(gs[1], sharex=ip_ax, sharey=ip_ax)
             gene_ax = plt.subplot(gs[2], sharex=ip_ax)
-            gene_prep(gene_ax)
 
         elif self.db is None and self.peaks:
             gs = gridspec.GridSpec(3, 1, height_ratios=[1, 1, .3])
             ip_ax = plt.subplot(gs[0])
             control_ax = plt.subplot(gs[1], sharex=ip_ax, sharey=ip_ax)
             peaks_ax = plt.subplot(gs[2], sharex=ip_ax)
-            peaks_prep(peaks_ax)
 
         elif self.db is None and self.peaks is None:
             gs = gridspec.GridSpec(2, 1, height_ratios=[1, 1])
@@ -250,6 +232,10 @@ class ChIPSeqMiniBrowser(BaseMiniBrowser):
             y /= self.ip.million_mapped_reads()
         ax.fill_between(x, y, y2=0, **self.ip_style)
         ax.axis('tight')
+        ax.spines['right'].set_color('None')
+        ax.spines['top'].set_color('None')
+        ax.xaxis.set_ticks_position('bottom')
+        ax.yaxis.set_ticks_position('left')
         return feature
 
     def control_panel(self, ax, feature):
@@ -260,12 +246,27 @@ class ChIPSeqMiniBrowser(BaseMiniBrowser):
             y /= self.control.million_mapped_reads()
         ax.fill_between(x, y, y2=0, **self.control_style)
         ax.axis('tight')
+        ax.spines['right'].set_color('None')
+        ax.spines['top'].set_color('None')
+        ax.xaxis.set_ticks_position('bottom')
+        ax.yaxis.set_ticks_position('left')
         return feature
 
     def peaks_panel(self, ax, feature):
         hits = self.peaks.intersect([feature], u=True)
         track = Track(hits, **self.peaks_style)
         ax.add_collection(track)
+        for x in (
+            ax.get_yticklines() + ax.get_xticklines() + ax.get_yticklabels()
+            + ax.get_xticklabels()
+        ):
+            x.set_visible(False)
+        ax.set_ylabel('Peaks', rotation=0, horizontalalignment='right',
+                      verticalalignment='center')
+        ax.yaxis.set_ticks_position('none')
+        ax.xaxis.set_ticks_position('none')
+        ax.set_frame_on(False)
+
         return feature
 
     def plot(self, feature):
@@ -336,13 +337,26 @@ class ChIPSeqMiniBrowser(BaseMiniBrowser):
         ax.axis('tight')
 
         # add lines indicating extent of current feature
-        vline_kwargs = dict(color='k', linestyle='--')
-        ax.axvline(feature.start, **vline_kwargs)
-        ax.axvline(feature.stop, **vline_kwargs)
+        #vline_kwargs = dict(color='k', linestyle='--')
+        #ax.axvline(feature.start, **vline_kwargs)
+        #ax.axvline(feature.stop, **vline_kwargs)
 
         # Make a new feature to represent the region plus surrounding genes
         interval = pybedtools.create_interval_from_list(feature.fields)
         interval.strand = '.'
+        for txt in ax.get_yticklabels():
+            txt.set_visible(False)
+        for tick in ax.get_yticklines():
+            tick.set_visible(False)
+        ax.set_ylabel('Genes')
+        ax.spines['right'].set_color('None')
+        ax.spines['left'].set_color('None')
+        ax.spines['top'].set_color('None')
+        ax.yaxis.set_ticks_position('none')
+        ax.xaxis.set_ticks_position('bottom')
+        ax.set_ylabel('Genes', rotation=0, horizontalalignment='right',
+                      verticalalignment='center')
+
         return interval
 
 
