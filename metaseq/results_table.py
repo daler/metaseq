@@ -753,7 +753,7 @@ class LazyDict(object):
         self._dict = {}
         self.dbfn = dbfn
         self.index = [i.strip() for i in open(index_file)]
-        self.extra = extra
+        self.extra = extra.ix[self.index]
         self.modifier = modifier
         self._cls = cls
 
@@ -761,7 +761,7 @@ class LazyDict(object):
         if key not in self._dict:
             fn = self.fn_dict[key]
             obj = self._cls(fn, db=self.dbfn)
-            obj.data = obj.data.reindex(self.index)
+            obj.data = obj.data.ix[self.index]
             if self.extra:
                 obj.data = pandas.merge(obj.data, self.extra, left_index=True,
                                         right_index=True)
