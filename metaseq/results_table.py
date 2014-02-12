@@ -1,14 +1,16 @@
 import copy
-import pybedtools
 from textwrap import dedent
 import numpy as np
 import pandas
-import gffutils
-from gffutils.helpers import asinterval
-import copy
 from matplotlib import pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib
+import plotutils
+from matplotlib.transforms import blended_transform_factory
+from matplotlib.collections import EventCollection
+import gffutils
+import pybedtools
+from pybedtools import featurefuncs
 
 
 class ResultsTable(object):
@@ -112,12 +114,45 @@ class ResultsTable(object):
             raise ValueError("Please attach a gffutils.FeatureDB")
         for i in self.data.index:
             try:
-                yield asinterval(self.db[i])
+                yield gffutils.helpers.asinterval(self.db[i])
             except gffutils.FeatureNotFoundError:
                 if ignore_unknown:
                     continue
                 else:
                     raise gffutils.FeatureNotFoundError('%s not found' % i)
+
+    def five_prime(self, upstream=1, downstream=0):
+        """
+        Creates a BED/GFF file of the 5' end of each feature represented in the
+        table and returns the resulting pybedtools.BedTool object. Needs an
+        attached database.
+
+        Parameters
+        ----------
+        upstream, downstream : int
+            Number of basepairs up and downstream to include
+        """
+        return pybedtools.BedTool(self.features())\
+            .each(featurefuncs.five_prime, upstream, downstream)\
+            .saveas()
+
+    def three_prime(self, upstream=0, downstream=1):
+        """
+        Creates a BED/GFF file of the 3' end of each feature represented in the
+        table and returns the resulting pybedtools.BedTool object. Needs an
+        attached database.
+
+        Parameters
+        ----------
+        upstream, downstream : int
+            Number of basepairs up and downstream to include
+        """
+        return pybedtools.BedTool(self.features())\
+            .each(featurefuncs.three_prime, upstream, downstream)\
+            .saveas()
+
+    TSS = five_prime
+    TTS = three_prime
 
     def align_with(self, other):
         """
@@ -142,11 +177,14 @@ class ResultsTable(object):
 
     def scatter(self, x, y, xfunc=None, yfunc=None, xscale=None, yscale=None,
                 xlab=None, ylab=None, genes_to_highlight=None,
-                label_genes=False,
+                label_genes=False, marginal_histograms=False,
                 general_kwargs=dict(color="k", alpha=0.2, linewidths=0),
-                marginal=False, offset_kwargs={}, label_kwargs=None, ax=None,
+                general_hist_kwargs=None,
+                offset_kwargs={}, label_kwargs=None, ax=None,
                 one_to_one=None, callback=None, xlab_prefix=None,
-                ylab_prefix=None, sizefunc=None):
+                ylab_prefix=None, sizefunc=None, hist_size=0.3, hist_pad=0.0,
+                nan_offset=0.015, pos_offset=0.99, linelength=0.01,
+                neg_offset=0.005):
         """
         Do-it-all method for making annotated scatterplots.
 
@@ -181,10 +219,6 @@ class ResultsTable(object):
             the same length as `ind`.  It will be used to label the genes in
             `ind` using `label_kwargs`.
 
-        marginal : bool
-            Toggles display of non-finite cases where `x` or `y` is
-            nonzero but the other one is zero (and `xfunc` or `yfunc` are log)
-
         callback : callable
             Function to call upon clicking a point. Default is to print the
             gene name, but an example of another useful callback would be
@@ -207,6 +241,20 @@ class ResultsTable(object):
         xlab_prefix, ylab_prefix : str
             Optional label prefix that will be added to the beginning of `xlab`
             and/or `ylab`.
+
+        hist_size : float
+            Size of marginal histograms
+
+        hist_pad : float
+            Spacing between marginal histograms
+
+        nan_offset, pos_offset, neg_offset : float
+            Offset, in units of "fraction of axes" for the NaN, +inf, and -inf
+            "rug plots"
+
+        linelength : float
+            Line length for the rug plots
+
         """
         _x = self.data[x]
         _y = self.data[y]
@@ -246,6 +294,9 @@ class ResultsTable(object):
         if general_kwargs is None:
             general_kwargs = {}
 
+        if general_hist_kwargs is None:
+            general_hist_kwargs = {}
+
         if genes_to_highlight is None:
             genes_to_highlight = []
 
@@ -259,7 +310,7 @@ class ResultsTable(object):
                                 bbox=dict(facecolor='w', edgecolor='None',
                                           alpha=0.5))
 
-        # ---------------------------------------------------------------------
+        # Clean data ---------------------------------------------------------
         xi = xfunc(_x)
         yi = yfunc(_y)
 
@@ -271,67 +322,135 @@ class ResultsTable(object):
         neg_yv = np.isinf(yi) & (yi < 0)
         nan_yv = np.isnan(yi)
 
+        # Indexes for valid values
         xv = ~(pos_xv | neg_xv | nan_xv)
         yv = ~(pos_yv | neg_yv | nan_yv)
 
-        xmax = xi[xv].max()
-        xmin = xi[xv].min()
-        ymax = yi[yv].max()
-        ymin = yi[yv].min()
+        gmin = max(xi[xv].min(), yi[yv].min())
+        gmax = min(xi[xv].max(), yi[yv].max())
 
-        xpad = (xmax - xmin) * 0.1
-        ypad = (ymax - ymin) * 0.1
 
-        global_min = min(xmin, ymin)
-        global_max = max(xmax, ymax)
-
-        # Include marginal data on global min/max
-        xi[pos_xv] = xmax + xpad
-        xi[neg_xv] = xmin - xpad
-        xi[nan_xv] = xmin - xpad
-
-        yi[pos_yv] = ymax + ypad
-        yi[neg_yv] = ymin - ypad
-        yi[nan_yv] = ymin - ypad
-
-        # By default, use everything
+        # Convert any integer indexes into boolean, and create a new list of
+        # genes to highlight.  This handles optional hist kwargs.
         allind = np.zeros_like(xi) == 0
-
-        # Convert any integer indexes into boolean
         _genes_to_highlight = []
-        for ind, kwargs in genes_to_highlight:
+        for block in genes_to_highlight:
+            ind = block[0]
             if ind.dtype != 'bool':
                 new_ind = (np.zeros_like(xi) == 0)
                 new_ind[ind] = True
-                _genes_to_highlight.append((new_ind, kwargs))
+                _genes_to_highlight.append(
+                    tuple([new_ind] + list(block[1:]))
+                )
             else:
-                _genes_to_highlight.append((ind, kwargs))
+                _genes_to_highlight.append(
+                    tuple([ind] + list(block[1:]))
+                )
 
-        # Remove any genes that are handled by genes_to_hightlight.
-        for ind, _ in _genes_to_highlight:
+        # Remove any genes that will be plotted by genes_to_highlight.  This
+        # avoids double-plotting.
+        for block in _genes_to_highlight:
+            ind = block[0]
             allind[ind] = False
 
-        # Plot
-        coll = ax.scatter(xi[allind], yi[allind], picker=5, **general_kwargs)
-        coll.df = self.data
-        coll.ind = allind
 
-        # one-to-one line, if kwargs were specified
+        # Marginal histograms can be controlled either in the general kwargs or
+        # overridden using the `marginal_histograms` kwarg.
+        marginal_histograms = (
+            general_kwargs.pop('marginal_histograms', False)
+            or marginal_histograms)
+
+        # Copy over the color and alpha if they're not specified
+        general_hist_kwargs = plotutils._updatecopy(
+            orig=general_hist_kwargs, update_with=general_kwargs,
+            keys=['color', 'alpha'])
+
+        # Put the non-highlighted genes at the beginning of _genes_to_highlight
+        # so we can just iterate over that.
+        _genes_to_highlight.insert(
+            0,
+            (allind, general_kwargs, general_hist_kwargs)
+        )
+
+        # Set up the object that will handle the marginal histograms
+        self.marginal = plotutils.MarginalHistScatter(
+            ax, hist_size=hist_size, pad=hist_pad)
+
+
+        # Set up kwargs for x and y rug plots
+        rug_x_kwargs = dict(
+            linelength=linelength,
+            transform=blended_transform_factory(ax.transData, ax.transAxes),
+        )
+        rug_y_kwargs = dict(
+            linelength=linelength,
+            transform=blended_transform_factory(ax.transAxes, ax.transData),
+            orientation='vertical',
+        )
+
+        # EventCollection objects need a color as a 3-tuple, so set up
+        # a converter here.
+        color_converter = matplotlib.colors.ColorConverter().to_rgb
+
+        # Plot the one-to-one line, if kwargs were specified
         if one_to_one:
-            gmin = max(xmin, ymin)
-            gmax = min(xmax, ymax)
             ax.plot([gmin, gmax],
                     [gmin, gmax],
                     **one_to_one)
 
-        # plot any specially-highlighted genes, and label if specified
-        for ind, kwargs in _genes_to_highlight:
+        # Plot any specially-highlighted genes, and label if specified
+        for block in _genes_to_highlight:
+            ind = block[0]
+            kwargs = block[1]
+
+            if len(block) == 3:
+                hist_kwargs = block[2]
+            else:
+                hist_kwargs = {}
+
             names = kwargs.pop('names', None)
-            updated_kwargs = general_kwargs.copy()
-            updated_kwargs.update(kwargs)
-            coll = ax.scatter(xi[ind], yi[ind], picker=5, **updated_kwargs)
+            _marginal_histograms = (
+                kwargs.pop('marginal_histograms', False) or
+                marginal_histograms)
+
+            updated_kwargs = plotutils._updatecopy(
+                orig=kwargs, update_with=general_kwargs)
+
+
+            updated_hist_kwargs = plotutils._updatecopy(
+                orig=hist_kwargs, update_with=general_hist_kwargs)
+            updated_hist_kwargs = plotutils._updatecopy(
+                orig=updated_hist_kwargs, update_with=kwargs,
+                keys=['color', 'alpha'], override=True)
+
+            self.marginal.append(
+                xi[ind & xv & yv],
+                yi[ind & xv & yv],
+                scatter_kwargs=dict(picker=5, **updated_kwargs),
+                hist_kwargs=updated_hist_kwargs,
+                marginal_histograms=_marginal_histograms)
+            coll = self.marginal.scatter_ax.collections[-1]
             coll.df = self.data
             coll.ind = ind
+
+            color = color_converter(updated_kwargs['color'])
+            rug_x_kwargs['color'] = color
+            rug_y_kwargs['color'] = color
+
+            items = [
+                (xi, ind & xv & pos_yv, pos_offset, rug_x_kwargs),
+                (xi, ind & xv & nan_yv, nan_offset, rug_x_kwargs),
+                (xi, ind & xv & neg_yv, neg_offset, rug_x_kwargs),
+                (yi, ind & yv & pos_xv, pos_offset, rug_y_kwargs),
+                (yi, ind & yv & nan_xv, nan_offset, rug_y_kwargs),
+                (yi, ind & yv & neg_xv, neg_offset, rug_y_kwargs),
+            ]
+            for values, index, offset, kwargs in items:
+                coll = EventCollection(
+                    values[index], lineoffset=offset, **kwargs)
+                coll.df = self.data
+                coll.ind = index
+                ax.add_collection(coll)
 
             if names:
                 transOffset = matplotlib.transforms.offset_copy(
@@ -357,8 +476,9 @@ class ResultsTable(object):
 
         ax.set_xlabel(xlab)
         ax.set_ylabel(ylab)
+        ax.axis('tight')
 
-        ax.axis((xmin - xpad, xmax + xpad, ymin - ypad, ymax + ypad))
+        #ax.axis((xmin - xpad, xmax + xpad, ymin - ypad, ymax + ypad))
         return ax
 
     def _id_callback(self, event):
@@ -616,7 +736,8 @@ class DESeqResults(ResultsTable):
                 if lfc < 0:
                     score *= -1
                 feature.score = str(score)
-                feature = extend_fields(gff2bed(asinterval(feature)), 9)
+                feature = extend_fields(
+                    gff2bed(gffutils.helpers.asinterval(feature)), 9)
                 fields = feature.fields[:]
                 fields[6] = fields[1]
                 fields[7] = fields[2]
@@ -703,7 +824,8 @@ class DESeqResults(ResultsTable):
 
 
 class LazyDict(object):
-    def __init__(self, fn_dict, dbfn, index_file, extra=None, cls=DESeqResults, modifier=None):
+    def __init__(self, fn_dict, dbfn, index_file, extra=None, cls=DESeqResults,
+                 modifier=None):
         """
         Dictionary-like object that lazily-loads ResultsTable objects.
 
@@ -814,7 +936,7 @@ if __name__ == "__main__":
     minibrowser = GeneModelMiniBrowser([], e.db)
 
     def callback(i):
-        feature = asinterval(e.db[i])
+        feature = gffutils.helpers.asinterval(e.db[i])
         print e.ix[i]
         if feature.chrom == 'chr2L':
             minibrowser.plot(feature)
