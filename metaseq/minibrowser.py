@@ -158,64 +158,69 @@ class ChIPSeqMiniBrowser(BaseMiniBrowser):
 
     def panels(self):
         self.fig.set_facecolor('w')
+        method_dispatch = {
+            'ip': self.ip_panel,
+            'control': self.control_panel,
+            'peaks': self.peaks_panel,
+            'genes': self.genes_panel}
         if self.db and self.peaks:
-            gs = gridspec.GridSpec(4, 1, height_ratios=[1, 1, .3, .5])
+            gs = gridspec.GridSpec(4, 1, height_ratios=[1, 1, .15, .5])
             ip_ax = plt.subplot(gs[0])
             control_ax = plt.subplot(gs[1], sharex=ip_ax, sharey=ip_ax)
             peaks_ax = plt.subplot(gs[2], sharex=ip_ax)
             gene_ax = plt.subplot(gs[3], sharex=ip_ax)
+            axes = {'ip': ip_ax, 
+                    'control': control_ax,
+                    'peaks': peaks_ax,
+                    'genes': gene_ax,
+                    }
+
 
         elif self.db and self.peaks is None:
             gs = gridspec.GridSpec(3, 1, height_ratios=[1, 1, .5])
             ip_ax = plt.subplot(gs[0])
             control_ax = plt.subplot(gs[1], sharex=ip_ax, sharey=ip_ax)
             gene_ax = plt.subplot(gs[2], sharex=ip_ax)
+            axes = {'ip': ip_ax, 
+                    'control': control_ax,
+                    'genes': gene_ax,
+                    }
+
 
         elif self.db is None and self.peaks:
             gs = gridspec.GridSpec(3, 1, height_ratios=[1, 1, .3])
             ip_ax = plt.subplot(gs[0])
             control_ax = plt.subplot(gs[1], sharex=ip_ax, sharey=ip_ax)
             peaks_ax = plt.subplot(gs[2], sharex=ip_ax)
+            axes = {'ip': ip_ax, 
+                    'control': control_ax,
+                    'peaks': peaks_ax,
+                    }
 
         elif self.db is None and self.peaks is None:
             gs = gridspec.GridSpec(2, 1, height_ratios=[1, 1])
             ip_ax = plt.subplot(gs[0])
             control_ax = plt.subplot(gs[1], sharex=ip_ax, sharey=ip_ax)
+            axes = {'ip': ip_ax, 
+                    'control': control_ax,
+                    }
 
-        if self.db and self.peaks:
-            axes = [
-                (ip_ax, self.ip_panel),
-                (control_ax, self.control_panel),
-                (peaks_ax, self.peaks_panel),
-                (gene_ax, self.gene_panel),
-            ]
+        self.axes = axes
+        self.gridspec = gs
 
-        elif self.db and self.peaks is None:
-            axes = [
-                (ip_ax, self.ip_panel),
-                (control_ax, self.control_panel),
-                (gene_ax, self.gene_panel),
-            ]
+        # Order shouldn't matter, but just in case...
+        mapping = []
+        for kind in ['ip', 'control', 'peaks', 'genes']:
+            if kind in axes:
+                mapping.append((axes[kind], method_dispatch[kind]))
 
-        elif self.db is None and self.peaks:
-            axes = [
-                (ip_ax, self.ip_panel),
-                (control_ax, self.control_panel),
-                (peaks_ax, self.peaks_panel),
-            ]
-        else:
-            axes = [
-                (ip_ax, self.ip_panel),
-                (control_ax, self.control_panel),
-            ]
+        self._first_ax = mapping[0][0]
+        self._last_ax = mapping[-1][0]
 
-        self._first_ax = axes[0][0]
-        self._last_ax = axes[-1][0]
-
-        return axes
+        return mapping
 
     def _bins(self, feature):
-        return min(len(feature), 5000)
+        return min(len(feature), self.max_bins)
 
     def _zoomed_feature(self, feature):
         extra = int(self.settings['zoom'] * len(feature) / 2)
@@ -287,7 +292,7 @@ class ChIPSeqMiniBrowser(BaseMiniBrowser):
         start, stop, _, _ = self._first_ax.axis()
         return '%s:%s-%s' % (chrom, int(start), int(stop))
 
-    def gene_panel(self, ax, feature):
+    def genes_panel(self, ax, feature):
         """
         Plots gene models on an Axes.
 
