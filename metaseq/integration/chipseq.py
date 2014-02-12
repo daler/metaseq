@@ -230,11 +230,11 @@ class Chipseq(object):
 
         if (self.ip_array is None) or force:
             self.ip_array = self.ip.array(features, **array_kwargs)
-            self.ip_array /= self.ip.million_mapped_reads()
+            self.ip_array /= self.ip.mapped_read_count() / 1e6
 
         if (self.control_array is None) or force:
             self.control_array = self.control.array(features, **array_kwargs)
-            self.control_array /= self.control.million_mapped_reads()
+            self.control_array /= self.control.mapped_read_count() / 1e6
 
         if func is None:
             #func = metaseq.plotutils.nice_log

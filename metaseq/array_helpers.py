@@ -340,7 +340,11 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
             profile /= scale
         profiles.append(profile)
 
-    return np.hstack(xs), np.hstack(profiles)
+    stacked_xs = np.hstack(xs)
+    stacked_profiles = np.hstack(profiles)
+    del xs
+    del profiles
+    return stacked_xs, stacked_profiles
 
 
 def _array_parallel(fn, cls, genelist, chunksize=25, processes=1, **kwargs):

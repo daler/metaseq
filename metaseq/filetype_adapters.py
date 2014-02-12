@@ -130,7 +130,7 @@ class BigWigAdapter(BaseAdapter):
         raise NotImplementedError(
             "__getitem__ not implemented for %s" % self.__class__.__name__)
 
-    def summarize(self, interval, bins=None, method='summarize'):
+    def summarize(self, interval, bins=None, method='summarize', function='mean'):
 
         # We may be dividing by zero in some cases, which raises a warning in
         # NumPy based on the IEEE 754 standard (see
@@ -154,7 +154,10 @@ class BigWigAdapter(BaseAdapter):
                 s[np.isnan(s)] = 0
 
         elif method == 'ucsc_summarize':
-            return self.ucsc_summarize(interval, bins)
+            if function in ['mean', 'min', 'max', 'std', 'coverage']:
+                return self.ucsc_summarize(interval, bins, function=function)
+            else:
+                raise ValueError('function "%s" not supported by UCSC\'s bigWigSummary')
 
         else:
             bw = BigWigFile(open(self.fn))
@@ -165,14 +168,26 @@ class BigWigAdapter(BaseAdapter):
             if s is None:
                 s = np.zeros((bins,))
             else:
-                s = s.sum_data / s.valid_count
-                s[np.isnan(s)] = 0
+                if function == 'sum':
+                    s = s.sum_data
+                if function == 'mean':
+                    s = s.sum_data / s.valid_count
+                    s[np.isnan(s)] = 0
+                if function == 'min':
+                    s = s.min_val
+                    s[np.isinf(s)] = 0
+                if function == 'max':
+                    s = s.max_val
+                    s[np.isinf(s)] = 0
+                if function == 'std':
+                    s = (s.sum_squares / s.valid_count)
+                    s[np.isnan(s)] = 0
 
         # Reset NumPy error reporting
         np.seterr(divide=orig)
         return s
 
-    def ucsc_summarize(self, interval, bins=None):
+    def ucsc_summarize(self, interval, bins=None, function='mean'):
         if bins is None:
             bins = len(interval)
         y = np.zeros(bins)
@@ -184,7 +199,7 @@ class BigWigAdapter(BaseAdapter):
             str(interval.start),
             str(interval.stop),
             str(bins),
-            '-type=mean']
+            '-type=%s' % function]
         p = subprocess.Popen(
             cmds,
             stdout=subprocess.PIPE,
