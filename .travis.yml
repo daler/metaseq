@@ -7,7 +7,6 @@ install:
     - conda create --yes --name test scipy pytables numexpr pandas cython statsmodels matplotlib pip nose pyyaml
     - export PATH="$HOME/envs/test/bin:$PATH"
     - pip install -q -r requirements.txt
-    - ./.travis-install.sh
     - pip install .
 
 
@@ -16,7 +15,7 @@ virtualenv:
 
 
 script:
-    - nosetests -v metaseq/test/test.py
+    - ./.travis-test.sh
 
 branches:
     only:
