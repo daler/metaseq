@@ -11,4 +11,5 @@ export PATH=${TRAVIS_BUILD_DIR}/tabix-${TABIX_VERSION}:$PATH
 export PATH=${TRAVIS_BUILD_DIR}/samtools-${SAMTOOLS_VERSION}:$PATH
 export PATH=${TRAVIS_BUILD_DIR}/bedtools2/bin:$PATH
 echo $PATH
+export METASEQ_PROCESSES=1
 nosetests -v metaseq/test/test.py

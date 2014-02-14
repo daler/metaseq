@@ -3,6 +3,7 @@ Many of these tests use the minimal test/data/gdc.bed file which has just
 enough complexity to be useful in testing corner cases.  When reading through
 the tests, it's useful to have that file open to understand what's happening.
 """
+import os
 import metaseq
 import multiprocessing
 from metaseq.array_helpers import ArgumentError
@@ -12,6 +13,7 @@ gs = {}
 for kind in ['bed', 'bam', 'bigbed', 'bigwig']:
     gs[kind] = metaseq.genomic_signal(metaseq.example_filename('gdc.%s' % kind), kind)
 
+PROCESSES = int(os.environ.get("METASEQ_PROCESSES", multiprocessing.cpu_count()))
 
 def test_tointerval():
     assert metaseq.helpers.tointerval("chr2L:1-10[-]").strand == '-'
@@ -210,7 +212,7 @@ def test_local_coverage_full():
              ),
             ),
         ):
-            for processes in [None, multiprocessing.cpu_count()]:
+            for processes in [None, PROCESSES]:
 
                 yield check, kind, coord, processes, expected
 
@@ -247,7 +249,7 @@ def test_local_coverage_binned():
              ),
             ),
         ):
-            for processes in [None, multiprocessing.cpu_count()]:
+            for processes in [None, PROCESSES]:
                 yield check, kind, coord, processes, expected
 
 
@@ -276,7 +278,7 @@ def test_array_binned():
              np.array([[0., 0., 2., 2., 2., 2., 2., 0.]]),
              ),
         ):
-            for processes in [None, multiprocessing.cpu_count()]:
+            for processes in [None, PROCESSES]:
                 yield check, kind, coord, processes, expected
 
 
@@ -307,7 +309,7 @@ def test_array_binned_preserve_total():
              np.array([[0., 0., .4, .4, .4, .4, .4, 0.]]),
              ),
         ):
-            for processes in [None, multiprocessing.cpu_count()]:
+            for processes in [None, PROCESSES]:
                 yield check, kind, coord, processes, expected
 
 
@@ -371,7 +373,7 @@ def test_array_ragged():
              ],
             ),
         ):
-            for processes in [None, multiprocessing.cpu_count()]:
+            for processes in [None, PROCESSES]:
                 yield check, kind, coord, processes, expected
 
 
@@ -483,7 +485,7 @@ def test_errors():
         (ValueError, metaseq.filetype_adapters.BaseAdapter, (metaseq.example_filename('gdc.bed'),), {}),
         (NotImplementedError, metaseq.filetype_adapters.BigWigAdapter(metaseq.example_filename('gdc.bigwig')).__getitem__, (0,), {}),
         (ValueError, X("").__getitem__, (0,), {}),
-        (ValueError, gs['bam'].local_coverage, ['chr2L:1-5', 'chr2L:1-5'], dict(processes=multiprocessing.cpu_count())),
+        (ValueError, gs['bam'].local_coverage, ['chr2L:1-5', 'chr2L:1-5'], dict(processes=PROCESSES)),
     ]
     for error, callable_obj, args, kwargs in items:
         yield check, error, callable_obj, args, kwargs
