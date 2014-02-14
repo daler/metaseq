@@ -9,3 +9,4 @@ pybedtools
 statsmodels
 gffutils
 pysam
+pyyaml

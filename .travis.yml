@@ -4,7 +4,7 @@ install:
     - sudo apt-get install -qq python-dev python-pip python-yaml g++
     - sudo pip install conda
     - sudo conda init
-    - conda create --yes --name test scipy pytables numexpr pandas cython statsmodels matplotlib pip nose
+    - conda create --yes --name test scipy pytables numexpr pandas cython statsmodels matplotlib pip nose pyyaml
     - export PATH="$HOME/envs/test/bin:$PATH"
     - pip install -q -r requirements.txt
     - pip install .
