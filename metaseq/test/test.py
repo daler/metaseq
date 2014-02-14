@@ -498,12 +498,9 @@ def test_bam_genome():
 
 def test_bam_mmr():
     import os
-    fn = metaseq.example_filename('gdc.bam.scale')
-    if os.path.exists(fn):
-        os.unlink(fn)
-    assert gs['bam'].million_mapped_reads(force=True) == 8e-6
+    assert gs['bam'].mapped_read_count(force=True) == 8
     gs['bam']._readcount = None
-    assert gs['bam'].million_mapped_reads(force=False) == 8e-6, gs['bam'].million_mapped_reads(force=False)
+    assert gs['bam'].mapped_read_count(force=False) == 8, gs['bam'].mapped_read_count(force=False)
 
 def test_bigwig_out_of_range():
     x, y = gs['bigwig'].local_coverage('chr1:1-100', bins=None)
