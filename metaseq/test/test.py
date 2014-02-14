@@ -485,7 +485,7 @@ def test_errors():
         (ValueError, metaseq.filetype_adapters.BaseAdapter, (metaseq.example_filename('gdc.bed'),), {}),
         (NotImplementedError, metaseq.filetype_adapters.BigWigAdapter(metaseq.example_filename('gdc.bigwig')).__getitem__, (0,), {}),
         (ValueError, X("").__getitem__, (0,), {}),
-        (ValueError, gs['bam'].local_coverage, ['chr2L:1-5', 'chr2L:1-5'], dict(processes=PROCESSES)),
+        #(ValueError, gs['bam'].local_coverage, ['chr2L:1-5', 'chr2L:1-5'], dict(processes=PROCESSES)),
     ]
     for error, callable_obj, args, kwargs in items:
         yield check, error, callable_obj, args, kwargs
