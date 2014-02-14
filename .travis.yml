@@ -1,20 +1,22 @@
-language: python
-before_install:
-    - "sudo apt-get install -qq libatlas-dev libatlas-base-dev liblapack-dev gfortran"
-    - "pip install -q numpy"
-    - "pip install scipy"
-    - "pip install -q cython"
+language: c
 install:
-    - "pip install -q -r requirements.txt --use-mirrors"
-    - "pip install ."
+    - sudo apt-get update -qq
+    - sudo apt-get install -qq python-dev python-pip python-yaml g++
+    - sudo pip install conda
+    - sudo conda init
+    - conda create --yes --name test scipy pytables numexpr pandas cython statsmodels matplotlib pip
+    - export PATH="$HOME/envs/test/bin:$PATH"
+    - pip install -q -r requirements.txt
+    - pip install .
 
 
 virtualenv:
     system_site_packages: true
 
 
-script: ./.travis-test.sh
+script:
+    - ./.travis-test.sh
 
 branches:
     only:
-        - docs
+        - v0.5dev
