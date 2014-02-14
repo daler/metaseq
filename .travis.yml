@@ -7,9 +7,7 @@ install:
     - conda create --yes --name test scipy pytables numexpr pandas cython statsmodels matplotlib pip nose pyyaml
     - export PATH="$HOME/envs/test/bin:$PATH"
     - pip install -q -r requirements.txt
-    - ./.install-bedtools2.sh
-    - ./.install-tabix.sh
-    - ./.install-samtools.sh
+    - ./.travis-install.sh
     - pip install .
 
 
