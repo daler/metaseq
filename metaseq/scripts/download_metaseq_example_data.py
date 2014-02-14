@@ -1,9 +1,9 @@
 #! /usr/bin/python
 
-# Download large data for running metaseq tests.
-#
-# > 1.6 GB of downloads
-
+usage = """
+Download large data for running metaseq tests from ENCODE, GEO, and Ensembl
+ > 1.6 GB of downloads
+"""
 import sys
 import os
 import hashlib
@@ -11,6 +11,14 @@ import gffutils
 import pybedtools
 import metaseq
 import logging
+import fnmatch
+import argparse
+
+ap = argparse.ArgumentParser()
+ap.add_argument('--refresh', nargs='+',  help='Force a re-download of data for files matching pattern')
+args = ap.parse_args()
+
+
 logging.basicConfig(level=logging.DEBUG, format='[%(name)s] [%(asctime)s]: %(message)s')
 logger = logging.getLogger('metaseq data download')
 
@@ -20,18 +28,18 @@ DATA_DIR = metaseq.data_dir()
 
 # ENCODE data
 DATA = """
-ff6979ace9befe82e71b6a05609d36e1  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562RxlchV0416101AlnRep1.bam
-ab2f3d2efd5a0281092e7ad542dfad36  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562RxlchV0416101AlnRep1.bam.bai
-fa20b05ea082dcb063463b73b6a5af2f  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562RxlchV0416101RawRep1.bigWig
-b0716bd81170efe1fd0a8e411fb669d8  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562Atf3V0416101AlnRep1.bam
-6e8f85d3ab428ef95e3382237b1b2419  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562Atf3V0416101PkRep1.broadPeak.gz
-cf869424dc915e59d9f1b3f73d720883  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562Atf3V0416101AlnRep1.bam.bai
-fb3b9dc8e85636a3a1226d22f8c1dbec  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562Atf3V0416101RawRep1.bigWig
+488M  ff6979ace9befe82e71b6a05609d36e1  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562RxlchV0416101AlnRep1.bam
+5.7M  ab2f3d2efd5a0281092e7ad542dfad36  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562RxlchV0416101AlnRep1.bam.bai
+2.6M  fa20b05ea082dcb063463b73b6a5af2f  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562RxlchV0416101RawRep1.bigWig
+1.2G  b0716bd81170efe1fd0a8e411fb669d8  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562Atf3V0416101AlnRep1.bam
+174K  6e8f85d3ab428ef95e3382237b1b2419  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562Atf3V0416101PkRep1.broadPeak.gz
+6.0M  cf869424dc915e59d9f1b3f73d720883  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562Atf3V0416101AlnRep1.bam.bai
+18M   fb3b9dc8e85636a3a1226d22f8c1dbec  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562Atf3V0416101RawRep1.bigWig
 """
 
 # Ensembl annotations
 DATA += """
-25e76f628088daabd296447d06abe16b  ftp://ftp.ensembl.org/pub/release-66/gtf/homo_sapiens/Homo_sapiens.GRCh37.66.gtf.gz
+21M  25e76f628088daabd296447d06abe16b  ftp://ftp.ensembl.org/pub/release-66/gtf/homo_sapiens/Homo_sapiens.GRCh37.66.gtf.gz
 """
 
 # Cufflinks results files from GSE33816, ATF3 samples
@@ -41,24 +49,24 @@ DATA += """
 # GSM847567_SL4337 = uninduced rep 2
 # GSM847568_SL4326 = induced rep 2
 DATA += """
-4d02dcbd813a538bbbcf27b3732ef7aa  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847568/GSM847568_SL4326.gtf.gz
-a419d585a4a214885d6f249b5fc9a3a4  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847567/GSM847567_SL4337.gtf.gz
-ec23fb05d3b46cae6a3fcd38fd64a8c5  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847566/GSM847566_SL2592.gtf.gz
-45cffa476d6e74b144744ef515bb433e  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847565/GSM847565_SL2585.gtf.gz
+6.9M  4d02dcbd813a538bbbcf27b3732ef7aa  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847568/GSM847568_SL4326.gtf.gz
+6.9M  a419d585a4a214885d6f249b5fc9a3a4  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847567/GSM847567_SL4337.gtf.gz
+6.9M  ec23fb05d3b46cae6a3fcd38fd64a8c5  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847566/GSM847566_SL2592.gtf.gz
+6.9M  45cffa476d6e74b144744ef515bb433e  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847565/GSM847565_SL2585.gtf.gz
 """
 
 # bigWig files from GSE33816, ATF3 samples
 DATA += """
-6449cb8a49a78a45de654aa8af54c732  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847568/GSM847568_SL4326.bw
-9e02208fec0f23b2859f44df4ad6d7af  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847567/GSM847567_SL4337.bw
-82919ea67c564f6786e29a9150255d2d  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847566/GSM847566_SL2592.bw
-b2e33ceb52bbd35629c0c666ad820ac7  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847565/GSM847565_SL2585.bw
+65M  6449cb8a49a78a45de654aa8af54c732  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847568/GSM847568_SL4326.bw
+68M  9e02208fec0f23b2859f44df4ad6d7af  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847567/GSM847567_SL4337.bw
+63M  82919ea67c564f6786e29a9150255d2d  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847566/GSM847566_SL2592.bw
+69M  b2e33ceb52bbd35629c0c666ad820ac7  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847565/GSM847565_SL2585.bw
 """
 
 items = []
 for i in DATA.splitlines():
     if (len(i) > 0) and not (i.startswith('#')):
-        items.append(i.strip().split())
+        items.append(i.strip().split()[1:])
 
 header = "[metaseq download]"
 
@@ -86,8 +94,15 @@ cleaned_fn, cleaned_md5 = (os.path.join(DATA_DIR, 'Homo_sapiens.GRCh37.66.cleane
 db_fn, db_md5 = (os.path.join(DATA_DIR, 'Homo_sapiens.GRCh37.66.cleaned.gtf.db'), 'bf0a69d0787d01d0e3241ee23b1c66e3')
 
 def _up_to_date(md5, fn):
-    if os.path.exists(fn):
-        logger.info('calculating md5 for %s...' % os.path.basename(fn))
+    if args.refresh is not None:
+        for pattern in args.refresh:
+            if fnmatch.fnmatch(fn, pattern):
+                logger.info("Refreshing %s" % fn)
+                if os.path.exists(fn):
+                    os.unlink(fn)
+                    return False
+    elif os.path.exists(fn):
+        logger.info('calculating md5 for %s...' % fn)
         if hashlib.md5(open(fn).read()).hexdigest() == md5:
             logger.info('up to date')
             return True
@@ -103,6 +118,7 @@ def _just_download():
         if not _up_to_date(md5, fn):
             logger.info('%s, downloading...' % fn)
             cmds = [
+                'cd', DATA_DIR, '&&', 
                     'wget',
                     full_path,
                     ]
@@ -110,12 +126,20 @@ def _just_download():
 
 
 def _gffutils_prep():
+    def fixer(f):
+        if f.chrom in chroms_to_ignore:
+            return
+        f.chrom = 'chr' + f.chrom
+        return f
+
     if not _up_to_date(cleaned_md5, cleaned_fn):
         logger.info("cleaning GTF...")
-        gffutils.clean_gff(fn=gtf_fn, newfn=cleaned_fn, addchr=True, sanity_check=True, chroms_to_ignore=chroms_to_ignore)
+        x = pybedtools.BedTool(gtf_fn).each(fixer).saveas(cleaned_fn)
+        #gffutils.clean_gff(fn=gtf_fn, newfn=cleaned_fn, addchr=True, sanity_check=True, chroms_to_ignore=chroms_to_ignore)
 
     if not _up_to_date(db_md5, db_fn):
-        os.unlink(db_fn)
+        if os.path.exists(db_fn):
+            os.unlink(db_fn)
         gffutils.create_db(cleaned_fn, db_fn, verbose=True, force=True)
 
 
