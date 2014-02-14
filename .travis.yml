@@ -15,7 +15,7 @@ virtualenv:
 
 
 script:
-    - ./.travis-test.sh
+    - nosetests -v metaseq/test/test.py
 
 branches:
     only:
