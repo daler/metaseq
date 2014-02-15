@@ -1,158 +1,183 @@
-#! /usr/bin/python
-
-usage = """
-Download large data for running metaseq tests from ENCODE, GEO, and Ensembl
- > 1.6 GB of downloads
-"""
-import sys
+#!/usr/bin/env python
 import os
-import hashlib
-import gffutils
-import pybedtools
-import metaseq
+import subprocess
 import logging
-import fnmatch
-import argparse
-
-ap = argparse.ArgumentParser()
-ap.add_argument('--refresh', nargs='+',  help='Force a re-download of data for files matching pattern')
-args = ap.parse_args()
-
+import hashlib
+import pybedtools
+import gffutils
+import metaseq
 
 logging.basicConfig(level=logging.DEBUG, format='[%(name)s] [%(asctime)s]: %(message)s')
 logger = logging.getLogger('metaseq data download')
 
-DATA_DIR = metaseq.data_dir()
+hg19 = pybedtools.chromsizes('hg19')
+genomes_file = pybedtools.chromsizes_to_file('hg19', 'hg19')
 
-# md5 hex digests for example files ===========================================
-
-# ENCODE data
-DATA = """
-488M  ff6979ace9befe82e71b6a05609d36e1  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562RxlchV0416101AlnRep1.bam
-5.7M  ab2f3d2efd5a0281092e7ad542dfad36  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562RxlchV0416101AlnRep1.bam.bai
-2.6M  fa20b05ea082dcb063463b73b6a5af2f  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562RxlchV0416101RawRep1.bigWig
-1.2G  b0716bd81170efe1fd0a8e411fb669d8  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562Atf3V0416101AlnRep1.bam
-174K  6e8f85d3ab428ef95e3382237b1b2419  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562Atf3V0416101PkRep1.broadPeak.gz
-6.0M  cf869424dc915e59d9f1b3f73d720883  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562Atf3V0416101AlnRep1.bam.bai
-18M   fb3b9dc8e85636a3a1226d22f8c1dbec  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562Atf3V0416101RawRep1.bigWig
+usage = """
+Downloads data from UCSC, GEO, and Ensembl.
 """
 
-# Ensembl annotations
-DATA += """
-21M  25e76f628088daabd296447d06abe16b  ftp://ftp.ensembl.org/pub/release-66/gtf/homo_sapiens/Homo_sapiens.GRCh37.66.gtf.gz
-"""
+import argparse
+ap = argparse.ArgumentParser(usage=usage)
+ap.add_argument(
+    '--data-dir',
+    default=metaseq.data_dir(),
+    help='Location to store downloaded and prepped data.  Default is %(default)s')
+args = ap.parse_args()
 
-# Cufflinks results files from GSE33816, ATF3 samples
-#
-# GSM847565_SL2585 = uninduced rep 1
-# GSM847566_SL2592 = induced rep 1
-# GSM847567_SL4337 = uninduced rep 2
-# GSM847568_SL4326 = induced rep 2
-DATA += """
-6.9M  4d02dcbd813a538bbbcf27b3732ef7aa  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847568/GSM847568_SL4326.gtf.gz
-6.9M  a419d585a4a214885d6f249b5fc9a3a4  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847567/GSM847567_SL4337.gtf.gz
-6.9M  ec23fb05d3b46cae6a3fcd38fd64a8c5  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847566/GSM847566_SL2592.gtf.gz
-6.9M  45cffa476d6e74b144744ef515bb433e  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847565/GSM847565_SL2585.gtf.gz
-"""
+CHROM = 'chr17'
+COORD = "%s:%s-%s" % (CHROM, 0, hg19[CHROM][-1])
 
-# bigWig files from GSE33816, ATF3 samples
-DATA += """
-65M  6449cb8a49a78a45de654aa8af54c732  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847568/GSM847568_SL4326.bw
-68M  9e02208fec0f23b2859f44df4ad6d7af  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847567/GSM847567_SL4337.bw
-63M  82919ea67c564f6786e29a9150255d2d  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847566/GSM847566_SL2592.bw
-69M  b2e33ceb52bbd35629c0c666ad820ac7  ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847565/GSM847565_SL2585.bw
-"""
+def requirements_check():
+    required_programs = [
+        ('samtools', 'http://samtools.sourceforge.net/'),
+        ('bedtools', 'http://bedtools.readthedocs.org/en/latest/'),
+        ('bigWigToBedGraph', 'http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/'),
+        ('bedGraphToBigWig', 'http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/'),
+    ]
+    for req, url in required_programs:
+        try:
+            p = subprocess.Popen([req], stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+            stdout, stderr = p.communicate()
+        except OSError:
+            raise ValueError("Please install %s (%s)" % (req, url))
 
-items = []
-for i in DATA.splitlines():
-    if (len(i) > 0) and not (i.startswith('#')):
-        items.append(i.strip().split()[1:])
-
-header = "[metaseq download]"
-
-chroms_to_ignore = [
-'MT', 'Y', 'GL000191.1', 'GL000192.1', 'GL000193.1', 'GL000194.1',
-'GL000195.1', 'GL000199.1', 'GL000201.1', 'GL000204.1', 'GL000205.1',
-'GL000209.1', 'GL000211.1', 'GL000212.1', 'GL000213.1', 'GL000216.1',
-'GL000218.1', 'GL000219.1', 'GL000220.1', 'GL000222.1', 'GL000223.1',
-'GL000224.1', 'GL000225.1', 'GL000228.1', 'GL000229.1', 'GL000230.1',
-'GL000233.1', 'GL000236.1', 'GL000240.1', 'GL000241.1', 'GL000242.1',
-'GL000243.1', 'GL000247.1', 'HG1000_2_PATCH', 'HG1032_PATCH',
-'HG104_HG975_PATCH', 'HG115_PATCH', 'HG14_PATCH', 'HG183_PATCH', 'HG185_PATCH',
-'HG186_PATCH', 'HG19_PATCH', 'HG243_PATCH', 'HG281_PATCH', 'HG480_HG481_PATCH',
-'HG506_HG1000_1_PATCH', 'HG531_PATCH', 'HG536_PATCH', 'HG544_PATCH',
-'HG686_PATCH', 'HG706_PATCH', 'HG730_PATCH', 'HG736_PATCH', 'HG745_PATCH',
-'HG75_PATCH', 'HG79_PATCH', 'HG7_PATCH', 'HG858_PATCH', 'HG905_PATCH',
-'HG946_PATCH', 'HG987_PATCH', 'HG989_PATCH', 'HG990_PATCH', 'HG991_PATCH',
-'HG996_PATCH', 'HG998_1_PATCH', 'HG998_2_PATCH', 'HG999_1_PATCH',
-'HG999_2_PATCH', 'HSCHR17_1', 'HSCHR4_1', 'HSCHR6_MHC_APD', 'HSCHR6_MHC_COX',
-'HSCHR6_MHC_DBB', 'HSCHR6_MHC_MANN', 'HSCHR6_MHC_MCF', 'HSCHR6_MHC_QBL',
-'HSCHR6_MHC_SSTO',]
-
-gtf_fn, gtf_md5 = (os.path.join(DATA_DIR, 'Homo_sapiens.GRCh37.66.gtf.gz'), '25e76f628088daabd296447d06abe16b')
-cleaned_fn, cleaned_md5 = (os.path.join(DATA_DIR, 'Homo_sapiens.GRCh37.66.cleaned.gtf'), '6964313797754c68ea0e892abbfdc9d4')
-db_fn, db_md5 = (os.path.join(DATA_DIR, 'Homo_sapiens.GRCh37.66.cleaned.gtf.db'), 'bf0a69d0787d01d0e3241ee23b1c66e3')
 
 def _up_to_date(md5, fn):
-    if args.refresh is not None:
-        for pattern in args.refresh:
-            if fnmatch.fnmatch(fn, pattern):
-                logger.info("Refreshing %s" % fn)
-                if os.path.exists(fn):
-                    os.unlink(fn)
-                    return False
-    elif os.path.exists(fn):
-        logger.info('calculating md5 for %s...' % fn)
+    if os.path.exists(fn):
         if hashlib.md5(open(fn).read()).hexdigest() == md5:
-            logger.info('up to date')
+            logger.info('md5sum match for %s' % fn)
             return True
         else:
-            logger.info('md5sum does not match.')
+            logger.info('wrong md5sum for %s' % fn)
             os.unlink(fn)
-            return False
+
+bams = [
+    ('13M', '0270b88c30339659b38f11cd32b7fb11', 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562RxlchV0416101AlnRep1.bam'),
+    ('37M', 'fd5fee8c3db467238e1d11d15c36f3c0', 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562Atf3V0416101AlnRep1.bam'),
+]
+
+bais = [
+    ('173K', '873b0d236c30e089fe346f3901502329', os.path.join(args.data_dir, 'wgEncodeHaibTfbsK562Atf3V0416101AlnRep1_chr17.bam.bai')),
+    ('161K', 'f40de02458ce71db708480953a307507', os.path.join(args.data_dir, 'wgEncodeHaibTfbsK562RxlchV0416101AlnRep1_chr17.bam.bai')),
+]
+
+bigwigs = [
+    ('97K', '9408d7d066c2f2c9b9f8f61a3985e289', 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562RxlchV0416101RawRep1.bigWig'),
+    ('831K', '33d8a7b43fbecc2fb54944711cfe179a', 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibTfbs/wgEncodeHaibTfbsK562Atf3V0416101RawRep1.bigWig'),
+]
+
+GTF = ('19M', '0612ecf8bc707f6d8145d85337b95cba', 'ftp://ftp.ensembl.org/pub/release-66/gtf/homo_sapiens/Homo_sapiens.GRCh37.66.gtf.gz')
+DB = ('55M', 'e9e91b7231fc0c9305da1cfbc58e6bbf', os.path.join(args.data_dir, 'Homo_sapiens.GRCh37.66_%s.gtf.db' % CHROM))
 
 
-def _just_download():
-    for md5, full_path in items:
-        fn = os.path.join(DATA_DIR, os.path.basename(full_path))
-        if not _up_to_date(md5, fn):
-            logger.info('%s, downloading...' % fn)
+cufflinks = [
+    ('6.9M', '4d02dcbd813a538bbbcf27b3732ef7aa', 'ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847568/GSM847568_SL4326.gtf.gz'),
+    ('6.9M', 'a419d585a4a214885d6f249b5fc9a3a4', 'ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847567/GSM847567_SL4337.gtf.gz'),
+    ('6.9M', 'ec23fb05d3b46cae6a3fcd38fd64a8c5', 'ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847566/GSM847566_SL2592.gtf.gz'),
+    ('6.9M', '45cffa476d6e74b144744ef515bb433e', 'ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA/supplementary/samples/GSM847nnn/GSM847565/GSM847565_SL2585.gtf.gz'),
+]
+
+cufflinks_tables = [
+        ('6.9M', '5c601c78e89e8d76fa998e2462ea718f', 'GSM847568_SL4326.gtf.gz'),
+        ('6.9M', '9616609cd5c2ef012341471c07988e69', 'GSM847567_SL4337.gtf.gz'),
+        ('6.9M', 'b46eb07e01abc6c76c096896582f4a2d', 'GSM847566_SL2592.gtf.gz'),
+        ('6.9M', '845cf7e32c61703781cf3316b9452029', 'GSM847565_SL2585.gtf.gz'),
+]
+
+
+def logged_command(cmds):
+    logger.info(' '.join(cmds))
+    os.system(' '.join(cmds))
+
+
+def get_cufflinks():
+    for size, md5, url in cufflinks:
+        cuff_gtf = os.path.join(args.data_dir, os.path.basename(url))
+        if not _up_to_date(md5, cuff_gtf):
             cmds = [
-                'cd', DATA_DIR, '&&', 
-                    'wget',
-                    full_path,
-                    ]
-            os.system(' '.join(cmds))
+                'wget', url, '-O', cuff_gtf]
+            logged_command(cmds)
 
 
-def _gffutils_prep():
-    def fixer(f):
-        if f.chrom in chroms_to_ignore:
-            return
-        f.chrom = 'chr' + f.chrom
-        return f
+def get_bams():
+    for size, md5, url in bams:
+        bam = os.path.join(args.data_dir, os.path.basename(url).replace('.bam', '_%s.bam' % CHROM))
+        if not _up_to_date(md5, bam):
+            logger.info('Downloading reads on chromosome %s from %s to %s' % (CHROM, url, bam))
+            cmds = ['samtools', 'view', '-b', url, COORD, '>', bam]
+            logged_command(cmds)
+        bai = bam + '.bai'
+        if not os.path.exists(bai):
+            logger.info('indexing %s' % bam)
+            logger.info(' '.join(cmds))
+            cmds = [
+                'samtools',
+                'index',
+                bam]
+            logged_command(cmds)
+        if os.path.exists(os.path.basename(url) + '.bai'):
+            os.unlink(os.path.basename(url) + '.bai')
 
-    if not _up_to_date(cleaned_md5, cleaned_fn):
-        logger.info("cleaning GTF...")
-        x = pybedtools.BedTool(gtf_fn).each(fixer).saveas(cleaned_fn)
-        #gffutils.clean_gff(fn=gtf_fn, newfn=cleaned_fn, addchr=True, sanity_check=True, chroms_to_ignore=chroms_to_ignore)
+    for size, md5, fn in bais:
+        if not _up_to_date(md5, fn):
+            cmds = [
+                'samtools', 'index', bai.replace('.bai', '')]
+            logged_command(cmds)
 
-    if not _up_to_date(db_md5, db_fn):
-        if os.path.exists(db_fn):
-            os.unlink(db_fn)
-        gffutils.create_db(cleaned_fn, db_fn, verbose=True, force=True)
+def get_bigwigs():
+    for size, md5, url in bigwigs:
+        bigwig = os.path.join(args.data_dir, os.path.basename(url).replace('.bigWig', '_%s.bigWig' % CHROM))
+        bedgraph = os.path.join(args.data_dir, os.path.basename(url).replace('.bigWig', '.bedGraph'))
+        subset_bedgraph = bedgraph.replace('.bedGraph', '_%s.bedGraph' % CHROM)
+        if not _up_to_date(md5, bigwig):
+            logger.info('Downloading bigWig %s to %s' % (url, bedgraph))
+            cmds = [
+                'bigWigToBedGraph', url, bedgraph]
+            logged_command(cmds)
+
+            cmds = [
+                'awk -F "\\t" \'{if ($1 == "%s") print $0}\'' % CHROM,
+                bedgraph, '>', subset_bedgraph]
+            logged_command(cmds)
+
+            cmds = [
+                'bedGraphToBigWig',
+                subset_bedgraph,
+                genomes_file,
+                bigwig]
+            logged_command(cmds)
+
+        if os.path.exists(subset_bedgraph):
+            os.unlink(subset_bedgraph)
+        if os.path.exists(bedgraph):
+            os.unlink(bedgraph)
+
+def get_gtf():
+    size, md5, url = GTF
+    full_gtf = os.path.join(args.data_dir, os.path.basename(url))
+    subset_gtf = os.path.join(args.data_dir, os.path.basename(url).replace('.gtf.gz', '_%s.gtf' % CHROM))
+
+    if not _up_to_date(md5, subset_gtf):
+        cmds = [
+            'wget', url, '-O', full_gtf]
+        logged_command(cmds)
+
+        cmds = ['zcat', full_gtf, '|', 'awk -F "\\t" \'{if ($1 == "%s") print $0}\'' % CHROM.replace('chr', ''), '|', 'awk \'{print "chr"$0}\'', '>', subset_gtf]
+        logged_command(cmds)
+
+def make_db():
+    size, md5, fn = DB
+    if not _up_to_date(md5, fn):
+        gffutils.create_db(fn.replace('.db', ''), fn, verbose=True, force=True)
 
 
-def _cufflinks_conversion():
+def cufflinks_conversion():
     # convert Cufflinks output GTF files into tables
     fns = [
-        ('5c601c78e89e8d76fa998e2462ea718f', 'GSM847568_SL4326.gtf.gz'),
-        ('9616609cd5c2ef012341471c07988e69', 'GSM847567_SL4337.gtf.gz'),
-        ('b46eb07e01abc6c76c096896582f4a2d', 'GSM847566_SL2592.gtf.gz'),
-        ('845cf7e32c61703781cf3316b9452029', 'GSM847565_SL2585.gtf.gz'),
         ]
-    for md5, fn in fns:
-        fn = os.path.join(DATA_DIR, fn)
+    for size, md5, fn in cufflinks_tables:
+        fn = os.path.join(args.data_dir, fn)
         table = fn.replace('.gtf.gz', '.table')
         if not _up_to_date(md5, table):
             logger.info("Converting Cufflinks GTF %s to table" % fn)
@@ -167,10 +192,12 @@ def _cufflinks_conversion():
                     fout.write('\t'.join([accession, i.score, i['FPKM']]) + '\n')
             fout.close()
 
-def download_and_prep_data():
-    _just_download()
-    _gffutils_prep()
-    _cufflinks_conversion()
+
 
 if __name__ == "__main__":
-    download_and_prep_data()
+    get_bams()
+    get_bigwigs()
+    get_gtf()
+    make_db()
+    get_cufflinks()
+    cufflinks_conversion()
