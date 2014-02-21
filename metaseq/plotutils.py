@@ -123,6 +123,20 @@ def prepare_logged(x, y):
     return xi, yi
 
 
+def new_shell(figsize=(5, 12), strip=False, height_ratios=(4, 1), width_ratios=(4, 1), subplot_params=None):
+    if subplot_params is None:
+        subplot_params = {}
+    fig = plt.figure(figsize=figsize)
+    gs = gridspec.GridSpec(2, 2, height_ratios=height_ratios, width_ratios=width_ratios, **subplot_params)
+    fig.array_axes = plt.subplot(gs[0])
+    if strip:
+        fig.strip_axes = plt.subplot(gs[1])
+    fig.line_axes = plt.subplot(gs[2])
+    fig.cax = plt.subplot(gs[3])
+    fig.gs = gs
+    return fig
+
+
 def matrix_and_line_shell(figsize=(5, 12), strip=False):
     """
     Helper function to construct an empty figure that has space for a matrix,
