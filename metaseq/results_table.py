@@ -121,6 +121,24 @@ class ResultsTable(object):
                 else:
                     raise gffutils.FeatureNotFoundError('%s not found' % i)
 
+    def reindex_to(self, x, attribute="Name"):
+        """
+        Returns a copy that only has rows corresponding to feature names in x.
+
+        Parameters
+        ----------
+        x : str or pybedtools.BedTool
+            BED, GFF, GTF, or VCF where the "Name" field (that is, the value
+            returned by feature['Name']) or any arbitrary attribute
+
+        attribute : str
+            Attribute containing the name of the feature to use as the index.
+        """
+        names = [i[attribute] for i in x]
+        new = self.copy()
+        new.data = new.data.reindex(names)
+        return new
+
     def five_prime(self, upstream=1, downstream=0):
         """
         Creates a BED/GFF file of the 5' end of each feature represented in the
