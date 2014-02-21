@@ -9,6 +9,8 @@ from scipy import stats
 from statsmodels.stats.multitest import fdrcorrection
 from matplotlib.ticker import MaxNLocator
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+from matplotlib import gridspec
+import colormap_adjust
 
 
 def ci_plot(x, arr, conf=0.95, ax=None, line_kwargs=None, fill_kwargs=None):
@@ -23,6 +25,86 @@ def ci_plot(x, arr, conf=0.95, ax=None, line_kwargs=None, fill_kwargs=None):
     ax.plot(x, m, **line_kwargs)
     ax.fill_between(x, lo, hi, **fill_kwargs)
     return ax
+
+
+def imshow(arr, x=None, vmin=None, vmax=None, percentile=True, strip=False,
+           features=None, conf=0.95, line_kwargs=None, sort_by=None,
+           fill_kwargs=None, figsize=(5, 12), subplot_params=dict(wspace=0.1, hspace=0.1)):
+    """
+    Parameters
+    ----------
+    arr : array-like
+
+    x : 1D array
+        X values to use.  If None, use range(arr.shape[1])
+
+    vmin, vmax : float
+
+    percentile : bool
+        If True, then treat values for `vmin` and `vmax` as percentiles rather
+        than absolute values.
+
+    strip : bool
+        Include a strip plot alongside the array
+
+    features : pybedtools.BedTool or string filename
+        Features used to construct the array
+
+    sort_by : array-like
+        Use the provided array to sort the array (e.g., expression).  This
+        array is argsorted to get the proper order.
+
+    line_kwargs, fill_kwargs : dict
+        Passed directly to `ci_plot`.
+
+    figsize : tuple
+        (Width, height) of the figure to create.
+    """
+
+    fig = new_shell(figsize=figsize, strip=strip, subplot_params=subplot_params) #matrix_and_line_shell(figsize=figsize, strip=strip)
+
+    if x is None:
+        x = np.arange(arr.shape[1])
+
+    if percentile:
+        if vmin is None:
+            vmin = arr.min()
+        else:
+            vmin = stats.scoreatpercentile(arr.ravel(), vmin)
+        if vmax is None:
+            vmax = arr.max()
+        else:
+            vmax = stats.scoreatpercentile(arr.ravel(), vmax)
+    else:
+        if vmin is None:
+            vmin = arr.min()
+        if vmax is None:
+            vmax = arr.max()
+
+    cmap = colormap_adjust.smart_colormap(vmin, vmax)
+    if sort_by is not None:
+        ind = np.argsort(sort_by)
+    else:
+        ind = np.arange(arr.shape[0])
+
+    mappable = fig.array_axes.imshow(
+        arr[ind, :],
+        aspect='auto',
+        cmap=cmap,
+        vmin=vmin,
+        vmax=vmax,
+        origin='lower',
+        extent=(x.min(), x.max(), 0, arr.shape[0]),
+    )
+    plt.colorbar(mappable, fig.cax)
+    ci_plot(
+        x,
+        arr,
+        ax=fig.line_axes,
+        line_kwargs=line_kwargs,
+        fill_kwargs=fill_kwargs,
+    )
+    return fig
 
 
 def ci(arr, conf=0.95):
