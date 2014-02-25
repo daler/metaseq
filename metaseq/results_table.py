@@ -371,13 +371,6 @@ class ResultsTable(object):
             ind = block[0]
             allind[ind] = False
 
-
-        # Marginal histograms can be controlled either in the general kwargs or
-        # overridden using the `marginal_histograms` kwarg.
-        marginal_histograms = (
-            general_kwargs.pop('marginal_histograms', False)
-            or marginal_histograms)
-
         # Copy over the color and alpha if they're not specified
         general_hist_kwargs = plotutils._updatecopy(
             orig=general_hist_kwargs, update_with=general_kwargs,
@@ -434,18 +427,22 @@ class ResultsTable(object):
             updated_kwargs = plotutils._updatecopy(
                 orig=kwargs, update_with=general_kwargs)
 
-
             updated_hist_kwargs = plotutils._updatecopy(
                 orig=hist_kwargs, update_with=general_hist_kwargs)
             updated_hist_kwargs = plotutils._updatecopy(
                 orig=updated_hist_kwargs, update_with=kwargs,
                 keys=['color', 'alpha'], override=True)
 
+            xhist_kwargs = updated_kwargs.pop('xhist_kwargs', None)
+            yhist_kwargs = updated_kwargs.pop('yhist_kwargs', None)
+
             self.marginal.append(
                 xi[ind & xv & yv],
                 yi[ind & xv & yv],
                 scatter_kwargs=dict(picker=5, **updated_kwargs),
                 hist_kwargs=updated_hist_kwargs,
+                xhist_kwargs=xhist_kwargs,
+                yhist_kwargs=yhist_kwargs,
                 marginal_histograms=_marginal_histograms)
             coll = self.marginal.scatter_ax.collections[-1]
             coll.df = self.data
