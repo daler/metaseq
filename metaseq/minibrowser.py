@@ -190,7 +190,10 @@ class ChIPSeqMiniBrowser(BaseMiniBrowser):
         self.ip_style = ip_style or {}
         self.peaks_style = peaks_style or {}
         self.control_style = control_style or {}
-        self.peaks = pybedtools.BedTool(peaks)
+
+        if peaks is not None:
+            peaks = pybedtools.BedTool(peaks)
+        self.peaks = peaks
         self.max_bins = max_bins
 
         self.settings = {
