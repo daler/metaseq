@@ -347,7 +347,7 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
     return stacked_xs, stacked_profiles
 
 
-def _array_parallel(fn, cls, genelist, chunksize=25, processes=1, **kwargs):
+def _array_parallel(fn, cls, genelist, chunksize=250, processes=1, **kwargs):
     """
     Returns an array of genes in `genelist`, using `bins` bins.
 
@@ -360,19 +360,21 @@ def _array_parallel(fn, cls, genelist, chunksize=25, processes=1, **kwargs):
     """
     pool = multiprocessing.Pool(processes)
     chunks = list(chunker(genelist, chunksize))
-
     # pool.map can only pass a single argument to the mapped function, so you
     # need this trick for passing multiple arguments; idea from
     # http://stackoverflow.com/questions/5442910/
     #               python-multiprocessing-pool-map-for-multiple-arguments
     #
-    return pool.map(
-        _array_star,
-        itertools.izip(
+    results = pool.map(
+        func=_array_star,
+        iterable=itertools.izip(
             itertools.repeat(fn),
             itertools.repeat(cls),
             chunks,
             itertools.repeat(kwargs)))
+    pool.close()
+    pool.join()
+    return results
 
 
 def _array_star(args):
