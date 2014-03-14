@@ -29,7 +29,8 @@ def ci_plot(x, arr, conf=0.95, ax=None, line_kwargs=None, fill_kwargs=None):
 
 def imshow(arr, x=None, vmin=None, vmax=None, percentile=True, strip=False,
            features=None, conf=0.95, line_kwargs=None, sort_by=None,
-           fill_kwargs=None, figsize=(5, 12), subplot_params=dict(wspace=0.1, hspace=0.1)):
+           fill_kwargs=None, figsize=(5, 12), width_ratios=(4, 1), height_ratios=(4, 1),
+           subplot_params=dict(wspace=0.1, hspace=0.1)):
     """
     Parameters
     ----------
@@ -61,7 +62,12 @@ def imshow(arr, x=None, vmin=None, vmax=None, percentile=True, strip=False,
         (Width, height) of the figure to create.
     """
 
-    fig = new_shell(figsize=figsize, strip=strip, subplot_params=subplot_params) #matrix_and_line_shell(figsize=figsize, strip=strip)
+    fig = new_shell(
+        figsize=figsize,
+        strip=strip,
+        subplot_params=subplot_params,
+        width_ratios=width_ratios,
+        height_ratios=height_ratios)
 
     if x is None:
         x = np.arange(arr.shape[1])
@@ -209,12 +215,17 @@ def new_shell(figsize=(5, 12), strip=False, height_ratios=(4, 1), width_ratios=(
     if subplot_params is None:
         subplot_params = {}
     fig = plt.figure(figsize=figsize)
-    gs = gridspec.GridSpec(2, 2, height_ratios=height_ratios, width_ratios=width_ratios, **subplot_params)
-    fig.array_axes = plt.subplot(gs[0])
+    gs = gridspec.GridSpec(
+        len(height_ratios),
+        len(width_ratios),
+        height_ratios=height_ratios,
+        width_ratios=width_ratios,
+        **subplot_params)
+    fig.array_axes = plt.subplot(gs[0, 0])
     if strip:
-        fig.strip_axes = plt.subplot(gs[1])
-    fig.line_axes = plt.subplot(gs[2])
-    fig.cax = plt.subplot(gs[3])
+        fig.strip_axes = plt.subplot(gs[0, 1])
+    fig.line_axes = plt.subplot(gs[1, 0])
+    fig.cax = plt.subplot(gs[1, 1])
     fig.gs = gs
     return fig
 
