@@ -30,7 +30,8 @@ def ci_plot(x, arr, conf=0.95, ax=None, line_kwargs=None, fill_kwargs=None):
 def imshow(arr, x=None, vmin=None, vmax=None, percentile=True, strip=False,
            features=None, conf=0.95, line_kwargs=None, sort_by=None,
            fill_kwargs=None, figsize=(5, 12), width_ratios=(4, 1), height_ratios=(4, 1),
-           subplot_params=dict(wspace=0.1, hspace=0.1)):
+           subplot_params=dict(wspace=0.1, hspace=0.1),
+           imshow_kwargs=None):
     """
     Parameters
     ----------
@@ -87,6 +88,9 @@ def imshow(arr, x=None, vmin=None, vmax=None, percentile=True, strip=False,
         if vmax is None:
             vmax = arr.max()
 
+    if imshow_kwargs is None:
+        imshow_kwargs = {}
+
     cmap = colormap_adjust.smart_colormap(vmin, vmax)
     if sort_by is not None:
         ind = np.argsort(sort_by)
@@ -101,6 +105,7 @@ def imshow(arr, x=None, vmin=None, vmax=None, percentile=True, strip=False,
         vmax=vmax,
         origin='lower',
         extent=(x.min(), x.max(), 0, arr.shape[0]),
+        **imshow_kwargs
     )
     plt.colorbar(mappable, fig.cax)
     ci_plot(
