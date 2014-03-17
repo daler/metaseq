@@ -1,6 +1,7 @@
 from copy import copy
 import os
 import sys
+import glob
 import time
 import scipy
 import matplotlib
@@ -46,6 +47,16 @@ def example_filename(fn):
         raise ValueError("%s does not exist" % fn)
     return fn
 
+
+def list_example_files(pattern=None, full_path=False):
+    if pattern is None:
+        files = os.listdir(data_dir())
+    else:
+        files = glob.glob(os.path.join(data_dir(), pattern))
+    if full_path:
+        return files
+    else:
+        return [os.path.basename(i) for i in files]
 
 def split_feature(f, n):
     """
