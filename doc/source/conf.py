@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# metachip documentation build configuration file, created by
+# metaseq documentation build configuration file, created by
 # sphinx-quickstart on Sat Oct  8 14:09:02 2011.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -33,7 +33,11 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest',
 
 autosummary_generate = True
 autoclass_content = "both"
-
+doctest_global_setup = """
+from metaseq import *
+import metaseq
+import numpy as np
+from matplotlib import pyplot as plt"""
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -47,8 +51,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'metachip'
-copyright = u'2011, Ryan Dale'
+project = u'metaseq'
+copyright = u'2014, Ryan Dale'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -173,7 +177,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'metachipdoc'
+htmlhelp_basename = 'metaseqdoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -192,7 +196,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'metachip.tex', u'metachip Documentation',
+  ('index', 'metaseq.tex', u'metaseq Documentation',
    u'Ryan Dale', 'manual'),
 ]
 
@@ -222,7 +226,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'metachip', u'metachip Documentation',
+    ('index', 'metaseq', u'metaseq Documentation',
      [u'Ryan Dale'], 1)
 ]
 
@@ -236,8 +240,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'metachip', u'metachip Documentation', u'Ryan Dale',
-   'metachip', 'One line description of project.', 'Miscellaneous'),
+  ('index', 'metaseq', u'metaseq Documentation', u'Ryan Dale',
+   'metaseq', 'One line description of project.', 'Miscellaneous'),
 ]
 
 # Documents to append as an appendix to all manuals.
@@ -253,7 +257,7 @@ texinfo_documents = [
 # -- Options for Epub output ---------------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = u'metachip'
+epub_title = u'metaseq'
 epub_author = u'Ryan Dale'
 epub_publisher = u'Ryan Dale'
 epub_copyright = u'2011, Ryan Dale'
