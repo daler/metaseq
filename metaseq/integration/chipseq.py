@@ -135,39 +135,6 @@ class Chipseq(object):
         * `_strip_kwargs` (the style for the dots in the left panel)
         * `browser_plotting_kwargs` (style of signal lines in the mini-browser)
 
-    Example usage:
-
-        >>> dbfn=metaseq.example_filename(
-        ...        'Homo_sapiens.GRCh37.66.cleaned.gtf.db')
-        >>> C = Chipseq(
-        ...        ip_bam=metaseq.example_filename(
-        ...            'wgEncodeUwTfbsK562CtcfStdAlnRep1.bam'),
-        ...        control_bam=metaseq.example_filename(
-        ...            'wgEncodeUwTfbsK562InputStdAlnRep1.bam'),
-        ...        dbfn=dbfn)
-        >>> local_coverage_kwargs = dict(
-        ...         fragment_size=200,
-        ...         bins=100, chunksize=50, processes=6)
-
-        >>> # make some features to use
-        >>> G = gffutils.FeatureDB(dbfn)
-        >>> genes = G.features_of_type('gene')
-        >>> features = []
-        >>> for i in range(100):
-        ...    features.append(asinterval(genes.next()))
-
-        >>> # x-axis for plots
-        >>> x = np.arange(100)
-
-        >>> # Create the array
-        >>> C.diff_array(features=features, array_kwargs=local_coverage_kwargs)
-
-        >>> # sort genes by
-        >>> row_order = np.argsort(
-        ...     plotutils.tip_zscores(C.diffed_array))[::-1]
-        >>> C.plot(x=x, row_order=row_order)
-        >>> plt.show()
-
     """
     def __init__(self, ip_bam, control_bam, dbfn=None):
         """

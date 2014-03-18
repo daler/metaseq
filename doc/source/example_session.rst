@@ -12,15 +12,16 @@ http://nbviewer.ipython.org/github/daler/metaseq/blob/v0.5dev/doc/source/example
 
 .. code:: python
 
+    # Enable in-line plots for this example
     %matplotlib inline
 Example data
 ------------
 
 This example uses data that can be downloaded and prepared by running
-the `download_metaseq_example_data.py` script included with metaseq.
-This will download human cell line data from the ENCODE project,
-Ensembl, and GEO, and will prepare small test data files that only use
-data from chromosome 17.
+the `download_metaseq_example_data.py` script included with
+`metaseq`. This will download human cell line data from the ENCODE
+project, Ensembl, and GEO, and will prepare small test data files that
+only use data from chromosome 17.
 
 This section shows how to get the TSS +/- 1kb surrounding all
 transcripts on chr17 from the example GTF file. It also shows how to
@@ -40,7 +41,7 @@ work with, then you can skip to the next section.
     # Input chromatin for K562 cells, chr17 only.
     input_filename = example_filename('wgEncodeHaibTfbsK562RxlchV0416101AlnRep1_chr17.bam')
 
-The metaseq example data includes a GTF file of annotations for
+The `metaseq` example data includes a GTF file of annotations for
 chromosome 17. As part of the data download process, it was converted
 into a `gffutils` database. We can use that database in order to
 create TSS +/- 1kb for all transcripts.
@@ -143,12 +144,18 @@ Now that we’ve saved to disk, we can load the data:
 
 .. code:: python
 
+    # ---------------------------------------------------------
+    # Load the windows and arrays
+    
     features, arrays = persistence.load_features_and_arrays(prefix='example')
 
 Let’s do some double-checks.
 
 .. code:: python
 
+    # ---------------------------------------------------------
+    # Sanity-checks
+    
     assert len(features) == 5708  # how many features?
     assert sorted(arrays.keys()) == ['input', 'ip']  # `arrays` acts like a dictionary
     assert arrays['ip'].shape == (5708, 100)  # one row per feature, and one column per bin
@@ -164,6 +171,9 @@ input. Let’s construct meaningful values for the x-axis, from -1000 to
 
 .. code:: python
 
+    # ---------------------------------------------------------
+    # Create a meaningful x-axis
+    
     import numpy as np
     x = np.linspace(-1000, 1000, 100)
 
@@ -171,6 +181,9 @@ Then plot:
 
 .. code:: python
 
+    # ---------------------------------------------------------
+    # Initial plot of average signal over TSSs
+    
     from matplotlib import pyplot as plt
     
     fig = plt.figure()
@@ -193,20 +206,26 @@ Then plot:
 
 
 Let's work on improving this plot, one step at a time. First, let's
-create a single normalized array by subtracting input from IP. For
-comparison, we'll make another one that divides IP by input.
+create a single normalized array by subtracting input from IP:
 
 .. code:: python
 
+    # ---------------------------------------------------------
+    # Normalize IP to the control
+    
     normalized_subtracted = arrays['ip'] - arrays['input']
-    normalized_divided = arrays['ip'] / arrays['input']
-
-`metaseq` comes with some helper functions to make plotting easier.
-The :func:`metaseq.plotutils.imshow` function is one of these; here
-the arguments are described:
+We don't really know if this average signal is due to a handful of
+really strong peaks, or if it's moderate signal over many peaks. So one
+improvement would be to include a heatmap of the signal over all the
+TSSs. `metaseq` comes with some helper functions to simplify this kind
+of plotting. The :func:`metaseq.plotutils.imshow` function is one of
+these; here the arguments are described:
 
 .. code:: python
 
+    # ---------------------------------------------------------
+    # First version of a plot that includes a heatmap of the array
+    
     plt.rcParams['font.family'] = 'Arial'
     plt.rcParams['font.size'] = 10
     
@@ -243,6 +262,9 @@ the `sort_by` kwarg when calling :func:`metaseq.plotutils.imshow`.
 
 .. code:: python
 
+    # ---------------------------------------------------------
+    # Same plot, but add a meaningful sort order
+    
     fig = metaseq.plotutils.imshow(
         # These are the same arguments as above.
         normalized_subtracted,
@@ -269,6 +291,9 @@ additional tweaks:
 
 .. code:: python
 
+    # ---------------------------------------------------------
+    # Label axes, add dotted lines indicating TSS
+    
     fig.line_axes.set_ylabel('Average enrichment');
     fig.line_axes.set_xlabel('Distance from TSS (bp)');
     
@@ -299,10 +324,16 @@ went up, down, or were unchanged upon ATF3 knockdown.
 
 .. code:: python
 
+    # ---------------------------------------------------------
+    # Get filenames for example data
+    
     control_filename = example_filename('GSM847565_SL2585.table')
     knockdown_filename = example_filename('GSM847566_SL2592.table')
 .. code:: python
 
+    # ---------------------------------------------------------
+    # Create ResultsTable objects out of example data
+    
     from metaseq.results_table import ResultsTable
     
     control = ResultsTable(control_filename, import_kwargs=dict(index_col=0))
@@ -311,10 +342,15 @@ went up, down, or were unchanged upon ATF3 knockdown.
 :class:`metaseq.results_table.ResultsTable` objects are wrappers
 around `pandas.DataFrame` objects. The `DataFrame` object is always
 available as the `data` attribute. Here are the first 5 rows of the
-`control` object:
+`control` object, which show that the index is `id`, which are
+Ensembl transcript IDs, and there are two columns, `score` and
+`fpkm`:
 
 .. code:: python
 
+    # ---------------------------------------------------------
+    # Inspect results to see what we're working with
+    
     print len(control.data)
     control.data.head()
 
@@ -387,6 +423,9 @@ that file to see how the transcript ID information is stored:
 
 .. code:: python
 
+    # ---------------------------------------------------------
+    # Inspect the GTF file originally used to create the array
+    
     print tsses[0]
 
 
@@ -402,11 +441,16 @@ the GTF attributes, so we should let the
 
 .. code:: python
 
+    # ---------------------------------------------------------
+    # Re-align the ResultsTables to match the GTF file
     control = control.reindex_to(tsses, attribute='transcript_id')
     knockdown = knockdown.reindex_to(tsses, attribute='transcript_id')
 
 .. code:: python
 
+    # ---------------------------------------------------------
+    # Sanity-checks
+    
     # Everything should be the same length
     assert len(control.data) == len(knockdown.data) == len(tsses) == 5708
     
@@ -417,6 +461,9 @@ the GTF attributes, so we should let the
 
 .. code:: python
 
+    # ---------------------------------------------------------
+    # Merge the control and knockdown data, and create a log2foldchange variable
+    
     # Join the dataframes and create a new pandas.DataFrame.
     data = control.data.join(knockdown.data, lsuffix='_control', rsuffix='_knockdown')
     
@@ -491,6 +538,9 @@ the GTF attributes, so we should let the
 
 .. code:: python
 
+    # ---------------------------------------------------------
+    # How many transcripts on chr17 changed expression?
+    
     print "up:", sum(data.log2foldchange > 1)
     print "down:", sum(data.log2foldchange < -1)
 
@@ -509,6 +559,9 @@ entry to the `height_ratios` tuple:
 
 .. code:: python
 
+    # ---------------------------------------------------------
+    # Add an additional axes to the heatmap figure
+    
     fig = metaseq.plotutils.imshow(
         # Same as before...
         normalized_subtracted,
@@ -537,6 +590,9 @@ plots the mean signal +/- 95% CI bands.
 
 .. code:: python
 
+    # ---------------------------------------------------------
+    # Add average signal for different classes of transcripts to the new axes
+    
     
     # Signal over TSSs of transcripts that were activated upon knockdown.
     metaseq.plotutils.ci_plot(
