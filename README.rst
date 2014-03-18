@@ -1,52 +1,36 @@
 Metaseq
 =======
-.. note:: 
 
-    The main documentation for `metaseq` can be found at
-    http://packages.python.org/metaseq/
+The main documentation for `metaseq` can be found at http://packages.python.org/metaseq/
 
-    See http://packages.python.org/metaseq/example_session.html for an example
-    session.
-
-The goal of `metaseq` is to tie together lots of existing software into
+Briefly, the goal of `metaseq` is to tie together lots of existing software into
 a framework for exploring genomic data.  It focuses on flexibility and
-interactive exploration of data.
+interactive exploration and plotting of disparate genomic data sets.
 
-`metaseq` is sort of like a glue that brings together lot of great software
-commonly used for genomic data analysis.  It gives you the tools you need to do
-analyses that are difficult to do in any other way that I know of.  It ties
-together other packages like:
+The example session shows the the process of creating a plot like this,
+starting with BAM and GTF files:
 
-* `Pysam` [1]_ for access to BAM and SAM files
-* `bx-python` [2]_ for access to bigWig and bigBed files
-* `pybedtools` [3]_, which integrates BEDTools into Python, for fast "genome
-  algebra"
-* `matplotlib` [4]_ for rich, interactive, highly customizable plotting
-* `gffutils` [5]_ for hierarchical access to gene models
-* `Cython` [6]_ for speed
-* `scikits.learn` [7]_ for fast clustering
-* `NumPy` [8]_ for large, fast arrays
+.. figure:: demo.png
 
+    Top: Heatmap of ATF3 ChIP-seq signal over transcription start sites (TSS) on
+    chr17 in human K562 cells.  Middle: average ChIP enrichment over all TSSs
+    +/- 1kb, with 95% CI band.  Bottom: Integration with ATF3 knockdown RNA-seq
+    results, showing differential enrichment over transcripts that went up,
+    down, or were unchanged upon ATF3 knockdown.
 
-`metaseq` also:
+`metaseq` offers:
 
-* Supplies a fast "rebinning" routine that is compiled in C for speed
-* Accepts bigBed, bigWig, BAM and SAM files as input for random access of
-  continuous data (and with Tabix, accepts BED, GFF, GTF, VCF as well)
-* Support for tunable (i.e., tradeoffs between CPU, RAM, and I/O) parallel
-  processing of data accessed from the file formats mentioned above
-* Provides a framework for "mini-browsers", zoomable and pannable Python-only
-  figures that show genomic signal and gene models and are spawned by clicking
-  on features of interest
-* Integrates RNA-seq and ChIP-seq data by using gffutils to convert between
-  gene IDs and coordinates as well as handle full gene models and plotting.
+* A format-agnostic API for accessing "genomic signal" that allows you to work
+  with BAM, BED, VCF, GTF, GFF, bigBed, and bigWig using the same API.
 
+* Parallel data access from the file formats mentioned above
 
-.. [1] http://code.google.com/p/pysam/
-.. [2] https://bitbucket.org/james_taylor/bx-python/wiki/Home
-.. [3] http://packages.python.org/pybedtools
-.. [4] http://matplotlib.sourceforge.net/
-.. [5] http://packages.python.org/gffutils
-.. [6] http://cython.org/
-.. [7] http://scikit-learn.org/stable/
-.. [8] http://www.scipy.org/
+* "Mini-browsers", zoomable and pannable Python-only  figures that show genomic
+  signal and gene models and are spawned by clicking on features of interest
+
+* A wrapper around pandas.DataFrames to simplify working with tabular results
+  data, (think DESeq results tables)
+
+* Integrates data keyed by genomic interval (think BAM or BED files) with data
+  keyed by gene ID (e.g., Cufflinks or DESeq results tables)
+

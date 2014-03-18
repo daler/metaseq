@@ -46,5 +46,8 @@ Contents:
 .. toctree::
     :maxdepth: 2
 
+    install
     example_session
     autodocs
+    changes
+    autodocs2/metaseq

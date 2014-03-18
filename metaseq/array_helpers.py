@@ -45,6 +45,8 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
                     preserve_total=False, method=None, processes=None,
                     stranded=True, verbose=False):
     """
+    Returns a binned vector of coverage.
+
     Computes a 1D vector of coverage at the coordinates for each feature in
     `features`, extending each read by `fragmentsize` bp.
 
@@ -159,8 +161,14 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
     processes : int or None
         The feature can be split across multiple processes.
 
-    :rtype: NumPy array
+    Returns
+    -------
 
+    1-d NumPy array
+
+
+    Notes
+    -----
     If a feature has a "-" strand attribute, then the resulting profile will be
     *relative to a minus-strand feature*.  That is, the resulting profile will
     be reversed.

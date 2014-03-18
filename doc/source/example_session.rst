@@ -1,6 +1,6 @@
 
-Example: Average signal over promoters
-======================================
+Example: Average ChIP-seq signal over promoters
+===============================================
 
 This example demonstrates the use of :mod:`metaseq` for performing a
 common task when analyzing ChIP-seq data: what is the average signal
@@ -8,6 +8,7 @@ over transcription start sites (TSS) throughout the genome?
 
 The IPython Notebook of this example can be found in the source
 directory (`doc/source/example_session.ipynb`) or at
+http://nbviewer.ipython.org/github/daler/metaseq/blob/v0.5dev/doc/source/example\_session.ipynb
 
 .. code:: python
 
@@ -137,11 +138,13 @@ to disk, along with the windows that were used to create them.
             prefix='example',
             link_features=True,
             overwrite=True)
+        
 Now that we’ve saved to disk, we can load the data:
 
 .. code:: python
 
     features, arrays = persistence.load_features_and_arrays(prefix='example')
+
 Let’s do some double-checks.
 
 .. code:: python
@@ -150,6 +153,7 @@ Let’s do some double-checks.
     assert sorted(arrays.keys()) == ['input', 'ip']  # `arrays` acts like a dictionary
     assert arrays['ip'].shape == (5708, 100)  # one row per feature, and one column per bin
     assert arrays['ip'].shape == arrays['input'].shape
+
 Plotting
 --------
 
@@ -162,6 +166,7 @@ input. Let’s construct meaningful values for the x-axis, from -1000 to
 
     import numpy as np
     x = np.linspace(-1000, 1000, 100)
+
 Then plot:
 
 .. code:: python
@@ -183,6 +188,7 @@ Then plot:
     ax.legend(loc='best');
 
 
+
 .. image:: example_session_files/example_session_19_0.png
 
 
@@ -194,6 +200,7 @@ comparison, we'll make another one that divides IP by input.
 
     normalized_subtracted = arrays['ip'] - arrays['input']
     normalized_divided = arrays['ip'] / arrays['input']
+
 `metaseq` comes with some helper functions to make plotting easier.
 The :func:`metaseq.plotutils.imshow` function is one of these; here
 the arguments are described:
@@ -226,6 +233,7 @@ the arguments are described:
     )
 
 
+
 .. image:: example_session_files/example_session_23_0.png
 
 
@@ -249,6 +257,7 @@ the `sort_by` kwarg when calling :func:`metaseq.plotutils.imshow`.
     )
 
 
+
 .. image:: example_session_files/example_session_25_0.png
 
 
@@ -270,6 +279,7 @@ additional tweaks:
     fig.line_axes.axvline(0, linestyle=':', color='k')
     
     fig
+
 
 
 
@@ -297,6 +307,7 @@ went up, down, or were unchanged upon ATF3 knockdown.
     
     control = ResultsTable(control_filename, import_kwargs=dict(index_col=0))
     knockdown = ResultsTable(knockdown_filename, import_kwargs=dict(index_col=0))
+
 :class:`metaseq.results_table.ResultsTable` objects are wrappers
 around `pandas.DataFrame` objects. The `DataFrame` object is always
 available as the `data` attribute. Here are the first 5 rows of the
@@ -378,6 +389,7 @@ that file to see how the transcript ID information is stored:
 
     print tsses[0]
 
+
 .. parsed-literal::
 
     chr17	gffutils_derived	transcript	37025256	37027255	.	+	.	transcript_id "ENST00000318008"; gene_id "ENSG00000002834";
@@ -392,6 +404,7 @@ the GTF attributes, so we should let the
 
     control = control.reindex_to(tsses, attribute='transcript_id')
     knockdown = knockdown.reindex_to(tsses, attribute='transcript_id')
+
 .. code:: python
 
     # Everything should be the same length
@@ -401,6 +414,7 @@ the GTF attributes, so we should let the
     assert tsses[0]['transcript_id'] == control.data.index[0]
     assert tsses[100]['transcript_id'] == control.data.index[100]
     assert tsses[5000]['transcript_id'] == control.data.index[5000]
+
 .. code:: python
 
     # Join the dataframes and create a new pandas.DataFrame.
@@ -409,6 +423,7 @@ the GTF attributes, so we should let the
     # Add a log2 fold change variable
     data['log2foldchange'] = np.log2(data.fpkm_knockdown / data.fpkm_control)
     data.head()
+
 
 
 
@@ -478,6 +493,7 @@ the GTF attributes, so we should let the
 
     print "up:", sum(data.log2foldchange > 1)
     print "down:", sum(data.log2foldchange < -1)
+
 
 .. parsed-literal::
 
@@ -561,7 +577,10 @@ plots the mean signal +/- 95% CI bands.
     
     # Nice legend
     bottom_axes.legend(loc='best', frameon=False, fontsize=8, labelspacing=.3, handletextpad=0.2)
+    fig.subplots_adjust(left=0.3, right=0.8, bottom=0.05)
+    fig.savefig('demo.png')
     fig
+
 
 
 
@@ -579,13 +598,3 @@ replicate, and we only looked at chr17, the direction of the
 relationship we see here -- where ATF3-repressed genes have a higher
 signal than ATF3-activated -- is consistent with ATF3's known repressive
 role.
-
-.. code:: python
-
-    
-.. code:: python
-
-    
-.. code:: python
-
-    

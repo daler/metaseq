@@ -111,6 +111,8 @@ class BaseSignal(object):
             supplying `bins` or if all features are of uniform length.  If
             True, then return a list of 1-D NumPy arrays
 
+        Notes
+        -----
         Additional keyword args are passed to local_coverage() which performs
         the work for each feature; see that method for more details.
         """
@@ -126,7 +128,6 @@ class BaseSignal(object):
             return stacked_arrays
         else:
             return arrays
-      
 
     def local_coverage(self, features, *args, **kwargs):
         processes = kwargs.pop('processes', None)
@@ -156,6 +157,8 @@ class BaseSignal(object):
             del x, y
             return xi, yi
         return x, y
+
+    local_coverage.__doc__ = _local_coverage.__doc__
 
 
 class BigWigSignal(BaseSignal):

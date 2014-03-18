@@ -582,6 +582,10 @@ p {
     margin: 0.8em 0 0.5em 0;
 }
 
+p.caption {
+    font-size: 0.8em;
+    font-style: italic;
+}
 .section p img {
     margin: 1em 2em;
 }

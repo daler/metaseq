@@ -47,7 +47,9 @@ html:
 	-rm -r $(BUILDDIR)/html
 	(cd source && ipython nbconvert --to rst example_session.ipynb && sed -i "s/\`\`/\`/g" example_session.rst)
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
-	cd $(BUILDDIR)/html && zip -r docs.zip . && cd -
+	cp source/demo.png $(BUILDDIR)/html/demo.png
+	cp source/demo.png ..
+	(cd $(BUILDDIR)/html && zip -rq docs.zip .)
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
