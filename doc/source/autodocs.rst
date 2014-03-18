@@ -3,11 +3,11 @@ API docs
 .. contents::
 
 
-.. currentmodule:: metaseq.genomic_signal
+.. currentmodule:: metaseq._genomic_signal
 
 :mod:`genomic_signal`
 ---------------------
-.. automodule:: metaseq.genomic_signal
+.. automodule:: metaseq._genomic_signal
 
 ----
 
@@ -17,8 +17,8 @@ API docs
    :nosignatures:
    :toctree: autodocs
 
-   metaseq.genomic_signal.genomic_signal
-   metaseq.genomic_signal.supported_formats
+   metaseq._genomic_signal.genomic_signal
+   metaseq._genomic_signal.supported_formats
 
 .. rubric:: Classes
 
@@ -27,10 +27,10 @@ API docs
    :toctree: autodocs
    :template: auto_template.rst
 
-   metaseq.genomic_signal.BigWigSignal
-   metaseq.genomic_signal.BamSignal
-   metaseq.genomic_signal.BigBedSignal
-   metaseq.genomic_signal.BedSignal
+   metaseq._genomic_signal.BigWigSignal
+   metaseq._genomic_signal.BamSignal
+   metaseq._genomic_signal.BigBedSignal
+   metaseq._genomic_signal.BedSignal
 
 
 ----
