@@ -1,386 +1,591 @@
 
-.. _example_session:
+Example: Average signal over promoters
+======================================
 
-Example session
-===============
-This example session will demonstrate reading in BAM files from a ChIP-seq
-experiment and plotting the normalized ChIP signal for TSSs of selected genes
-as a heatmap.
+This example demonstrates the use of :mod:`metaseq` for performing a
+common task when analyzing ChIP-seq data: what is the average signal
+over transcription start sites (TSS) throughout the genome?
 
-.. note::
+The IPython Notebook of this example can be found in the source
+directory (`doc/source/example_session.ipynb`) or at
 
-    **Using this documentation**: To follow along:
+.. code:: python
 
-    * first install `IPython <http://ipython.org/ipython-doc/dev/index.html>`_
-    * Start IPython in pylab mode: ``ipython --pylab``
-    * For each block of code below, use the `%cpaste` magic function to paste
-      in the code, and end the pasted entry with a ``--`` on a line by itself.
-      For example::
-
-        In [1]: %cpaste
-        Pasting code; enter '--' alone on the line to stop or use Ctrl-D.
-        :
-        :In [1]: import metaseq
-        :
-        :# ATF3 ChIP in K562 cells from ENCODE
-        : In [2]: ip_bam = metaseq.example_filename(
-        :   ...:     'wgEncodeHaibTfbsK562Atf3V0416101AlnRep1.bam')
-        :
-        :--
-
-    Do not paste in lines containing output (e.g., ``Out [1]: 5345``) as these
-    will result in a syntax error.
-
+    %matplotlib inline
 Example data
 ------------
-Example data can be downloaded from ENCODE and GEO using the installed script,
-:file:`download_metaseq_example_data.py`.  This will download several GB of
-publicly available data and store it in the :mod:`metaseq` installation folder.
 
-After downloading the data, it can be easily accessed with the
-:func:`metaseq.example_filename` function:
+This example uses data that can be downloaded and prepared by running
+the `download_metaseq_example_data.py` script included with metaseq.
+This will download human cell line data from the ENCODE project,
+Ensembl, and GEO, and will prepare small test data files that only use
+data from chromosome 17.
 
-.. ipython::
+This section shows how to get the TSS +/- 1kb surrounding all
+transcripts on chr17 from the example GTF file. It also shows how to
+easily access the example data. If you have your own data you’d like to
+work with, then you can skip to the next section.
 
-    In [1]: import metaseq
+.. code:: python
 
-    # ATF3 ChIP in K562 cells from ENCODE
-    In [2]: ip_bam = metaseq.example_filename(
-       ...:     'wgEncodeHaibTfbsK562Atf3V0416101AlnRep1.bam')
+    # ---------------------------------------------------------
+    # Get example filenames
+    #
+    from metaseq.helpers import example_filename
+    
+    # ATF3 ChIP-seq data in K562 cells, chr17 only
+    ip_filename = example_filename('wgEncodeHaibTfbsK562Atf3V0416101AlnRep1_chr17.bam')
+    
+    # Input chromatin for K562 cells, chr17 only.
+    input_filename = example_filename('wgEncodeHaibTfbsK562RxlchV0416101AlnRep1_chr17.bam')
 
-    # Reverse-crosslinked chromatin as control
-    In [3]: control_bam = metaseq.example_filename(
-       ...:     'wgEncodeHaibTfbsK562RxlchV0416101AlnRep1.bam')
+The metaseq example data includes a GTF file of annotations for
+chromosome 17. As part of the data download process, it was converted
+into a `gffutils` database. We can use that database in order to
+create TSS +/- 1kb for all transcripts.
 
+.. code:: python
 
-    # A gffutils database that was created by the data download script from
-    # the Ensembl GTF annotations for GRCh37.66.
-    In [4]: dbfn = metaseq.example_filename(
-       ...:     'Homo_sapiens.GRCh37.66.cleaned.gtf.db')
+    # ---------------------------------------------------------
+    # Get TSS +/- 1kb for all annotated transcripts on chr17.
+    #
+    import os
+    import gffutils
+    import pybedtools
+    from pybedtools.featurefuncs import TSS
+    from gffutils.helpers import asinterval
+    
+    db = gffutils.FeatureDB(example_filename('Homo_sapiens.GRCh37.66_chr17.gtf.db'))
+    
+    # Here we only create if needed, caching to disk.
+    if not os.path.exists('tsses.gtf'):
+        def tss_generator():
+                """
+                Generator function to yield TSS +/- 1kb of each annotated transcript
+                """
+                for transcript in db.features_of_type('transcript'):
+                    yield TSS(asinterval(transcript), upstream=1000, downstream=1000)
+    
+        # A BedTool made out of a generator, and saved to file.
+        tsses = pybedtools.BedTool(tss_generator()).saveas('tsses.gtf')
 
+Creating the arrays
+-------------------
 
-Create a :class:`Chipseq` object
---------------------------------
-The :class:`metaseq.integration.chipseq.Chipseq` class creates
-:class:`metaseq.genomic_signal.BamSignal` objects and has some useful methods
-to manipulate them that we'll take advantage of later (specificialy,
-:meth:`metaseq.integration.chipseq.Chipseq.plot` and
-:meth:`metaseq.integration.chipseq.Chipseq.diff_array`). So let's create one
-using the example filenames:
+metaseq works with the concepts of signal and windows. In this example,
+the signal is ChIP data, and the windows are TSS +/- 1kb.
 
-.. ipython::
+The first step is to create “genomic signal” objects out of the data.
+Since our example files are BAM files, we specify the kind=’bam’, but if
+you have your own data in a different format (bigWig, bigBed, BED, GFF,
+GTF, VCF) then specify that format instead (see
+:func:`metaseq.genomic_signal()`).
 
-    In [1]: from metaseq.integration import chipseq
+.. code:: python
 
-    In [1]: chip = chipseq.Chipseq(ip_bam=ip_bam, control_bam=control_bam,
-       ...:    dbfn=dbfn)
+    # ---------------------------------------------------------
+    # Create genomic_signal objects that point to data files
+    #
+    import metaseq
+    ip_signal = metaseq.genomic_signal(ip_filename, 'bam')
+    input_signal = metaseq.genomic_signal(input_filename, 'bam')
+Next we need the windows to use. The GTF file of TSSs we created above
+is called `tsses.gtf`, and we can connect to it like this (again,
+provide your own path as needed):
 
+.. code:: python
 
-Select features of interest
----------------------------
-Let's create some features to look at. A common task for transcription factors
-is to focus on transcription start sites (TSSs) of annotated genes.
+    # ---------------------------------------------------------
+    # The windows we'll get signal over
+    
+    tsses = pybedtools.BedTool('tsses.gtf')
+Now we can create the arrays of signal over each window. Since this can
+be a time-consuming step, the first time this code is run it will cache
+the arrays on disk. The next time this code is run, it will be quickly
+loaded. Trigger a re-run by deleting the `.npz` file.
 
-We can use the prepared database to get individual isoforms for
-all genes. Recall that GTF files only contain exon/CDS/start codon/stop codon features,
-not whole genes or transcripts.  One step of the database creation with
-:mod:`gffutils` is to collect all exons for a particular transcript and infer
-the start/stop coords of the full transcript -- then do the same for all
-transcripts of a gene to infer the full gene coords.  In the end, it allows us
-to access the transcript coords easily in the :func:`feature_generator`
-function below.
+Here, with the :meth:`BamSignal.array` method, we bin each promoter
+region into 100 bins, and calculate the signal in parallel across as
+many CPUs as are available. We do this for the IP signal and input
+signals separately. Then, since these are BAM files of mapped reads, we
+scale the arrays to the library size. The scaled arrays are then saved
+to disk, along with the windows that were used to create them.
 
-.. note::
+.. code:: python
 
-    This documentation is run every time it is generated to ensure correctness.
-    As a result, many of the example analyses are truncated (for example, here
-    restricting to only chromsome 19) so that the doctests run quickly.  In
-    actual analyses, you wouldn't need such truncation.
+    # ---------------------------------------------------------
+    # Create arrays in parallel, and save to disk for later
+    
+    from metaseq import persistence
+    import multiprocessing
+    processes = multiprocessing.cpu_count()
+    
+    if not os.path.exists('example.npz'):
+    
+        # Create arrays in parallel
+        ip_array = ip_signal.array(tsses, bins=100, processes=processes)
+        input_array = input_signal.array(tsses, bins=100, processes=processes)
+    
+        # Normalize to library size
+        ip_array /= ip_signal.mapped_read_count() / 1e6
+        input_array /= input_signal.mapped_read_count() / 1e6
+    
+        # Cache to disk (will be saved as "example.npz" and "example.features")
+        persistence.save_features_and_arrays(
+            features=tsses,
+            arrays={'ip': ip_array, 'input': input_array},
+            prefix='example',
+            link_features=True,
+            overwrite=True)
+Now that we’ve saved to disk, we can load the data:
 
-Here, we write a generator function that only returns transcripts on chr19, and
-then use the :mod:`pybedtools.featurefuncs.TSS` function on each one to get
-just the TSS +/- 1kb for each transcript.
+.. code:: python
 
+    features, arrays = persistence.load_features_and_arrays(prefix='example')
+Let’s do some double-checks.
 
-.. ipython::
+.. code:: python
 
-    In [1]: import gffutils
-
-    # asinterval will convert a gffutils.Feature into a pybedtools.Interval
-    In [1]: from gffutils.helpers import asinterval
-
-    # Connect to the database
-    In [1]: db = gffutils.FeatureDB(dbfn)
-
-    In [1]: def feature_generator():
-       ...:     for gene in db.features_of_type('gene', chrom='chr19'):
-       ...:         for transcript in db.children(gene):
-       ...:             yield asinterval(transcript)
-
-    In [1]: import pybedtools
-
-    In [1]: from pybedtools.featurefuncs import TSS
-
-    # Saves a temp file of transcripts
-    In [1]: transcripts = pybedtools.BedTool(feature_generator()).saveas()
-
-    # Converts transcripts to TSSs +/- 1kb and saveas a temp file
-    In [1]: tss_features = transcripts\
-       ...:     .each(TSS, upstream=1000, downstream=1000)\
-       ...:     .saveas()
-
-    # How many TSSs are there on chr19?
-    In [1]: len(tss_features)
-
-
-Calculate normalized enrichment values
---------------------------------------
-We now have an interesting set of features and an object (`chip`) that
-encapulates data we want to look at for these features.
-
-In the end we would like to have some normalized value that we can think of as
-"enrichment".  In order to do this, we need to first correct for differences in
-library sizes between the control and IP, and then we need to use the control
-sample to correct the IP -- for example, open chromatin at promoters can lead
-to strong signal in the control that is not specific to the IP.
-
-The :meth:`metaseq.integration.chipseq.Chipseq.diff_array` method does all of
-this.  Specifically, it:
- * takes an iterable of features and other configuration info
- * computes and bins the coverage across each feature
- * scales the coverage to reads per million mapped reads (RPMMR)
- * does this for IP and control BAM files
- * subtracts control from IP, resulting in a matrix of enrichment across each
-   feature
- * log2-transforms this difference matrix, dealing with negative numbers
-   appropriately
- * sets the :attr:`Chipseq.diffed_array` attribute for access to the newly
-   created array.
-
-Most of this behavior is configurable if the defaults aren't suitable.
-
-`array_kwargs` are used to configure parallel processing. In this case,
-8 processes will be used and each process will get 50 features to work on at
-a time.  Each read will be extended in the 3' direction to a total of 300 bp,
-and coverage will be binned into 100 bins.
-
-.. ipython::
-
-    In [1]: chip.diff_array(
-       ...:     features=tss_features, array_kwargs=dict(processes=8, chunksize=50,
-       ...:     bins=100, fragment_size=300))
-
-    # The created array has a row for each feature and a column for each bin
-    In [1]: chip.diffed_array.shape
-
-
+    assert len(features) == 5708  # how many features?
+    assert sorted(arrays.keys()) == ['input', 'ip']  # `arrays` acts like a dictionary
+    assert arrays['ip'].shape == (5708, 100)  # one row per feature, and one column per bin
+    assert arrays['ip'].shape == arrays['input'].shape
 Plotting
 --------
-Determine sort order
-~~~~~~~~~~~~~~~~~~~~
 
-The sort order of the rows can be important for interpretation. One method is
-to sort by the TIP score (see (see Cheng et al. 2001, Bioinformatics
-27(23):3221-3227)):
+Now that we have NumPy arrays of signal over windows, there’s a lot we
+can do. One easy thing is to simply plot the mean signal of IP and of
+input. Let’s construct meaningful values for the x-axis, from -1000 to
++1000 over 100 bins:
+
+.. code:: python
+
+    import numpy as np
+    x = np.linspace(-1000, 1000, 100)
+Then plot:
+
+.. code:: python
+
+    from matplotlib import pyplot as plt
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    
+    ax.plot(x, arrays['ip'].mean(axis=0), color='r', label='IP')
+    ax.plot(x, arrays['input'].mean(axis=0), color='k', label='input')
+    
+    # Add a vertical line at the TSS
+    ax.axvline(0, linestyle=':', color='k')
+    
+    # Add labels and legend
+    ax.set_xlabel('Distance from TSS (bp)')
+    ax.set_ylabel('Average read coverage (per million mapped reads)')
+    ax.legend(loc='best');
 
-.. ipython::
 
-    In [1]: import numpy as np
+.. image:: example_session_files/example_session_19_0.png
 
-    In [1]: tip_order = np.argsort(
-       ...:     metaseq.plotutils.tip_zscores(chip.diffed_array))
+
+Let's work on improving this plot, one step at a time. First, let's
+create a single normalized array by subtracting input from IP. For
+comparison, we'll make another one that divides IP by input.
 
+.. code:: python
 
-Another, albeit contrived, method is to sort by the position of the highest
-value in the row:
+    normalized_subtracted = arrays['ip'] - arrays['input']
+    normalized_divided = arrays['ip'] / arrays['input']
+`metaseq` comes with some helper functions to make plotting easier.
+The :func:`metaseq.plotutils.imshow` function is one of these; here
+the arguments are described:
+
+.. code:: python
+
+    plt.rcParams['font.family'] = 'Arial'
+    plt.rcParams['font.size'] = 10
+    
+    fig = metaseq.plotutils.imshow(
+        # The array to plot
+        normalized_subtracted,
+        
+        # X-axis to use
+        x=x,
+        
+        # Change the default figure size to something smaller for these docs
+        figsize=(3, 7),
+        
+        # Make the colorbar limits go from 5th to 99th percentile. 
+        # `percentile=True` means treat vmin/vmax as percentiles rather than
+        # actual values.
+        vmin=5, vmax=99,  percentile=True,
+        
+        # Style for the average line plot
+        line_kwargs=dict(color='k', label='All'),
+        
+        # Style for the +/- 95% CI band surrounding the average line
+        fill_kwargs=dict(color='k', alpha=0.3),
+    )
 
-.. ipython::
 
-    In [1]: other_order = np.argsort(chip.diffed_array.argmax(axis=1))
+.. image:: example_session_files/example_session_23_0.png
 
-Colormap
-~~~~~~~~
 
-Colormap choice is also important for interpretation.  The
-:func:`metaseq.colormap_adjust.smart_colormap` function centers the colormap on
-zero and shows positive and negative values with different hues but equivalent
-saturation and value (see http://en.wikipedia.org/wiki/HSL_and_HSV).
+The array is not very meaningful as currently sorted. We can adjust the
+sorting this either by re-ordering the array before plotting, or using
+the `sort_by` kwarg when calling :func:`metaseq.plotutils.imshow`.
 
-But first, let's put the array on a log scale, but in such a way that the
-negative numbers (that is, disenriched regions) stay negative.  The
-`metaseq.plotutils.nice_log` is useful for this:
-
-.. ipython::
-
-    In [1]: from metaseq.colormap_adjust import smart_colormap
-
-    In [1]: from metaseq.plotutils import nice_log
-
-    In [1]: # make a copy of the diffed array
-
-    In [1]: backup = chip.diffed_array.copy()
-
-    In [1]: chip.diffed_array = nice_log(chip.diffed_array)
-
-    In [1]: cmap = smart_colormap(chip.diffed_array.min(), chip.diffed_array.max())
-
-X-axis
-~~~~~~
-
-Next, we need to construct a nice x-axis that makes sense for this plot, with
-upstream coords as negative and downstream as positive. With that, we can use
-the :meth:`metaseq.integration.chipseq.Chipseq.plot` method that shows a nice
-multi-panel figure:
-
-.. ipython::
-
-
-    In [1]: x = np.linspace(-1000, 1000, 100)
-
-    @savefig first_array.png width=4in
-    In [1]: fig = chip.plot(x, row_order=tip_order,
-       ...:     imshow_kwargs=dict(cmap=cmap))
-
-    In [1]: import matplotlib.pyplot as plt
-
-    In [1]: plt.show()
-
-Axes labels, etc
-~~~~~~~~~~~~~~~~
-The :meth:`Chipseq.plot` method sets the :attr:`axes` attribute on the :class:`Chipseq`
-object so we can access the :class:`Axes` objects for further tweaking.  Lets
-add axes labels, a title, and a dashed line indicating the position of the TSS:
-
-.. ipython::
-
-    In [1]: chip.axes['line_ax'].set_xlabel('Distance from TSS (bp)');
-
-    In [1]: chip.axes['line_ax'].set_ylabel('Average enrichment (RPMMR)');
-
-    In [1]: chip.axes['line_ax'].axvline(0, color='k', linestyle='--');
-
-    In [1]: chip.axes['strip_ax'].set_ylabel('TSSs');
-
-    In [1]: chip.axes['cbar_ax'].set_ylabel('Enrichment (RPMMR)');
-
-    In [1]: chip.axes['matrix_ax'].axvline(0, color='k', linestyle='--');
-
-    In [1]: chip.axes['matrix_ax'].set_title('ATF3 binding profile over TSSs on chr19');
-
-    @savefig second_array.png width=4in
-    In [1]: plt.draw()
-
-
-.. Or, sort by the position:
-.. 
-.. .. ipython::
-
-..    @savefig first_array.png width=4in
-..    In [1]: fig = chip.plot(x, row_order=other_order,
-..       ...:     imshow_kwargs=dict(cmap=cmap))
-
-Interactive exploration
------------------------
-
-The left-hand axes contains a point for each TSS.  Clicking on a dot will open
-a mini-browser window.  Interactively, you can use the :mod:`matplotlib` zoom
-tools to zoom in to the, say, top 10 genes:
-
-.. ipython::
-
-    # Can do this interactively, or set axes limits manually:
-    In [1]: chip.axes['matrix_ax'].axis(ymax=10)
-
-    @savefig third_array.png width=4in
-    In [1]: plt.draw()
-
-Clicking on a point -- say, the one for the 9th TSS -- spawns a new browser
-window.  Alternatively, the same window can be spawned using the
-:meth:`Chipseq.minibrowser` method using the feature:
-
-.. ipython::
-
-    In [1]: feature = tss_features[tip_order[::-1][8]]
-
-    @savefig minibrowser.png width=5in
-    In [1]: chip.minibrowser.plot(feature)
-
-Currently, the mini-browser shows the extent of the actual feature as vertical
-dashed lines.  For context, it also shows the full extent of any genes that
-happen to overlap the feature.  This behavior is extremely customizable by
-creating subclasses -- see the docs for the :mod:`metaseq.minibrowser` module
-for more info.
-
-Improving the analysis
-----------------------
-
-OK, so it looks like there's a peak on centered on the TSS in the matrix plots.
-We don't yet have a negative control or anything else we can compare this peak
-to.  How about transcription termination site, or TTS, as a comparison?  Let's
-calculate another diffed array using TTS features instead of TSS (this will
-also demonstrate creating a custom feature manipulator). First, the new set of
-features:
-
-.. ipython::
-
-    In [1]: def TTS(feature, upstream, downstream):
-       ...:     if feature.strand == '-':
-       ...:         tts = feature.start
-       ...:         start = tts - downstream
-       ...:         stop = tts + upstream
-       ...:     else:
-       ...:         tts = feature.stop
-       ...:         start = tts - upstream
-       ...:         stop = tts + downstream
-       ...:     start = max(start, 0)
-       ...:     feature.start = start
-       ...:     feature.stop = stop
-       ...:     return feature
-
-    In [1]: tts_features = transcripts\
-       ...:     .each(TTS, upstream=1000, downstream=1000)\
-       ...:     .saveas()
-
-
-Now we just need to pass the new features to :class:`chip` to re-create a new
-array.  Let's save the old array first though so we don't lose it:
-
-.. ipython::
-
-    In [1]: tss_array = chip.diffed_array.copy()
-
-    In [1]: chip.diff_array(
-       ...:     features=tts_features, array_kwargs=dict(processes=8, chunksize=50,
-       ...:     bins=100, fragment_size=300))
-
-    In [1]: tts_array = chip.diffed_array.copy()
-
-And then we can plot the average of both matrices on the same plot:
-
-.. ipython::
-
-    In [1]: fig = plt.figure()
-
-    In [1]: ax = fig.add_subplot(111)
-
-    In [1]: ax.plot(x, tss_array.mean(axis=0), color='r', label='TSS');
-
-    In [1]: ax.plot(x, tts_array.mean(axis=0), color='b', label='TTS');
-
-    In [1]: ax.set_xlabel('Distance from TTS or TSS (bp)');
-
-    In [1]: ax.set_title('Average ATF3 signal for transcripts on chr19');
-
-    In [1]: ax.legend(loc='best');
-
-    @savefig comparison_plot.png width=4in
-    In [1]: ax.set_ylabel('RPMMR');
-
-Another potential improvement is being more sophisticated about choosing TSSs
-and TTSs.  Specifically, as things stand now, if all isoforms of a gene have
-the same TSS then all of those TSSs will be included in the plot leading to
-duplication and possible over-estimating of the enrichment.  We might want to
-require that all TSSs be unique (some "genome algebra" with :mod:`pybedtools`
-would be useful here).  There are many other improvements that can be done, as
-informed by the biology of the system being studied.  :mod:`metaseq` attempts
-to make these manipulations easy (or at least straightforward) to do.
+.. code:: python
+
+    fig = metaseq.plotutils.imshow(
+        # These are the same arguments as above.
+        normalized_subtracted,
+        x=x,
+        figsize=(3, 7),
+        vmin=5, vmax=99,  percentile=True,
+        line_kwargs=dict(color='k', label='All'),
+        fill_kwargs=dict(color='k', alpha=0.3),
+        
+        # Additionally, sort by mean signal
+        sort_by=normalized_subtracted.mean(axis=1)
+    )
+
+
+.. image:: example_session_files/example_session_25_0.png
+
+
+Now we'll make some tweaks to the plot. The figure returned by
+:func:`metaseq.plotutils.imshow` has attributes `array_axes`,
+`line_axes`, and `cax`, which can be used as an easy way to get
+handles to the axes for further configuration. Let's make some
+additional tweaks:
+
+.. code:: python
+
+    fig.line_axes.set_ylabel('Average enrichment');
+    fig.line_axes.set_xlabel('Distance from TSS (bp)');
+    
+    fig.array_axes.set_ylabel('Transcripts on chr17')
+    fig.array_axes.set_xticklabels([])
+    
+    fig.array_axes.axvline(0, linestyle=':', color='k')
+    fig.line_axes.axvline(0, linestyle=':', color='k')
+    
+    fig
+
+
+
+.. image:: example_session_files/example_session_27_0.png
+
+
+
+Integrating with expression data
+--------------------------------
+
+
+`metaseq` also comes with example data from ATF3 knockdown
+experiments. We will use them to subset the ChIP signal by those TSSs
+that were affected by knockdown and those that were not. For this
+example, we'll use a simple 2-fold cutoff to identify transcripts that
+went up, down, or were unchanged upon ATF3 knockdown.
+
+.. code:: python
+
+    control_filename = example_filename('GSM847565_SL2585.table')
+    knockdown_filename = example_filename('GSM847566_SL2592.table')
+.. code:: python
+
+    from metaseq.results_table import ResultsTable
+    
+    control = ResultsTable(control_filename, import_kwargs=dict(index_col=0))
+    knockdown = ResultsTable(knockdown_filename, import_kwargs=dict(index_col=0))
+:class:`metaseq.results_table.ResultsTable` objects are wrappers
+around `pandas.DataFrame` objects. The `DataFrame` object is always
+available as the `data` attribute. Here are the first 5 rows of the
+`control` object:
+
+.. code:: python
+
+    print len(control.data)
+    control.data.head()
+
+.. parsed-literal::
+
+    85699
+
+
+
+
+.. raw:: html
+
+    <div style="max-height:1000px;max-width:1500px;overflow:auto;">
+    <table border="1" class="dataframe">
+      <thead>
+        <tr style="text-align: right;">
+          <th></th>
+          <th>score</th>
+          <th>fpkm</th>
+        </tr>
+        <tr>
+          <th>id</th>
+          <th></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>ENST00000456328</th>
+          <td> 108.293111</td>
+          <td> 1.118336</td>
+        </tr>
+        <tr>
+          <th>ENST00000515242</th>
+          <td>  87.233019</td>
+          <td> 0.830617</td>
+        </tr>
+        <tr>
+          <th>ENST00000518655</th>
+          <td> 175.175609</td>
+          <td> 2.367682</td>
+        </tr>
+        <tr>
+          <th>ENST00000473358</th>
+          <td> 343.232679</td>
+          <td> 9.795265</td>
+        </tr>
+        <tr>
+          <th>ENST00000408384</th>
+          <td>   0.000000</td>
+          <td> 0.000000</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>5 rows × 2 columns</p>
+    </div>
+
+
+
+We should ensure that `control` and `knockdown` have their
+transcript IDs in the same order, and that they contain the transcripts
+on chr17. The :meth:`ResultsTable.reindex_to` method is very useful
+for this -- it takes a `pybedtools.BedTool` object and re-indexes the
+underlying dataframe so that the order of the dataframe matches the
+order of the features in the file.
+
+We still have the `tsses` object that we used to create the array, and
+we'll use that to re-index the dataframes. Let's look at a line from
+that file to see how the transcript ID information is stored:
+
+.. code:: python
+
+    print tsses[0]
+
+.. parsed-literal::
+
+    chr17	gffutils_derived	transcript	37025256	37027255	.	+	.	transcript_id "ENST00000318008"; gene_id "ENSG00000002834";
+    
+
+
+The Ensembl transcript ID is stored in the `transcript_id` field of
+the GTF attributes, so we should let the
+:meth:`ResultsTable.reindex_to` method know that:
+
+.. code:: python
+
+    control = control.reindex_to(tsses, attribute='transcript_id')
+    knockdown = knockdown.reindex_to(tsses, attribute='transcript_id')
+.. code:: python
+
+    # Everything should be the same length
+    assert len(control.data) == len(knockdown.data) == len(tsses) == 5708
+    
+    # Spot-check some values to make sure the GTF file and the DataFrame match up.
+    assert tsses[0]['transcript_id'] == control.data.index[0]
+    assert tsses[100]['transcript_id'] == control.data.index[100]
+    assert tsses[5000]['transcript_id'] == control.data.index[5000]
+.. code:: python
+
+    # Join the dataframes and create a new pandas.DataFrame.
+    data = control.data.join(knockdown.data, lsuffix='_control', rsuffix='_knockdown')
+    
+    # Add a log2 fold change variable
+    data['log2foldchange'] = np.log2(data.fpkm_knockdown / data.fpkm_control)
+    data.head()
+
+
+
+.. raw:: html
+
+    <div style="max-height:1000px;max-width:1500px;overflow:auto;">
+    <table border="1" class="dataframe">
+      <thead>
+        <tr style="text-align: right;">
+          <th></th>
+          <th>score_control</th>
+          <th>fpkm_control</th>
+          <th>score_knockdown</th>
+          <th>fpkm_knockdown</th>
+          <th>log2foldchange</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>ENST00000318008</th>
+          <td> 433.958279</td>
+          <td> 19.246250</td>
+          <td> 386.088132</td>
+          <td> 13.529179</td>
+          <td>-0.508503</td>
+        </tr>
+        <tr>
+          <th>ENST00000419929</th>
+          <td>        NaN</td>
+          <td>       NaN</td>
+          <td>        NaN</td>
+          <td>       NaN</td>
+          <td>      NaN</td>
+        </tr>
+        <tr>
+          <th>ENST00000433206</th>
+          <td>  40.938322</td>
+          <td>  0.328118</td>
+          <td> 181.442415</td>
+          <td>  2.517192</td>
+          <td> 2.939529</td>
+        </tr>
+        <tr>
+          <th>ENST00000435347</th>
+          <td> 450.179142</td>
+          <td> 21.655531</td>
+          <td> 436.579186</td>
+          <td> 19.617419</td>
+          <td>-0.142600</td>
+        </tr>
+        <tr>
+          <th>ENST00000443937</th>
+          <td> 451.761068</td>
+          <td> 21.905318</td>
+          <td> 431.172759</td>
+          <td> 18.859090</td>
+          <td>-0.216021</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>5 rows × 5 columns</p>
+    </div>
+
+
+
+.. code:: python
+
+    print "up:", sum(data.log2foldchange > 1)
+    print "down:", sum(data.log2foldchange < -1)
+
+.. parsed-literal::
+
+    up: 735
+    down: 514
+
+
+In addition to the average coverage line, we'd like to add additional
+lines in another axes panel. The :func:`metaseq.plotutils.imshow`
+function is very flexible, and uses `matplotlib.gridspec` for
+organizing the axes. We can ask for an additional axes by adding a new
+entry to the `height_ratios` tuple:
+
+.. code:: python
+
+    fig = metaseq.plotutils.imshow(
+        # Same as before...
+        normalized_subtracted,
+        x=x,
+        figsize=(3, 7),
+        vmin=5, vmax=99,  percentile=True,
+        line_kwargs=dict(color='k', label='All'),
+        fill_kwargs=dict(color='k', alpha=0.3),
+        sort_by=normalized_subtracted.mean(axis=1),
+        
+        # Additionally specify height_ratios:
+        height_ratios=(3, 1, 1)
+    )
+    
+    # `fig.gs` contains the `matplotlib.gridspec.GridSpec` object,
+    # so we can now create the new axes.
+    bottom_axes = plt.subplot(fig.gs[2, 0])
+
+
+
+.. image:: example_session_files/example_session_42_0.png
+
+
+The :func:`metaseq.plotutils.ci_plot` function takes an array and
+plots the mean signal +/- 95% CI bands.
+
+.. code:: python
+
+    
+    # Signal over TSSs of transcripts that were activated upon knockdown.
+    metaseq.plotutils.ci_plot(
+        x,
+        normalized_subtracted[(data.log2foldchange > 1).values, :],
+        line_kwargs=dict(color='#fe9829', label='up'),
+        fill_kwargs=dict(color='#fe9829', alpha=0.3),
+        ax=bottom_axes)
+    
+    # Signal over TSSs of transcripts that were repressed upon knockdown
+    metaseq.plotutils.ci_plot(
+        x,
+        normalized_subtracted[(data.log2foldchange < -1).values, :],
+        line_kwargs=dict(color='#8e3104', label='down'),
+        fill_kwargs=dict(color='#8e3104', alpha=0.3),
+        ax=bottom_axes)
+    
+    # Signal over TSSs tof transcripts that did not change upon knockdown
+    metaseq.plotutils.ci_plot(
+        x,
+        normalized_subtracted[((data.log2foldchange > -1) & (data.log2foldchange < 1)).values, :],
+        line_kwargs=dict(color='.5', label='unchanged'),
+        fill_kwargs=dict(color='.5', alpha=0.3),
+        ax=bottom_axes)
+    
+    # Clean up redundant x tick labels, and add axes labels
+    fig.line_axes.set_xticklabels([])
+    fig.array_axes.set_xticklabels([])
+    fig.line_axes.set_ylabel('Average\nenrichement')
+    fig.array_axes.set_ylabel('Transcripts on chr17')
+    bottom_axes.set_ylabel('Average\nenrichment')
+    bottom_axes.set_xlabel('Distance from TSS (bp)')
+    fig.cax.set_ylabel('Enrichment')
+    
+    # Add the vertical lines for TSS position to all axes
+    for ax in [fig.line_axes, fig.array_axes, bottom_axes]:
+        ax.axvline(0, linestyle=':', color='k')
+    
+    # Nice legend
+    bottom_axes.legend(loc='best', frameon=False, fontsize=8, labelspacing=.3, handletextpad=0.2)
+    fig
+
+
+
+.. image:: example_session_files/example_session_44_0.png
+
+
+
+It appears that transcripts unchanged by ATF3 knockdown have the
+strongest ChIP signal. Transcripts that went up upon knockdown (that is,
+ATF3 normally represses them) had a slightly higher signal than those
+transcripts that went down (normally activated by ATF3).
+
+Interestingly, even though we used a crude cutoff of 2-fold for a single
+replicate, and we only looked at chr17, the direction of the
+relationship we see here -- where ATF3-repressed genes have a higher
+signal than ATF3-activated -- is consistent with ATF3's known repressive
+role.
+
+.. code:: python
+
+    
+.. code:: python
+
+    
+.. code:: python
+
+    

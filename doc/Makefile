@@ -45,6 +45,7 @@ html:
 	cp ../README.rst source
 	-rm -r source/autodocs
 	-rm -r $(BUILDDIR)/html
+	(cd source && ipython nbconvert --to rst example_session.ipynb && sed -i "s/\`\`/\`/g" example_session.rst)
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	cd $(BUILDDIR)/html && zip -r docs.zip . && cd -
 	@echo
