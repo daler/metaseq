@@ -27,11 +27,11 @@ def ci_plot(x, arr, conf=0.95, ax=None, line_kwargs=None, fill_kwargs=None):
     return ax
 
 
-def imshow(arr, x=None, vmin=None, vmax=None, percentile=True, strip=False,
-           features=None, conf=0.95, line_kwargs=None, sort_by=None,
-           fill_kwargs=None, figsize=(5, 12), width_ratios=(4, 1), height_ratios=(4, 1),
-           subplot_params=dict(wspace=0.1, hspace=0.1),
-           imshow_kwargs=None):
+def imshow(arr, x=None, ax=None, vmin=None, vmax=None, percentile=True,
+           strip=False, features=None, conf=0.95, line_kwargs=None,
+           sort_by=None, fill_kwargs=None, figsize=(5, 12),
+           width_ratios=(4, 1), height_ratios=(4, 1),
+           subplot_params=dict(wspace=0.1, hspace=0.1), imshow_kwargs=None):
     """
     Parameters
     ----------
@@ -39,6 +39,13 @@ def imshow(arr, x=None, vmin=None, vmax=None, percentile=True, strip=False,
 
     x : 1D array
         X values to use.  If None, use range(arr.shape[1])
+
+    ax : matplotlib.Axes
+        If not None, then only plot the array on the provided axes.  This will
+        ignore any additional arguments provided that apply to figure-level
+        configuration or to the average line plot.  For example, `figsize`,
+        `width_ratios`, `height_ratios`, `subplot_params`, `line_kwargs`, and
+        `fill_kwargs` will be ignored.
 
     vmin, vmax : float
 
@@ -62,13 +69,13 @@ def imshow(arr, x=None, vmin=None, vmax=None, percentile=True, strip=False,
     figsize : tuple
         (Width, height) of the figure to create.
     """
-
-    fig = new_shell(
-        figsize=figsize,
-        strip=strip,
-        subplot_params=subplot_params,
-        width_ratios=width_ratios,
-        height_ratios=height_ratios)
+    if ax is None:
+        fig = new_shell(
+            figsize=figsize,
+            strip=strip,
+            subplot_params=subplot_params,
+            width_ratios=width_ratios,
+            height_ratios=height_ratios)
 
     if x is None:
         x = np.arange(arr.shape[1])
@@ -97,7 +104,10 @@ def imshow(arr, x=None, vmin=None, vmax=None, percentile=True, strip=False,
     else:
         ind = np.arange(arr.shape[0])
 
-    mappable = fig.array_axes.imshow(
+    if ax is None:
+        ax = fig.array_axes
+
+    mappable = ax.imshow(
         arr[ind, :],
         aspect='auto',
         cmap=cmap,
@@ -107,15 +117,20 @@ def imshow(arr, x=None, vmin=None, vmax=None, percentile=True, strip=False,
         extent=(x.min(), x.max(), 0, arr.shape[0]),
         **imshow_kwargs
     )
-    plt.colorbar(mappable, fig.cax)
-    ci_plot(
-        x,
-        arr,
-        ax=fig.line_axes,
-        line_kwargs=line_kwargs,
-        fill_kwargs=fill_kwargs,
-    )
-    return fig
+    if ax is None:
+        plt.colorbar(mappable, fig.cax)
+        ci_plot(
+            x,
+            arr,
+            ax=fig.line_axes,
+            line_kwargs=line_kwargs,
+            fill_kwargs=fill_kwargs,
+        )
+
+        return fig
+    else:
+        return ax.figure
+
 
 
 def ci(arr, conf=0.95):
@@ -216,7 +231,8 @@ def prepare_logged(x, y):
     return xi, yi
 
 
-def new_shell(figsize=(5, 12), strip=False, height_ratios=(4, 1), width_ratios=(4, 1), subplot_params=None):
+def new_shell(figsize=(5, 12), strip=False, height_ratios=(4, 1),
+              width_ratios=(4, 1), subplot_params=None):
     if subplot_params is None:
         subplot_params = {}
     fig = plt.figure(figsize=figsize)
