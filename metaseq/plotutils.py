@@ -132,6 +132,77 @@ def imshow(arr, x=None, ax=None, vmin=None, vmax=None, percentile=True,
         return ax.figure
 
 
+def calculate_limits(array_dict, method='global', percentiles=None, limit=()):
+    """
+    Calculate limits for a group of arrays in a flexible manner.
+
+    Returns a dictionary of calculated (vmin, vmax), with the same keys as
+    `array_dict`.
+
+    Useful for plotting heatmaps of multiple datasets, and the vmin/vmax values
+    of the colormaps need to be matched across all (or a subset) of heatmaps.
+
+    Parameters
+    ----------
+    array_dict : dict of np.arrays
+
+    method : {'global', 'independent', callable}
+        If method="global", then use the global min/max values across all
+        arrays in array_dict.  If method="independent", then each array will
+        have its own min/max calcuated.  If a callable, then it will be used to
+        group the keys of `array_dict`, and each group will have its own
+        group-wise min/max calculated.
+
+    limit: tuple, optional
+        Tuple of 2 scalars passed directly to scipy.stats.scoreatpercentile to
+        limit the calculation of the percentile.
+
+    percentiles : None or list
+        If not None, a list of (lower, upper) percentiles in the range [0,100].
+    """
+    if percentiles is not None:
+        for percentile in percentiles:
+            if not 0 <= percentile <= 100:
+                raise ValueError("percentile (%s) not between [0, 100]")
+
+    if method == 'global':
+        all_arrays = np.concatenate(
+            [i.ravel() for i in array_dict.itervalues()]
+        )
+        if percentiles:
+            vmin = stats.scoreatpercentile(
+                all_arrays, percentiles[0], limit=limit)
+            vmax = stats.scoreatpercentile(
+                all_arrays, percentiles[1], limit=limit)
+
+        else:
+            vmin = all_arrays.min()
+            vmax = all_arrays.max()
+        d = dict([(i, (vmin, vmax)) for i in array_dict.keys()])
+
+    elif method == 'independent':
+        d = {}
+        for k, v in array_dict.iteritems():
+            d[k] = (v.min(), v.max())
+
+    elif hasattr(method, '__call__'):
+        d = {}
+        sorted_keys = sorted(array_dict.keys(), key=method)
+        for group, keys in groupby(sorted_keys, method):
+            keys = list(keys)
+            all_arrays = np.concatenate([array_dict[i] for i in keys])
+            if percentiles:
+                vmin = stats.scoreatpercentile(
+                    all_arrays, percentiles[0], limit=limit)
+                vmax = stats.scoreatpercentile(
+                    all_arrays, percentiles[1], limit=limit)
+            else:
+                vmin = all_arrays.min()
+                vmax = all_arrays.max()
+            for key in keys:
+                d[key] = (vmin, vmax)
+    return d
+
 
 def ci(arr, conf=0.95):
     """
