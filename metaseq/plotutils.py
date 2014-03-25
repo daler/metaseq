@@ -105,9 +105,11 @@ def imshow(arr, x=None, ax=None, vmin=None, vmax=None, percentile=True,
         ind = np.arange(arr.shape[0])
 
     if ax is None:
-        ax = fig.array_axes
+        array_ax = fig.array_axes
+    else:
+        array_ax = ax
 
-    mappable = ax.imshow(
+    mappable = array_ax.imshow(
         arr[ind, :],
         aspect='auto',
         cmap=cmap,
