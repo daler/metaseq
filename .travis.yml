@@ -6,7 +6,7 @@ install:
     - sudo conda init
     - conda create --yes --name test scipy pytables numexpr pandas cython statsmodels matplotlib pip nose pyyaml
     - export PATH="$HOME/envs/test/bin:$PATH"
-    - pip install urlgrabber
+    - pip install pycurl
     - pip install -q -r requirements.txt
     - pip install .
 
