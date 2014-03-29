@@ -54,7 +54,10 @@ class ResultsTable(object):
         return getattr(self.data, attr)
 
     def __getitem__(self, attr):
-        return self.__class__(self.data.__getitem__(attr), **self._kwargs)
+        if isinstance(attr, basestring):
+            return self.data.__getitem__(attr)
+        else:
+            return self.__class__(self.data.__getitem__(attr), **self._kwargs)
 
     def update(self, dataframe):
         """
