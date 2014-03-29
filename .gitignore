@@ -18,7 +18,8 @@ doc/source/README.rst
 # example files downloaded with download_data.py script:
 #
 metaseq/test/data/Homo_sapiens.GRCh37.66_chr17.gtf.gz
-metaseq/test/data/Homo_sapiens.GRCh37.66.chr17.gtf.db
+metaseq/test/data/Homo_sapiens.GRCh37.66_chr17.gtf
+metaseq/test/data/Homo_sapiens.GRCh37.66_chr17.gtf.db
 metaseq/test/data/wgEncodeHaibTfbsK562Atf3V0416101AlnRep1_chr17.bam
 metaseq/test/data/wgEncodeHaibTfbsK562Atf3V0416101AlnRep1_chr17.bam.bai
 metaseq/test/data/wgEncodeHaibTfbsK562Atf3V0416101AlnRep1_chr17.bam.scale
