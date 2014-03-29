@@ -1,15 +1,25 @@
 Metaseq
 =======
 
-
 Briefly, the goal of `metaseq` is to tie together lots of existing software into
 a framework for exploring genomic data.  It focuses on flexibility and
 interactive exploration and plotting of disparate genomic data sets.
 
 The main documentation for `metaseq` can be found at http://packages.python.org/metaseq/.
 
-The docs have an example session which shows the the process of creating a plot
-like this, starting with BAM and GTF files:
+
+Example 1: Average ChIP-seq signal over promoters
+-------------------------------------------------
+There are multiple ways of viewing this example, depending on how you are
+viewing this document.  The  `[PyPI version]
+<https://pythonhosted.org/metaseq/example_session.html>`_ always has the
+latest released version.
+
+
+* Sphinx docs: `[PyPI version] <https://pythonhosted.org/metaseq/example_session.html>`_,  :ref:`[relative link within this documentation] <example_session>`,
+
+* IPython notebook: `[nbviewer] <http://nbviewer.ipython.org/github/daler/metaseq/blob/master/doc/source/example_session.ipynb?create=1>`_, `[source directory] <doc/source/example_session.ipynb>`_
+
 
 .. figure:: demo.png
 
@@ -19,6 +29,29 @@ like this, starting with BAM and GTF files:
     results, showing differential enrichment over transcripts that went up,
     down, or were unchanged upon ATF3 knockdown.
 
+Example 2: Differential expression scatterplots
+-----------------------------------------------
+There are multiple ways of viewing this example, depending on how you are
+viewing this document.  The  `[PyPI version]
+<https://pythonhosted.org/metaseq/example_session_2.html>`_ always has the
+latest released version.
+
+* Sphinx docs: `[PyPI version] <https://pythonhosted.org/metaseq/example_session_2.html>`_, :ref:`[relative link within this documentation] <example_session_2>`
+
+* IPython notebook: `[nbviewer] <http://nbviewer.ipython.org/github/daler/metaseq/blob/master/doc/source/example_session_2.ipynb?create=1>`_, `[source directory] <doc/source/example_session_2.ipynb>`_
+
+
+
+.. figure:: expression-demo.png
+
+    Control vs knockdown expression (log2(FPKM + 1)) for an ATF3 knockdown
+    experiment.  Each point represents one transcript on chromosome 17.
+    Marginal distributions are shown on top and side.  1:1 line shown as
+    a dotted line.  Up- and downregulated genes determined by a simple 2-fold
+    cutoff.
+
+Other features
+--------------
 In addition, `metaseq` offers:
 
 * A format-agnostic API for accessing "genomic signal" that allows you to work
@@ -36,3 +69,5 @@ In addition, `metaseq` offers:
 * Integrates data keyed by genomic interval (think BAM or BED files) with data
   keyed by gene ID (e.g., Cufflinks or DESeq results tables)
 
+Check out the `full documentation <http://packages.python.org/metaseq/>`_ for
+more.

@@ -46,9 +46,12 @@ html:
 	-rm -r source/autodocs
 	-rm -r $(BUILDDIR)/html
 	(cd source && ipython nbconvert --to rst example_session.ipynb && sed -i "s/\`\`/\`/g" example_session.rst)
+	(cd source && ipython nbconvert --to rst example_session_2.ipynb && sed -i "s/\`\`/\`/g" example_session_2.rst)
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	cp source/demo.png $(BUILDDIR)/html/demo.png
 	cp source/demo.png ..
+	cp source/expression-demo.png $(BUILDDIR)/html/expression-demo.png
+	cp source/expression-demo.png ..
 	(cd $(BUILDDIR)/html && zip -rq docs.zip .)
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."

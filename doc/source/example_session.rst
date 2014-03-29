@@ -1,6 +1,8 @@
 
-Example: Average ChIP-seq signal over promoters
-===============================================
+.. _example_session:
+
+Example 1: Average ChIP-seq signal over promoters
+=================================================
 
 This example demonstrates the use of :mod:`metaseq` for performing a
 common task when analyzing ChIP-seq data: what is the average signal
@@ -202,7 +204,7 @@ Then plot:
 
 
 
-.. image:: example_session_files/example_session_19_0.png
+.. image:: example_session_files/example_session_20_0.png
 
 
 Let's work on improving this plot, one step at a time. First, let's
@@ -253,7 +255,7 @@ these; here the arguments are described:
 
 
 
-.. image:: example_session_files/example_session_23_0.png
+.. image:: example_session_files/example_session_24_0.png
 
 
 The array is not very meaningful as currently sorted. We can adjust the
@@ -280,7 +282,7 @@ the `sort_by` kwarg when calling :func:`metaseq.plotutils.imshow`.
 
 
 
-.. image:: example_session_files/example_session_25_0.png
+.. image:: example_session_files/example_session_26_0.png
 
 
 Now we'll make some tweaks to the plot. The figure returned by
@@ -308,7 +310,7 @@ additional tweaks:
 
 
 
-.. image:: example_session_files/example_session_27_0.png
+.. image:: example_session_files/example_session_28_0.png
 
 
 
@@ -582,7 +584,7 @@ entry to the `height_ratios` tuple:
 
 
 
-.. image:: example_session_files/example_session_42_0.png
+.. image:: example_session_files/example_session_43_0.png
 
 
 The :func:`metaseq.plotutils.ci_plot` function takes an array and
@@ -640,7 +642,7 @@ plots the mean signal +/- 95% CI bands.
 
 
 
-.. image:: example_session_files/example_session_44_0.png
+.. image:: example_session_files/example_session_45_0.png
 
 
 
