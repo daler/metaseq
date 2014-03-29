@@ -11,14 +11,12 @@ The main documentation for `metaseq` can be found at http://packages.python.org/
 Example 1: Average ChIP-seq signal over promoters
 -------------------------------------------------
 There are multiple ways of viewing this example, depending on how you are
-viewing this document.  The  `[PyPI version]
-<https://pythonhosted.org/metaseq/example_session.html>`_ always has the
-latest released version.
+viewing this document:
 
-
-* Sphinx docs: `[PyPI version] <https://pythonhosted.org/metaseq/example_session.html>`_,  :ref:`[relative link within this documentation] <example_session>`,
-
-* IPython notebook: `[nbviewer] <http://nbviewer.ipython.org/github/daler/metaseq/blob/master/doc/source/example_session.ipynb?create=1>`_, `[source directory] <doc/source/example_session.ipynb>`_
+* Latest release version on PyPI: `Example 1 <https://pythonhosted.org/metaseq/example_session.html>`_
+* Reading this on GitHub? See `Example 1 <doc/source/example_session.rst>`.
+* IPython notebook: View on `nbviewer <http://nbviewer.ipython.org/github/daler/metaseq/blob/master/doc/source/example_session.ipynb?create=1>`_
+* Compiled Sphinx docs: :ref:`[relative link within this documentation] <example_session>`,
 
 
 .. figure:: demo.png
@@ -32,14 +30,12 @@ latest released version.
 Example 2: Differential expression scatterplots
 -----------------------------------------------
 There are multiple ways of viewing this example, depending on how you are
-viewing this document.  The  `[PyPI version]
-<https://pythonhosted.org/metaseq/example_session_2.html>`_ always has the
-latest released version.
+viewing this document.
 
-* Sphinx docs: `[PyPI version] <https://pythonhosted.org/metaseq/example_session_2.html>`_, :ref:`[relative link within this documentation] <example_session_2>`
-
-* IPython notebook: `[nbviewer] <http://nbviewer.ipython.org/github/daler/metaseq/blob/master/doc/source/example_session_2.ipynb?create=1>`_, `[source directory] <doc/source/example_session_2.ipynb>`_
-
+* Latest release version on PyPI: `Example 1 <https://pythonhosted.org/metaseq/example_session_2.html>`_
+* Reading this on GitHub? See `Example 1 <doc/source/example_session_2.rst>`.
+* IPython notebook: View on `nbviewer <http://nbviewer.ipython.org/github/daler/metaseq/blob/master/doc/source/example_session_2.ipynb?create=1>`_
+* Compiled Sphinx docs: :ref:`[relative link within this documentation] <example_session_2>`,
 
 
 .. figure:: expression-demo.png

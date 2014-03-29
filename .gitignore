@@ -1,7 +1,6 @@
 .coverage
 doc/.ipynb_checkpoints*
 doc/source/.ipynb_checkpoints*
-doc/source/example_session*_files/*
 *.egg-info
 *.swo
 *.swp
