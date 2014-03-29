@@ -907,7 +907,7 @@ class LazyDict(object):
             fn = self.fn_dict[key]
             obj = self._cls(fn, db=self.dbfn)
             obj.data = obj.data.ix[self.index]
-            if self.extra:
+            if self.extra is not None:
                 obj.data = pandas.merge(obj.data, self.extra, left_index=True,
                                         right_index=True)
             if self.modifier:
