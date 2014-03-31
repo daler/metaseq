@@ -44,6 +44,6 @@ setup(
             'Environment :: Console',
             'License :: OSI Approved :: MIT License',
             'Topic :: Scientific/Engineering :: Bio-Informatics',
-            'Topic :: Scientific/Engineering :: Medical Science Apps', 
+            'Topic :: Scientific/Engineering :: Medical Science Apps.', 
         ]
     )
