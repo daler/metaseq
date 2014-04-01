@@ -14,7 +14,7 @@ There are multiple ways of viewing this example, depending on how you are
 viewing this document:
 
 * Latest release version on PyPI: `Example 1 <https://pythonhosted.org/metaseq/example_session.html>`_
-* Reading this on GitHub? See `Example 1 <doc/source/example_session.rst>`.
+* Reading this on GitHub? See `Example 1 <doc/source/example_session.rst>`_.
 * IPython notebook: View on `nbviewer <http://nbviewer.ipython.org/github/daler/metaseq/blob/master/doc/source/example_session.ipynb?create=1>`_
 * Compiled Sphinx docs: :ref:`[relative link within this documentation] <example_session>`,
 
@@ -32,8 +32,8 @@ Example 2: Differential expression scatterplots
 There are multiple ways of viewing this example, depending on how you are
 viewing this document.
 
-* Latest release version on PyPI: `Example 1 <https://pythonhosted.org/metaseq/example_session_2.html>`_
-* Reading this on GitHub? See `Example 1 <doc/source/example_session_2.rst>`.
+* Latest release version on PyPI: `Example 2 <https://pythonhosted.org/metaseq/example_session_2.html>`_
+* Reading this on GitHub? See `Example 2 <doc/source/example_session_2.rst>`_.
 * IPython notebook: View on `nbviewer <http://nbviewer.ipython.org/github/daler/metaseq/blob/master/doc/source/example_session_2.ipynb?create=1>`_
 * Compiled Sphinx docs: :ref:`[relative link within this documentation] <example_session_2>`,
 

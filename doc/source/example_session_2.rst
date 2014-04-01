@@ -4,7 +4,6 @@
 Example 2: Differential expression scatterplots
 ===============================================
 
-
 This example looks more closely at using the results table part of
 :mod:`metaseq`, and highlights the flexibility in plotting afforded by
 :mod:`metaseq`.
@@ -315,7 +314,6 @@ chromosome 17 of the hg19 human genome assembly:
 Subsetting data
 ---------------
 
-
 The data we loaded from the knockdown experiment contains genes from all
 chromosomes. For the sake of argument, let's say we're only interested
 in the expression data for these genes on chr17. We can simply use
@@ -351,7 +349,6 @@ IDs, we'll need to create a list of Ensembl transcript IDs on chromosome
 
 Scatterplots
 ------------
-
 
 Let's plot some data. The :meth:`ResultsTable.scatter` method helps
 with plotting genome-wide data, and offers lots of flexibility.
@@ -629,7 +626,6 @@ marginal histograms, lets:
 -  only show histograms for up/down regulated
 -  change the number of bins to 50
 -  remove the edge around each bar
-
 
 .. code:: python
 

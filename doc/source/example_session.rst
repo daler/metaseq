@@ -317,7 +317,6 @@ additional tweaks:
 Integrating with expression data
 --------------------------------
 
-
 `metaseq` also comes with example data from ATF3 knockdown
 experiments. We will use them to subset the ChIP signal by those TSSs
 that were affected by knockdown and those that were not. For this
