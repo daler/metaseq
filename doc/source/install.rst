@@ -37,7 +37,10 @@ Step 2. Install Python packages
 Option 1 (recommended): Install from PyPI
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The most robust method for installing :mod:`metaseq` is to do a 2-stage
-installation.  First, ensure the base prerequisistes are installed:
+installation.  First, ensure the base prerequisites are installed.  If any of
+these are installed, a message will be printed on the screen indicating so.  Note that the
+Anaconda Python Distribution comes with these packages, so you don't
+necessarily need to run this:
 
 ::
 
