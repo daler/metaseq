@@ -3,7 +3,6 @@ import os
 import sys
 import glob
 import time
-import scipy
 import matplotlib
 import pybedtools
 import subprocess

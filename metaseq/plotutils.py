@@ -4,9 +4,8 @@ Module with handy utilities for plotting genomic signal
 from itertools import groupby
 import matplotlib
 from matplotlib import pyplot as plt
+from matplotlib import mlab
 import numpy as np
-from scipy import stats
-from statsmodels.stats.multitest import fdrcorrection
 from matplotlib.ticker import MaxNLocator
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib import gridspec
@@ -84,11 +83,11 @@ def imshow(arr, x=None, ax=None, vmin=None, vmax=None, percentile=True,
         if vmin is None:
             vmin = arr.min()
         else:
-            vmin = stats.scoreatpercentile(arr.ravel(), vmin)
+            vmin = mlab.prctile(arr.ravel(), vmin)
         if vmax is None:
             vmax = arr.max()
         else:
-            vmax = stats.scoreatpercentile(arr.ravel(), vmax)
+            vmax = mlab.prctile(arr.ravel(), vmax)
     else:
         if vmin is None:
             vmin = arr.min()
@@ -156,7 +155,7 @@ def calculate_limits(array_dict, method='global', percentiles=None, limit=()):
         group-wise min/max calculated.
 
     limit: tuple, optional
-        Tuple of 2 scalars passed directly to scipy.stats.scoreatpercentile to
+        Tuple of 2 scalars passed directly to matplotlib.mlab.prctile to
         limit the calculation of the percentile.
 
     percentiles : None or list
@@ -172,9 +171,9 @@ def calculate_limits(array_dict, method='global', percentiles=None, limit=()):
             [i.ravel() for i in array_dict.itervalues()]
         )
         if percentiles:
-            vmin = stats.scoreatpercentile(
+            vmin = mlab.prctile(
                 all_arrays, percentiles[0], limit=limit)
-            vmax = stats.scoreatpercentile(
+            vmax = mlab.prctile(
                 all_arrays, percentiles[1], limit=limit)
 
         else:
@@ -194,9 +193,9 @@ def calculate_limits(array_dict, method='global', percentiles=None, limit=()):
             keys = list(keys)
             all_arrays = np.concatenate([array_dict[i] for i in keys])
             if percentiles:
-                vmin = stats.scoreatpercentile(
+                vmin = mlab.prctile(
                     all_arrays, percentiles[0], limit=limit)
-                vmax = stats.scoreatpercentile(
+                vmax = mlab.prctile(
                     all_arrays, percentiles[1], limit=limit)
             else:
                 vmin = all_arrays.min()
@@ -256,6 +255,81 @@ def tip_zscores(a):
     scores = weighted.sum(axis=1)
     zscores = (scores - scores.mean()) / scores.std()
     return zscores
+
+
+def fdrcorrection(pvals, alpha=0.05, method='indep'):
+    '''
+    NOTE: This function was copied from
+    statsmodels.sandbox.stats.multicomp.fdrcorrection0, from statsmodels
+    version 0.5.0.
+
+    This is to avoid requiring all of statsmodels to be a dependency for
+    metaseq, just for this function.
+
+
+
+
+    pvalue correction for false discovery rate
+
+    This covers Benjamini/Hochberg for independent or positively correlated and
+    Benjamini/Yekutieli for general or negatively correlated tests. Both are
+    available in the function multipletests, as method=`fdr_bh`, resp. `fdr_by`.
+
+    Parameters
+    ----------
+    pvals : array_like
+        set of p-values of the individual tests.
+    alpha : float
+        error rate
+    method : {'indep', 'negcorr')
+
+    Returns
+    -------
+    rejected : array, bool
+        True if a hypothesis is rejected, False if not
+    pvalue-corrected : array
+        pvalues adjusted for multiple hypothesis testing to limit FDR
+
+    Notes
+    -----
+
+    If there is prior information on the fraction of true hypothesis, then alpha
+    should be set to alpha * m/m_0 where m is the number of tests,
+    given by the p-values, and m_0 is an estimate of the true hypothesis.
+    (see Benjamini, Krieger and Yekuteli)
+
+    The two-step method of Benjamini, Krieger and Yekutiel that estimates the number
+    of false hypotheses will be available (soon).
+
+    Method names can be abbreviated to first letter, 'i' or 'p' for fdr_bh and 'n' for
+    fdr_by.
+
+    '''
+    pvals = np.asarray(pvals)
+
+    pvals_sortind = np.argsort(pvals)
+    pvals_sorted = pvals[pvals_sortind]
+    sortrevind = pvals_sortind.argsort()
+
+    if method in ['i', 'indep', 'p', 'poscorr']:
+        ecdffactor = _ecdf(pvals_sorted)
+    elif method in ['n', 'negcorr']:
+        cm = np.sum(1./np.arange(1, len(pvals_sorted)+1))   #corrected this
+        ecdffactor = _ecdf(pvals_sorted) / cm
+##    elif method in ['n', 'negcorr']:
+##        cm = np.sum(np.arange(len(pvals)))
+##        ecdffactor = ecdf(pvals_sorted)/cm
+    else:
+        raise ValueError('only indep and necorr implemented')
+    reject = pvals_sorted <= ecdffactor*alpha
+    if reject.any():
+        rejectmax = max(np.nonzero(reject)[0])
+        reject[:rejectmax] = True
+
+    pvals_corrected_raw = pvals_sorted / ecdffactor
+    pvals_corrected = np.minimum.accumulate(pvals_corrected_raw[::-1])[::-1]
+    pvals_corrected[pvals_corrected>1] = 1
+    return reject[sortrevind], pvals_corrected[sortrevind]
 
 
 def tip_fdr(a, alpha=0.05):
@@ -608,16 +682,16 @@ def input_ip_plots(iparr, inputarr, diffed, x, sort_ind,
     all_base = np.column_stack((iparr.ravel(), inputarr.ravel())).ravel()
 
     if limits1[0] is None:
-        limits1[0] = stats.scoreatpercentile(
+        limits1[0] = mlab.prctile(
             all_base, 1. / all_base.size)
     if limits1[1] is None:
-        limits1[1] = stats.scoreatpercentile(
+        limits1[1] = mlab.prctile(
             all_base, 100 - 1. / all_base.size)
     if limits2[0] is None:
-        limits2[0] = stats.scoreatpercentile(
+        limits2[0] = mlab.prctile(
             diffed.ravel(), 1. / all_base.size)
     if limits2[1] is None:
-        limits2[1] = stats.scoreatpercentile(
+        limits2[1] = mlab.prctile(
             diffed.ravel(), 100 - 1. / all_base.size)
 
     del all_base
