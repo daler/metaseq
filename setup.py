@@ -1,9 +1,17 @@
-import ez_setup
-ez_setup.use_setuptools()
-from setuptools import setup
-import sys
 import os
-import numpy
+from setuptools import setup, find_packages
+import sys
+
+try:
+    import numpy
+except ImportError:
+    raise ImportError(
+        "Please install NumPy first, or use the Anaconda Python Distribution "
+        "(https://store.continuum.io/cshop/anaconda/) which comes with NumPy "
+        "installed."
+    )
+
+
 
 version_py = os.path.join(os.path.dirname(__file__), 'metaseq', 'version.py')
 version = open(version_py).read().split('=')[-1].strip().replace('"','')
@@ -12,13 +20,14 @@ long_description = open('README.rst').read()
 setup(
         name='metaseq',
         version=version,
-        long_description=long_description,
-        install_requires=['bx-python', 'numpy', 'HTSeq', 'matplotlib', 'scipy',
-                          'scikits.learn', 'pysam', 'statsmodels',
-                          'pybedtools', 'gffutils', 'argparse'],
-        packages=['metaseq', 'metaseq.test', 
-                  'metaseq.test.data',
-                  'metaseq.integration'],
+        description="Integrative analysis of high-thoughput sequencing data",
+        #long_description=long_description,
+        license="MIT",
+        install_requires=['bx-python>=0.7.1', 'matplotlib>=1.3.1',
+                          'pysam>=0.7', 'pandas>=0.13.1', 'pycurl',
+                          'pybedtools>=0.6.4', 'gffutils>=0.8', 'urlgrabber',
+                          'argparse', 'PyYAML',],
+        packages=find_packages(),
         package_data={
             'metaseq':[
                 'test/data/gdc*',
