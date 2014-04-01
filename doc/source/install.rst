@@ -122,11 +122,7 @@ Here is a list of dependencies, and why they are needed by :mod:`metaseq`:
     metaseq.
 
 :Cython:
-    Dependency for pybedtools, bx-python, statsmodels, pandas
-
-:SciPy:
-    dependency
-
+    dependency for pybedtools, bx-python, statsmodels, pandas
 
 :matplotlib:
     interactive plotting
@@ -135,13 +131,13 @@ Here is a list of dependencies, and why they are needed by :mod:`metaseq`:
     fast tablular data
 
 :bx-python:
-    Accessing bigWig and bigBed files
+    accessing bigWig and bigBed files
 
 :pysam:
-    Accessing BAM files
+    accessing BAM files
 
 :scikit-learn (optional):
-    Clustering
+    clustering
 
 :gffutils:
     GFF and GTF manipulation
@@ -150,7 +146,7 @@ Here is a list of dependencies, and why they are needed by :mod:`metaseq`:
     BED, BAM, GTF, GFF, VCF manipulation
 
 :urlgrabber:
-    For downloading example data
+    downloading example data
 
 :PyYAML:
-    Config files
+    config files
