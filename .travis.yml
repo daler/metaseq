@@ -4,10 +4,10 @@ install:
     - sudo apt-get install -qq python-dev python-pip python-yaml g++
     - sudo pip install conda
     - sudo conda init
-    - conda create --yes --name test scipy pytables numexpr pandas cython statsmodels matplotlib pip nose pyyaml
+    - conda create --yes --name test pytables numexpr pandas cython statsmodels matplotlib pip nose 
     - export PATH="$HOME/envs/test/bin:$PATH"
-    - pip install pycurl
-    - pip install -q -r requirements.txt
+    - pip install Cython numpy pycurl
+      #- pip install -q -r requirements.txt
     - pip install .
 
       # See https://github.com/guillermo-carrasco/bcbio-nextgen-deploy/blob/dabb3903ffdb29743b15c76eb535e7ae14885cad/.travis.yml
