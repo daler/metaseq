@@ -7,7 +7,8 @@ interactive exploration and plotting of disparate genomic data sets.
 
 The main documentation for `metaseq` can be found at http://packages.python.org/metaseq/.
 
-.. image:: https://travis-ci.org/daler/metaseq.svg?branch=master   :target: https://travis-ci.org/daler/metaseq
+.. image:: https://travis-ci.org/daler/metaseq.svg?branch=master
+    :target: https://travis-ci.org/daler/metaseq
 
 Example 1: Average ChIP-seq signal over promoters
 -------------------------------------------------
