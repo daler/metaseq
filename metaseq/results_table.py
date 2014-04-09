@@ -4,6 +4,7 @@ import numpy as np
 import pandas
 from matplotlib import pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+import matplotlib.patches as patches
 import matplotlib
 import plotutils
 from matplotlib.transforms import blended_transform_factory
@@ -511,6 +512,123 @@ class ResultsTable(object):
 
         #ax.axis((xmin - xpad, xmax + xpad, ymin - ypad, ymax + ypad))
         return ax
+
+
+    def radviz(self, column_names, transforms=dict(), **kwargs):
+        """
+        Radviz plot.
+
+        Useful for exploratory visualization, a radviz plot can show
+        multivariate data in 2D.  Conceptually, the variables (here, specified
+        in `column_names`) are distributed evenly around the unit circle.  Then
+        each point (here, each row in the dataframe) is attached to each
+        variable by a spring, where the stiffness of the spring is proportional
+        to the value of corresponding variable.  The final position of a point
+        represents the equilibrium position with all springs pulling on it.
+
+        In practice, each variable is normalized to 0-1 (by subtracting the
+        mean and dividing by the range).
+
+        This is a very exploratory plot.  The order of `column_names` will
+        affect the results, so it's best to try a couple different orderings.
+        For other caveats, see [1].
+
+        Additional kwargs are passed to self.scatter, so subsetting, callbacks,
+        and other configuration can be performed using options for that method
+        (e.g., `genes_to_highlight` is particularly useful).
+
+        Parameters
+        ----------
+        column_names : list
+            Which columns of the dataframe to consider.  The columns provided
+            should only include numeric data, and they should not contain any
+            NaN, inf, or -inf values.
+
+        transforms : dict
+            Dictionary mapping column names to transformations that will be
+            applied just for the radviz plot.  For example, np.log1p is
+            a useful function. If a column name is not in this dictionary, it
+            will be used as-is.
+
+        ax : matplotlib.Axes
+            If not None, then plot the radviz on this axes.  If None, then
+            a new figure will be created.
+
+        kwargs : dict
+            Additional arguments are passed to self.scatter.  Note that not all
+            possible kwargs for self.scatter are necessarily useful for
+            a radviz plot (for example, margninal histograms would not be
+            meaningful).
+
+        Notes
+        -----
+        This method adds two new variables to self.data: "radviz_x" and
+        "radviz_y".  It then calls the self.scatter method, using these new
+        variables.
+
+        The data transformation was adapted from the
+        pandas.tools.plotting.radviz function.
+
+        References
+        ----------
+        [1]  Hoffman,P.E. et al. (1997) DNA visual and analytic data mining. In
+             the Proceedings of the IEEE Visualization. Phoenix, AZ, pp. 437-441.
+        [2] http://www.agocg.ac.uk/reports/visual/casestud/brunsdon/radviz.htm
+        [3] http://pandas.pydata.org/pandas-docs/stable/visualization.html#radviz
+        """
+        # make a copy of data
+        x = self.data[column_names].copy()
+
+        for k, v in transforms.items():
+            x[k] = v(x[k])
+
+        def normalize(series):
+            mn = min(series)
+            mx = max(series)
+            return (series - mn) / (mx - mn)
+
+        df = x.apply(normalize)
+
+        to_plot = []
+
+        n = len(column_names)
+
+        s = np.array([(np.cos(t), np.sin(t))
+                      for t in [2.0 * np.pi * (i / float(n))
+                                for i in range(n)]])
+
+        for i in range(len(x)):
+            row = df.irow(i).values
+            row_ = np.repeat(np.expand_dims(row, axis=1), 2, axis=1)
+            to_plot.append((s * row_).sum(axis=0) / row.sum())
+
+        x_, y_ = zip(*to_plot)
+        self.data['radviz_x'] = x_
+        self.data['radviz_y'] = y_
+
+        ax = self.scatter('radviz_x', 'radviz_y', **kwargs)
+
+        # Thanks to 
+        ax.add_patch(patches.Circle((0.0, 0.0), radius=1.0, facecolor='none'))
+        for xy, name in zip(s, column_names):
+            ax.add_patch(patches.Circle(xy, radius=0.025, facecolor='gray'))
+            if xy[0] < 0.0 and xy[1] < 0.0:
+                ax.text(xy[0] - 0.025, xy[1] - 0.025, name,
+                        ha='right', va='top', size='small')
+            elif xy[0] < 0.0 and xy[1] >= 0.0:
+                ax.text(xy[0] - 0.025, xy[1] + 0.025, name,
+                        ha='right', va='bottom', size='small')
+            elif xy[0] >= 0.0 and xy[1] < 0.0:
+                ax.text(xy[0] + 0.025, xy[1] - 0.025, name,
+                        ha='left', va='top', size='small')
+            elif xy[0] >= 0.0 and xy[1] >= 0.0:
+                ax.text(xy[0] + 0.025, xy[1] + 0.025, name,
+                        ha='left', va='bottom', size='small')
+
+        ax.axis('equal')
+        return ax
+
+
 
     def _id_callback(self, event):
         for i in event.ind:
