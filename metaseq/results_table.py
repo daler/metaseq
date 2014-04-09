@@ -336,19 +336,19 @@ class ResultsTable(object):
         yi = yfunc(_y)
 
         # handle inf, -inf, and NaN
-        pos_xv = np.isinf(xi) & (xi > 0)
-        neg_xv = np.isinf(xi) & (xi < 0)
-        nan_xv = np.isnan(xi)
-        pos_yv = np.isinf(yi) & (yi > 0)
-        neg_yv = np.isinf(yi) & (yi < 0)
-        nan_yv = np.isnan(yi)
+        x_is_pos_inf = np.isinf(xi) & (xi > 0)
+        x_is_neg_inf = np.isinf(xi) & (xi < 0)
+        x_is_nan = np.isnan(xi)
+        y_is_pos_inf = np.isinf(yi) & (yi > 0)
+        y_is_neg_inf = np.isinf(yi) & (yi < 0)
+        y_is_nan = np.isnan(yi)
 
         # Indexes for valid values
-        xv = ~(pos_xv | neg_xv | nan_xv)
-        yv = ~(pos_yv | neg_yv | nan_yv)
+        x_valid = ~(x_is_pos_inf | x_is_neg_inf | x_is_nan)
+        y_valid = ~(y_is_pos_inf | y_is_neg_inf | y_is_nan)
 
-        gmin = max(xi[xv].min(), yi[yv].min())
-        gmax = min(xi[xv].max(), yi[yv].max())
+        gmin = max(xi[x_valid].min(), yi[y_valid].min())
+        gmax = min(xi[x_valid].max(), yi[y_valid].max())
 
 
         # Convert any integer indexes into boolean, and create a new list of
@@ -440,8 +440,8 @@ class ResultsTable(object):
             yhist_kwargs = updated_kwargs.pop('yhist_kwargs', None)
 
             self.marginal.append(
-                xi[ind & xv & yv],
-                yi[ind & xv & yv],
+                xi[ind & x_valid & y_valid],
+                yi[ind & x_valid & y_valid],
                 scatter_kwargs=dict(picker=5, **updated_kwargs),
                 hist_kwargs=updated_hist_kwargs,
                 xhist_kwargs=xhist_kwargs,
@@ -455,13 +455,26 @@ class ResultsTable(object):
             rug_x_kwargs['color'] = color
             rug_y_kwargs['color'] = color
 
+            # Note: if both x and y are not valid, then they will not be on the
+            # plot.
             items = [
-                (xi, ind & xv & pos_yv, pos_offset, rug_x_kwargs),
-                (xi, ind & xv & nan_yv, nan_offset, rug_x_kwargs),
-                (xi, ind & xv & neg_yv, neg_offset, rug_x_kwargs),
-                (yi, ind & yv & pos_xv, pos_offset, rug_y_kwargs),
-                (yi, ind & yv & nan_xv, nan_offset, rug_y_kwargs),
-                (yi, ind & yv & neg_xv, neg_offset, rug_y_kwargs),
+                # top rug, y is +inf and x is valid
+                (xi, ind & x_valid & y_is_pos_inf, pos_offset, rug_x_kwargs),
+
+                # one of the bottom rugs, where y is NaN
+                (xi, ind & x_valid & y_is_nan, nan_offset, rug_x_kwargs),
+
+                # bottom rug, y is -inf
+                (xi, ind & x_valid & y_is_neg_inf, neg_offset, rug_x_kwargs),
+
+                # right rug, x is +inf
+                (yi, ind & y_valid & x_is_pos_inf, pos_offset, rug_y_kwargs),
+
+                # one of the left rugs; x is NaN
+                (yi, ind & y_valid & x_is_nan, nan_offset, rug_y_kwargs),
+
+                # left rug, x is -inf
+                (yi, ind & y_valid & x_is_neg_inf, neg_offset, rug_y_kwargs),
             ]
             for values, index, offset, kwargs in items:
                 coll = EventCollection(
