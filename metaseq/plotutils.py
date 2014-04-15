@@ -154,9 +154,6 @@ def calculate_limits(array_dict, method='global', percentiles=None, limit=()):
         group the keys of `array_dict`, and each group will have its own
         group-wise min/max calculated.
 
-    limit: tuple, optional
-        Tuple of 2 scalars passed directly to matplotlib.mlab.prctile to
-        limit the calculation of the percentile.
 
     percentiles : None or list
         If not None, a list of (lower, upper) percentiles in the range [0,100].
@@ -172,9 +169,9 @@ def calculate_limits(array_dict, method='global', percentiles=None, limit=()):
         )
         if percentiles:
             vmin = mlab.prctile(
-                all_arrays, percentiles[0], limit=limit)
+                all_arrays, percentiles[0])
             vmax = mlab.prctile(
-                all_arrays, percentiles[1], limit=limit)
+                all_arrays, percentiles[1])
 
         else:
             vmin = all_arrays.min()
@@ -194,9 +191,9 @@ def calculate_limits(array_dict, method='global', percentiles=None, limit=()):
             all_arrays = np.concatenate([array_dict[i] for i in keys])
             if percentiles:
                 vmin = mlab.prctile(
-                    all_arrays, percentiles[0], limit=limit)
+                    all_arrays, percentiles[0])
                 vmax = mlab.prctile(
-                    all_arrays, percentiles[1], limit=limit)
+                    all_arrays, percentiles[1])
             else:
                 vmin = all_arrays.min()
                 vmax = all_arrays.max()
