@@ -365,6 +365,8 @@ class ResultsTable(object):
                     tuple([new_ind] + list(block[1:]))
                 )
             else:
+                if hasattr(ind, 'values'):
+                    ind = ind.values
                 _genes_to_highlight.append(
                     tuple([ind] + list(block[1:]))
                 )
