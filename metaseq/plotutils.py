@@ -10,6 +10,7 @@ from matplotlib.ticker import MaxNLocator
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib import gridspec
 import colormap_adjust
+from scipy import stats
 
 
 def ci_plot(x, arr, conf=0.95, ax=None, line_kwargs=None, fill_kwargs=None):
