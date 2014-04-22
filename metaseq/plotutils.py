@@ -95,10 +95,11 @@ def imshow(arr, x=None, ax=None, vmin=None, vmax=None, percentile=True,
         if vmax is None:
             vmax = arr.max()
 
-    if imshow_kwargs is None:
-        imshow_kwargs = {}
-
     cmap = colormap_adjust.smart_colormap(vmin, vmax)
+    _imshow_kwargs = dict(origin='lower', cmap=cmap, vmin=vmin, vmax=vmax, aspect='auto')
+    if imshow_kwargs is not None:
+        _imshow_kwargs.update(imshow_kwargs)
+
     if sort_by is not None:
         ind = np.argsort(sort_by)
     else:
@@ -111,13 +112,8 @@ def imshow(arr, x=None, ax=None, vmin=None, vmax=None, percentile=True,
 
     mappable = array_ax.imshow(
         arr[ind, :],
-        aspect='auto',
-        cmap=cmap,
-        vmin=vmin,
-        vmax=vmax,
-        origin='lower',
         extent=(x.min(), x.max(), 0, arr.shape[0]),
-        **imshow_kwargs
+        **_imshow_kwargs
     )
     if ax is None:
         plt.colorbar(mappable, fig.cax)
