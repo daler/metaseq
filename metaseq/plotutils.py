@@ -78,7 +78,7 @@ def imshow(arr, x=None, ax=None, vmin=None, vmax=None, percentile=True,
             height_ratios=height_ratios)
 
     if x is None:
-        x = np.arange(arr.shape[1])
+        x = np.arange(arr.shape[1] + 1)
 
     if percentile:
         if vmin is None:
