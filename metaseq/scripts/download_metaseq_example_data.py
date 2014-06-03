@@ -3,6 +3,7 @@ import os
 import subprocess
 import logging
 import hashlib
+import urllib
 import pybedtools
 import gffutils
 import metaseq
@@ -29,6 +30,17 @@ args = ap.parse_args()
 
 CHROM = 'chr17'
 COORD = "%s:%s-%s" % (CHROM, 0, hg19[CHROM][-1])
+
+
+def download(url, dest):
+    """
+    Platform-agnostic downloader.
+    """
+    u = urllib.FancyURLopener()
+    logger.info("Downloading %s..." % url)
+    u.retrieve(url, dest)
+    logger.info('Done, see %s' % dest)
+    return dest
 
 
 def requirements_check():
@@ -185,9 +197,7 @@ def get_cufflinks():
     for size, md5, url in cufflinks:
         cuff_gtf = os.path.join(args.data_dir, os.path.basename(url))
         if not _up_to_date(md5, cuff_gtf):
-            cmds = [
-                'wget', url, '-O', cuff_gtf]
-            logged_command(cmds)
+            download(url, cuff_gtf)
 
 
 def get_bams():
@@ -267,10 +277,7 @@ def get_gtf():
         os.path.basename(url).replace('.gtf.gz', '_%s.gtf' % CHROM))
 
     if not _up_to_date(md5, subset_gtf):
-        cmds = [
-            'wget', url, '-O', full_gtf]
-        logged_command(cmds)
-
+        download(url, full_gtf)
         cmds = [
             'zcat',
             full_gtf,
