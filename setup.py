@@ -16,7 +16,7 @@ except ImportError:
 version_py = os.path.join(os.path.dirname(__file__), 'metaseq', 'version.py')
 version = open(version_py).read().split('=')[-1].strip().replace('"','')
 
-requirements = os.path.join(os.path.dirname(__file__), 'requirements.txt')
+requirements = os.path.join(os.path.dirname(__file__), 'requirements.txt').readlines()
 
 
 long_description = open('README.rst').read()
