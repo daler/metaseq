@@ -320,6 +320,7 @@ def cufflinks_conversion():
 
 
 if __name__ == "__main__":
+    requirements_check()
     get_bams()
     get_bigwigs()
     get_gtf()
