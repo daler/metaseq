@@ -4,9 +4,9 @@ import multiprocessing
 import itertools
 import pysam
 import sys
-from rebin import rebin
 from helpers import chunker
 import helpers
+from helpers import rebin
 import filetype_adapters
 
 

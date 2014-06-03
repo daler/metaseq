@@ -36,9 +36,8 @@ import pybedtools
 from array_helpers import _array, _array_parallel, _local_coverage, \
     _local_count
 import filetype_adapters
-import rebin
 import helpers
-
+from helpers import rebin
 
 def supported_formats():
     """
@@ -153,7 +152,7 @@ class BaseSignal(object):
         # now we ravel() and re-bin
         y = np.column_stack(ys).ravel()
         if bins:
-            xi, yi = rebin.rebin(x, y, bins)
+            xi, yi = rebin(x, y, bins)
             del x, y
             return xi, yi
         return x, y
