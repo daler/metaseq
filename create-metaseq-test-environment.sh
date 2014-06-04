@@ -625,7 +625,7 @@ fi
     # Metaseq installation
     log "Installing Python requirements for metaseq and metaseq itself.  $(tailinfo ${METASEQ_INSTALL_LOG})"
 
-if [[ TRAVIS_CI = 1 ]]; then
+if [[ $TRAVIS_CI = 1 ]]; then
     log "-t was specified, so installing from this directory"
     pip install . > ${METASEQ_INSTALL_LOG} \
     && log "Done, see ${METASEQ_INSTALL_LOG}" \
