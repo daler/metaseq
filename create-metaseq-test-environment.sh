@@ -427,6 +427,12 @@ EOF
     fi
 }
 
+tailinfo () {
+
+    echo "To follow progress, paste the command 'tail -f $1' without the quotes in another terminal."
+
+}
+
 # Installation functions -----------------------------------------------------
 #
 #   Each function installs the prerequisite into a subdirectory of
@@ -522,7 +528,7 @@ install_ucsctools () {
 # BEDTools installation ---------------------------------------------
 echo "${TO_INSTALL}" | grep "bedtools" > /dev/null \
     && {
-         log "Installing BEDTools version ${USE_BEDTOOLS_VERSION} to ${BEDTOOLS_PATH}.  Paste the command 'tail -f ${BEDTOOLS_INSTALL_LOG}' in another terminal for details." \
+         log "Installing BEDTools version ${USE_BEDTOOLS_VERSION} to ${BEDTOOLS_PATH}.  $(tailinfo ${BEDTOOLS_INSTALL_LOG})" \
          && { [[ check_gplusplus = "no" ]] && { gplusplus_error_message; exit 1; } } \
          || install_bedtools > $BEDTOOLS_INSTALL_LOG 2>&1 && log "Done, see ${BEDTOOLS_INSTALL_LOG}.";
      } || log "skipping bedtools installation"
@@ -530,7 +536,7 @@ echo "${TO_INSTALL}" | grep "bedtools" > /dev/null \
 # samtools installation ---------------------------------------------
 echo "${TO_INSTALL}" | grep "samtools" > /dev/null \
     && {
-        log "Installing samtools version ${USE_SAMTOOLS_VERSION} to ${SAMTOOLS_PATH}. Paste the command 'tail -f ${SAMTOOLS_INSTALL_LOG}' in another terminal for details." \
+        log "Installing samtools version ${USE_SAMTOOLS_VERSION} to ${SAMTOOLS_PATH}. $(tailinfo ${SAMTOOLS_INSTALL_LOG})" \
         && { [[ check_gcc = "no" ]] && { gcc_error_message; exit 1; } } \
         || install_samtools > $SAMTOOLS_INSTALL_LOG 2>&1 && log "Done, see ${SAMTOOLS_INSTALL_LOG}.";
     } || log "skipping samtools installation"
@@ -538,7 +544,7 @@ echo "${TO_INSTALL}" | grep "samtools" > /dev/null \
 # tabix installation ------------------------------------------------
 echo "${TO_INSTALL}" | grep "tabix" > /dev/null \
     && {
-        log "Installing tabix version ${USE_TABIX_VERSION} to ${TABIX_PATH}. Paste the command 'tail -f ${TABIX_INSTALL_LOG}' in another terminal for details." \
+        log "Installing tabix version ${USE_TABIX_VERSION} to ${TABIX_PATH}. $(tailinfo ${TABIX_INSTALL_LOG})" \
         && { [[ check_gcc = "no" ]] && { gcc_error_message; exit 1; } } \
         ||  install_tabix > $TABIX_INSTALL_LOG 2>&1 && log "Done, see ${TABIX_INSTALL_LOG}.";
     } || log "skipping tabix installation"
@@ -546,14 +552,14 @@ echo "${TO_INSTALL}" | grep "tabix" > /dev/null \
 # UCSC tools installation -------------------------------------------
 echo "${TO_INSTALL}" | grep "ucsc" > /dev/null \
     && {
-        log "Installing UCSC tools to ${BW_PATH}. Paste the command 'tail -f ${BW_INSTALL_LOG}' in another terminal for details." \
+        log "Installing UCSC tools to ${BW_PATH}. $(tailinfo {BW_INSTALL_LOG})" \
         && install_ucsctools > $BW_INSTALL_LOG 2>&1 && log "Done, see ${BW_INSTALL_LOG}.";
     } || log "skipping UCSC tool installation"
 
 
 # Miniconda installation ---------------------------------------------
 if [[ "${INSTALL_MINICONDA}" == 1 ]]; then
-    log "Installing Miniconda to ${MINICONDA_DIR}. See ${MINICONDA_INSTALL_LOG} for details."
+    log "Installing Miniconda to ${MINICONDA_DIR}. $(tailinfo ${MINICONDA_INSTALL_LOG})"
     if [[ $SYSTEM_TYPE = "mac" ]]; then
         url="http://repo.continuum.io/miniconda/Miniconda-3.5.2-MacOSX-x86_64.sh"
     else
@@ -580,13 +586,13 @@ if [[ "${INSTALL_MINICONDA}" == 1 ]]; then
     fi
 
     # Set up environment
-    log "Setting up isolated Python environment. Follow $ENV_INSTALL_LOG for details."
+    log "Setting up isolated Python environment. $(tailinfo $ENV_INSTALL_LOG)"
     if [[ -e "${MINICONDA_DIR}/envs/${ENVNAME}" ]]; then
 
         # If it exists, activate then install
         log "Activating existing environment."
         source "${MINICONDA_DIR}/bin/activate" "${ENVNAME}"
-        log "Installing prerequisites into existing environment, follow ${ENV_INSTALL_LOG} for details."
+        log "Installing prerequisites into existing environment. $(tailinfo ${ENV_INSTALL_LOG})' without the quotes in another terminal for details."
         conda install \
             pip ipython pytables numexpr pandas \
             cython matplotlib numpy scipy nose pycurl \
@@ -596,7 +602,7 @@ if [[ "${INSTALL_MINICONDA}" == 1 ]]; then
     else
 
         # Otherwise create and then activate
-        log "Installing prerequisites into a new environment, follow ${ENV_INSTALL_LOG} for details."
+        log "Installing prerequisites into a new environment. $(tailinfo ${ENV_INSTALL_LOG})"
         ${MINICONDA_DIR}/bin/conda create -n "${ENVNAME}" \
             pip ipython pytables numexpr pandas \
             cython matplotlib numpy scipy nose pycurl \
@@ -617,7 +623,7 @@ fi
 
 
     # Metaseq installation
-log "Installing Python requirements for metaseq and metaseq itself.  Paste the command 'tail -f ${METASEQ_INSTALL_LOG}' in another terminal for details."
+    log "Installing Python requirements for metaseq and metaseq itself.  $(tailinfo ${METASEQ_INSTALL_LOG})"
 
 if [[ TRAVIS_CI = 1 ]]; then
     log "-t was specified, so installing from this directory"
@@ -629,7 +635,7 @@ elif [[ ${GIT_TAG} = "disable" ]]; then
     log "used -g=disable, so not installing metaseq"
 
 elif [[ ${GIT_TAG} = "" ]]; then
-    log "Installing from PyPI, Paste the command 'tail -f ${METASEQ_INSTALL_LOG}' in another terminal for details"
+    log "Installing from PyPI, $(tailinfo ${METASEQ_INSTALL_LOG})"
     pip install "metaseq==${USE_METASEQ_VERSION}" > $METASEQ_INSTALL_LOG \
     && log "Done, see ${METASEQ_INSTALL_LOG}" \
     || { log "Error installing metaseq from PyPI, see ${METASEQ_INSTALL_LOG}"; exit 1; }
