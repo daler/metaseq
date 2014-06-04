@@ -522,7 +522,7 @@ install_ucsctools () {
 # BEDTools installation ---------------------------------------------
 echo "${TO_INSTALL}" | grep "bedtools" > /dev/null \
     && {
-         log "Installing BEDTools version ${USE_BEDTOOLS_VERSION} to ${BEDTOOLS_PATH}.  Follow ${BEDTOOLS_INSTALL_LOG} for details." \
+         log "Installing BEDTools version ${USE_BEDTOOLS_VERSION} to ${BEDTOOLS_PATH}.  Paste the command 'tail -f ${BEDTOOLS_INSTALL_LOG}' in another terminal for details." \
          && { [[ check_gplusplus = "no" ]] && { gplusplus_error_message; exit 1; } } \
          || install_bedtools > $BEDTOOLS_INSTALL_LOG 2>&1 && log "Done, see ${BEDTOOLS_INSTALL_LOG}.";
      } || log "skipping bedtools installation"
@@ -530,7 +530,7 @@ echo "${TO_INSTALL}" | grep "bedtools" > /dev/null \
 # samtools installation ---------------------------------------------
 echo "${TO_INSTALL}" | grep "samtools" > /dev/null \
     && {
-        log "Installing samtools version ${USE_SAMTOOLS_VERSION} to ${SAMTOOLS_PATH}. Follow ${SAMTOOLS_INSTALL_LOG} for details." \
+        log "Installing samtools version ${USE_SAMTOOLS_VERSION} to ${SAMTOOLS_PATH}. Paste the command 'tail -f ${SAMTOOLS_INSTALL_LOG}' in another terminal for details." \
         && { [[ check_gcc = "no" ]] && { gcc_error_message; exit 1; } } \
         || install_samtools > $SAMTOOLS_INSTALL_LOG 2>&1 && log "Done, see ${SAMTOOLS_INSTALL_LOG}.";
     } || log "skipping samtools installation"
@@ -538,7 +538,7 @@ echo "${TO_INSTALL}" | grep "samtools" > /dev/null \
 # tabix installation ------------------------------------------------
 echo "${TO_INSTALL}" | grep "tabix" > /dev/null \
     && {
-        log "Installing tabix version ${USE_TABIX_VERSION} to ${TABIX_PATH}. Follow ${TABIX_INSTALL_LOG} for details." \
+        log "Installing tabix version ${USE_TABIX_VERSION} to ${TABIX_PATH}. Paste the command 'tail -f ${TABIX_INSTALL_LOG}' in another terminal for details." \
         && { [[ check_gcc = "no" ]] && { gcc_error_message; exit 1; } } \
         ||  install_tabix > $TABIX_INSTALL_LOG 2>&1 && log "Done, see ${TABIX_INSTALL_LOG}.";
     } || log "skipping tabix installation"
@@ -546,7 +546,7 @@ echo "${TO_INSTALL}" | grep "tabix" > /dev/null \
 # UCSC tools installation -------------------------------------------
 echo "${TO_INSTALL}" | grep "ucsc" > /dev/null \
     && {
-        log "Installing UCSC tools to ${BW_PATH}. Follow ${BW_INSTALL_LOG} for details." \
+        log "Installing UCSC tools to ${BW_PATH}. Paste the command 'tail -f ${BW_INSTALL_LOG}' in another terminal for details." \
         && install_ucsctools > $BW_INSTALL_LOG 2>&1 && log "Done, see ${BW_INSTALL_LOG}.";
     } || log "skipping UCSC tool installation"
 
@@ -617,7 +617,7 @@ fi
 
 
     # Metaseq installation
-log "Installing Python requirements for metaseq and metaseq itself.  Follow ${METASEQ_INSTALL_LOG} for details."
+log "Installing Python requirements for metaseq and metaseq itself.  Paste the command 'tail -f ${METASEQ_INSTALL_LOG}' in another terminal for details."
 
 if [[ TRAVIS_CI = 1 ]]; then
     log "-t was specified, so installing from this directory"
@@ -629,8 +629,8 @@ elif [[ ${GIT_TAG} = "disable" ]]; then
     log "used -g=disable, so not installing metaseq"
 
 elif [[ ${GIT_TAG} = "" ]]; then
-    log "Installing from PyPI, follow ${METASEQ_INSTALL_LOG} for details"
-    pip install metaseq=${USE_METASEQ_VERSION} > $METASEQ_INSTALL_LOG \
+    log "Installing from PyPI, Paste the command 'tail -f ${METASEQ_INSTALL_LOG}' in another terminal for details"
+    pip install "metaseq==${USE_METASEQ_VERSION}" > $METASEQ_INSTALL_LOG \
     && log "Done, see ${METASEQ_INSTALL_LOG}" \
     || { log "Error installing metaseq from PyPI, see ${METASEQ_INSTALL_LOG}"; exit 1; }
 
