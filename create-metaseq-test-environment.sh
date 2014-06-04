@@ -429,7 +429,11 @@ EOF
 
 tailinfo () {
 
-    echo "To follow progress, paste the command 'tail -f $1' without the quotes in another terminal."
+    if [[ $VERBOSE = 1 ]]; then
+        echo ""
+    else
+        echo "To follow progress, paste the command 'tail -f $1' without the quotes in another terminal."
+    fi
 
 }
 
