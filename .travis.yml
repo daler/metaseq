@@ -6,7 +6,8 @@ install:
     - source activate metaseq-test
     - echo "$(pwd)"
     - ls -lrth
-    - python setup.py install
+    - pip install .
+
 
       # See https://github.com/guillermo-carrasco/bcbio-nextgen-deploy/blob/dabb3903ffdb29743b15c76eb535e7ae14885cad/.travis.yml
     - sudo rm -rf /dev/shm && sudo ln -Tsf /run/shm /dev/shm
