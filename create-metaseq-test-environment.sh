@@ -654,9 +654,12 @@ fi
 # Each installation process wrote the installed path to this file.  Source it
 # now, so we can confirm that the tools were found.  Note that at this point
 # the miniconda env should still be activated.
-source ${INSTALL_DIR}/paths
+source "${INSTALL_DIR}/paths"
 
-cat <<EOF
+README="${INSTALL_DIR}/README.txt"
+cat /dev/null > ${README}
+
+cat >> ${README} <<EOF
 Results
 -------
 Before running this script, the following programs were detected on your path:
@@ -670,12 +673,33 @@ $(check_all)
 EOF
 
 
-[[ $SYSTEM_TYPE = "mac" ]] && profile="~/.bash_profile" || profile="~/.bashrc"
+[[ $SYSTEM_TYPE = "mac" ]] && profile="${HOME}/.bash_profile" || profile="${HOME}/.bashrc"
 
 
 if [[ $(grep "export" ${INSTALL_DIR}/paths) ]]; then
+    # If on travis-ci, we definitely don't want interactive prompts holding
+    # things up....
+    if [[ $TRAVIS_CI != 1 ]]; then
+        cat << EOF
 
-    cat <<EOF
+    I can automatically add the locations of the installed programs to the
+    beginning of your \$PATH, which will allow these programs to be
+    found when you open a new terminal. This is a good idea if you're not
+    comfortable with editing your \$PATH.  Specifically, I can add the contents
+    of ${INSTALL_DIR}/paths to the end of your ${profile} file.
+    You can always delete these lines later.
+
+    Do you want me to add these programs to your path now?
+EOF
+        echo -n "(yes/no): "
+        read ans
+
+        if [[ ($ans != "yes") && ($ans != "Yes") && ($ans != "YES") &&
+            ($ans != "y") && ($ans != "Y") ]]; then
+
+            # If not added automatically here,, then write instructions to the
+            # README
+            cat >> ${README} <<EOF
 Add installed programs to PATH
 ------------------------------
 The paths to these installed programs have been written to the file
@@ -685,14 +709,47 @@ should do the trick:
 
     cat ${INSTALL_DIR}/paths >> ${profile}
 
-Then open a new terminal window.
+Then open a new terminal window to activate the changes.
 
 EOF
-fi
+        else
+            # Otherwise do it and then log the changes to the README.
+            cat ${INSTALL_DIR}/paths >> ${profile}
+            cat >> ${README} << EOF
+[ $(date) ]: The following lines were appended to the end of ${profile}:
 
+$(cat ${INSTALL_DIR}/paths)
+
+EOF
+            log "Added paths to ${profile}"
+        fi # end if y/n
+    fi # end if TRAVIS_CI
+fi # end if something was installed
 
 if [[ ${INSTALL_MINICONDA} = 1 ]]; then
-    cat <<EOF
+    if [[ $TRAVIS_CI != 1 ]]; then
+        cat << EOF
+
+    Would you like to prepend the location of the Miniconda installation to
+    your \$PATH? This will make it easier to activate enivronments.  This is
+    a good idea  if you're not comfortable with editing your \$PATH.
+    Specifically, I can add the contents of
+    ${INSTALL_DIR}/miniconda-path to the end of your ${profile} file.
+    You can always delete these lines later.
+
+    Do you want to add the Miniconda installation to your path now?
+EOF
+        echo -n "(yes/no): "
+        read ans
+
+        if [[ ($ans != "yes") && ($ans != "Yes") && ($ans != "YES") &&
+            ($ans != "y") && ($ans != "Y") ]]; then
+
+            # If not added automatically here,, then write instructions to the
+            # README
+            cat >> ${README} <<EOF
+
+
 Using the miniconda installation
 --------------------------------
 A miniconda installation is now at ${MINICONDA_DIR}. To make this permanently
@@ -702,29 +759,53 @@ the miniconda installation to your PATH:
     cat ${INSTALL_DIR}/miniconda-paths >> ${profile}
 
 Then open a new terminal to activate the changes.
+EOF
+        else
+            # Otherwise do it and then log the changes to the README.
+            cat ${INSTALL_DIR}/miniconda-paths >> ${profile}
+            cat >> ${README} << EOF
+[ $(date) ]: The following lines were appended to the end of ${profile}:
 
-
-Using the new environment
--------------------------
-An isolated Python environment has been created called ${ENVNAME}. When you are
-ready to use it, use the command:
-
-    source activate ${ENVNAME}
-
-Now you will be using the isolated Python environment; anything you do will not
-touch the system-wide installation. When you're done, use
-
-    source deactivate
-
-to return to normal.
-
-Planning on trying out metaseq?  After activating the environment you can
-download the example data with:
-
-    download_metaseq_example_data.py
-
-and follow the tutorial at https://pythonhosted.org/metaseq/example_session.html
+$(cat ${INSTALL_DIR}/miniconda-paths)
 
 EOF
-fi
+            log "Added miniconda path to ${profile}"
+        fi # end if y/n
 
+    cat >> ${README} <<EOF
+
+    Using the new environment
+    -------------------------
+    An isolated Python environment has been created called ${ENVNAME}.
+
+    When you are ready to use it, open a new terminal and use the command:
+
+        source activate ${ENVNAME}
+
+    Now you will be using the isolated Python environment; anything you do will not
+    touch the system-wide installation. When you're done, use
+
+        source deactivate
+
+    to return to normal.
+
+    Planning on trying out metaseq?  After activating the environment you can
+    download the example data with:
+
+        download_metaseq_example_data.py
+
+    and follow the tutorial at https://pythonhosted.org/metaseq/example_session.html
+
+EOF
+
+    fi # end if travis-ci
+fi # end if miniconda installed
+
+log "
+
+    Done!  The results of this installation have been written to:
+
+        ${README}
+
+    Please follow the instructions in that file to complete the installation.
+"
