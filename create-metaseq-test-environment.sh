@@ -10,7 +10,7 @@ INSTALL_MINICONDA=1
 ENVNAME="metaseq-test"
 LOG=/dev/stdout
 VERBOSE=0
-GIT_TAG=
+GIT_TAG=""
 TRAVIS_CI=0
 
 USE_BEDTOOLS_VERSION=2.19.1
@@ -610,13 +610,20 @@ fi
 log "Installing Python requirements for metaseq and metaseq itself.  Follow ${METASEQ_INSTALL_LOG} for details."
 
 if [[ TRAVIS_CI = 1 ]]; then
-    pip install .
+    log "-t was specified, so installing from this directory"
+    pip install . > ${METASEQ_INSTALL_LOG} \
+    && log "Done, see ${METASEQ_INSTALL_LOG}" \
+    || { log "Error installing from this directory, see ${METASEQ_INSTALL_LOG}"; exit 1; }
 
 elif [[ ${GIT_TAG} = "disable" ]]; then
     log "used -g=disable, so not installing metaseq"
 
-elif [[ -z "${GIT_TAG}" ]]; then
-    pip install metaseq > $METASEQ_INSTALL_LOG
+elif [[ ${GIT_TAG} = "" ]]; then
+    log "Installing from PyPI, follow ${METASEQ_INSTALL_LOG} for details"
+    pip install metaseq > $METASEQ_INSTALL_LOG \
+    && log "Done, see ${METASEQ_INSTALL_LOG}" \
+    || { log "Error installing metaseq from PyPI, see ${METASEQ_INSTALL_LOG}"; exit 1; }
+
 
 else
     if [[ $(check_git) = "no" ]]; then
@@ -628,9 +635,12 @@ else
         "
         exit 1
     fi
-
-    git clone https://github.com/daler/metaseq.git ${INSTALL_DIR}/metaseq
-    ( cd ${INSTALL_DIR}/metaseq && git checkout $GIT_TAG && pip install . )
+    log "Cloning metaseq repository"
+    git clone https://github.com/daler/metaseq.git ${INSTALL_DIR}/metaseq \
+    && log "Checking out ${GIT_TAG} and installing" \
+    && ( cd ${INSTALL_DIR}/metaseq && git checkout $GIT_TAG && pip install . > ${METASEQ_INSTALL_LOG} ) \
+    && log "Done, see ${METASEQ_INSTALL_LOG}" \
+    || { log "Error installing metaseq from git clone, see ${METASEQ_INSTALL_LOG}"; exit 1; }
 fi
 
 
