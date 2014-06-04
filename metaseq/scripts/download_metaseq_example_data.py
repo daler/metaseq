@@ -279,7 +279,7 @@ def get_gtf():
     if not _up_to_date(md5, subset_gtf):
         download(url, full_gtf)
         cmds = [
-            'zcat',
+            'zcat', '<',
             full_gtf,
             '|', 'awk -F "\\t" \'{if ($1 == "%s") print $0}\''
             % CHROM.replace('chr', ''),
