@@ -16,7 +16,7 @@ TRAVIS_CI=0
 USE_BEDTOOLS_VERSION=2.19.1
 USE_SAMTOOLS_VERSION=0.1.19
 USE_TABIX_VERSION=0.2.6
-USE_METASEQ_VERSION=0.5.2
+USE_METASEQ_VERSION="0.5.3a1"
 # ---------------------------------------------------------------
 
 while getopts "hd:i:m:Me:vg:t" x; do
@@ -630,7 +630,7 @@ elif [[ ${GIT_TAG} = "disable" ]]; then
 
 elif [[ ${GIT_TAG} = "" ]]; then
     log "Installing from PyPI, follow ${METASEQ_INSTALL_LOG} for details"
-    pip install metaseq > $METASEQ_INSTALL_LOG \
+    pip install metaseq=${USE_METASEQ_VERSION} > $METASEQ_INSTALL_LOG \
     && log "Done, see ${METASEQ_INSTALL_LOG}" \
     || { log "Error installing metaseq from PyPI, see ${METASEQ_INSTALL_LOG}"; exit 1; }
 
