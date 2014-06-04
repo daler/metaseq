@@ -153,6 +153,9 @@ usage: $0 [options] | check
         d)
             INSTALL_DIR="${OPTARG}"
             ;;
+        e)
+            ENVNAME="${OPTARG}"
+            ;;
         i)
             TO_INSTALL="${OPTARG}"
             ;;
