@@ -186,8 +186,6 @@ log ()
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] : $1"
 }
 
-export CFLAGS="-w"
-export CXXFLAGS="-w"
 
 # Mac or Linux?
 uname | grep "Darwin" > /dev/null && SYSTEM_TYPE=mac || SYSTEM_TYPE=linux
@@ -585,21 +583,25 @@ if [[ "${INSTALL_MINICONDA}" == 1 ]]; then
         # If it exists, activate then install
         log "Activating existing environment."
         source "${MINICONDA_DIR}/bin/activate" "${ENVNAME}"
-        log "Installing prerequisites into existing environment"
+        log "Installing prerequisites into existing environment, follow ${ENV_INSTALL_LOG} for details."
         conda install \
             pip ipython pytables numexpr pandas \
             cython matplotlib numpy scipy nose pycurl \
-            > $ENV_INSTALL_LOG
+            > $ENV_INSTALL_LOG \
+        && log "Done, see ${ENV_INSTALL_LOG}" \
+        || { log "Error installing prerequisites, please see ${ENV_INSTALL_LOG}"; exit 1; }
     else
 
         # Otherwise create and then activate
-        log "Installing prerequisites into a new environment"
+        log "Installing prerequisites into a new environment, follow ${ENV_INSTALL_LOG} for details."
         ${MINICONDA_DIR}/bin/conda create -n "${ENVNAME}" \
             pip ipython pytables numexpr pandas \
             cython matplotlib numpy scipy nose pycurl \
-            > $ENV_INSTALL_LOG
-        log "Activating new environment."
-        source "${MINICONDA_DIR}/bin/activate" "${ENVNAME}"
+            > $ENV_INSTALL_LOG \
+        && log "Done, see ${ENV_INSTALL_LOG}" \
+        && log "Activating new environment." \
+        && source "${MINICONDA_DIR}/bin/activate" "${ENVNAME}" \
+        || { log "Error installing prerequisites, please see ${ENV_INSTALL_LOG}"; exit 1; }
     fi
 
     echo "# Added by metaseq installation, $(date)" > ${INSTALL_DIR}/miniconda-paths
