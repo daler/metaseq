@@ -4,7 +4,9 @@ install:
     - source "${HOME}/tools/miniconda-paths"
     - source "${HOME}/tools/paths"
     - source activate metaseq-test
-    - pip install .
+    - echo "$(pwd)"
+    - ls -lrth
+    - python setup.py install
 
       # See https://github.com/guillermo-carrasco/bcbio-nextgen-deploy/blob/dabb3903ffdb29743b15c76eb535e7ae14885cad/.travis.yml
     - sudo rm -rf /dev/shm && sudo ln -Tsf /run/shm /dev/shm
