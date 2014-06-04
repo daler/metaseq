@@ -5,7 +5,7 @@ set -e
 # Defaults ------------------------------------------------------
 MINICONDA_DIR="${HOME}/miniconda"
 INSTALL_DIR="$(pwd)/tools"
-TO_INSTALL="bedtools,samtools,tabix,bigWigSummary"
+TO_INSTALL="bedtools,samtools,tabix,ucsc"
 INSTALL_MINICONDA=1
 ENVNAME="metaseq-test"
 LOG=/dev/stdout
@@ -36,17 +36,18 @@ usage: $0 [options] | check
     Otherwise:
 
     This script can install the prerequisite genomics tools (BEDTools,
-    samtools, tabix, bigWigSummary) necessary for running metaseq.  It can also
-    install a standalone Python installation (Miniconda, a more streamlined
-    version of Anaconda; more info at
-    http://docs.continuum.io/anaconda/index.html) that includes metaseq and all
-    its Python requirements.  This can be used alongside any other Python
-    versions that may be installed.
+    samtools, tabix, and the UCSC tools bigWigSummary, bedGraphToBigWig, and
+    bigWigToBedGraph) necessary for running metaseq.  It can also install
+    a standalone Python installation (Miniconda, a more streamlined version of
+    Anaconda; more info at http://docs.continuum.io/anaconda/index.html) that
+    includes metaseq and all its Python requirements.  This can be used
+    alongside any other Python versions that may be installed.
 
     By default, this script will:
 
-        1) Download and install BEDTools, samtools, tabix, and bigWigSummary.
-          It will place them in the following directory:
+        1) Download and install BEDTools, samtools, tabix, bigWigSummary,
+           bedGraphToBigWig, bigWigToBedGraph.  It will place them in the
+           following directory:
 
               ${INSTALL_DIR}
 
@@ -73,7 +74,7 @@ usage: $0 [options] | check
 
     -i STRING    A string (usually comma-separated with no spaces) containing
                  the names of prerequisite tools to install in DIR.  Options
-                 are bedtools, samtools, tabix, bigWigSummary. Default is
+                 are bedtools, samtools, tabix, ucsc. Default is
                  \"${TO_INSTALL}\".
 
     -m DIR       Directory where miniconda (an isolated python distribution) will be installed.
@@ -238,6 +239,18 @@ check_bigWigSummary () {
         || echo "no"
 }
 
+check_bigWigToBedGraph () {
+    command -v bigWigToBedGraph > /dev/null 2>&1 \
+        && echo "yes [ ] $(which bigWigToBedGraph)" \
+        || echo "no"
+}
+
+check_bedGraphToBigWig () {
+    command -v bedGraphToBigWig > /dev/null 2>&1 \
+        && echo "yes [ ] $(which bedGraphToBigWig)" \
+        || echo "no"
+}
+
 check_gcc () {
     command -v gcc > /dev/null 2>&1 \
         && echo "yes [ $(gcc --version 2> /dev/null | grep -E 'version|gcc') ] $(which gcc)" \
@@ -280,22 +293,24 @@ check_all () {
 
     echo "
     Compilers:
-        gcc           : $(check_gcc)
-        g++           : $(check_gplusplus)
+        gcc              : $(check_gcc)
+        g++              : $(check_gplusplus)
 
     Genomics tools:
-        samtools      : $(check_samtools)
-        bedtools      : $(check_bedtools)
-        tabix         : $(check_tabix)
-        bigWigSummary : $(check_bigWigSummary)
+        samtools         : $(check_samtools)
+        bedtools         : $(check_bedtools)
+        tabix            : $(check_tabix)
+        bigWigSummary    : $(check_bigWigSummary)
+        bigWigToBedGraph : $(check_bigWigToBedGraph)
+        bedGraphToBigWig : $(check_bedGraphToBigWig)
 
     Python:
-        python        : $(check_python)
-        scipy         : $(check_python_package scipy)
-        metaseq       : $(check_python_package metaseq)
-        numpy         : $(check_python_package numpy)
-        matplotlib    : $(check_python_package matplotlib)
-        pybedtools    : $(check_python_package pybedtools)
+        python           : $(check_python)
+        scipy            : $(check_python_package scipy)
+        metaseq          : $(check_python_package metaseq)
+        numpy            : $(check_python_package numpy)
+        matplotlib       : $(check_python_package matplotlib)
+        pybedtools       : $(check_python_package pybedtools)
     "
 }
 
@@ -474,19 +489,21 @@ install_samtools () {
     )
 }
 
-install_bigwigsummary () {
-    # Download and install bigWigSummary
+install_ucsctools () {
+    # Download and install bigWigSummary, bigWigToBedGraph, bedGraphToBigWig
     mkdir -p "${BW_PATH}" && cd "${BW_PATH}" && \
     (
         cd "${INSTALL_DIR}"
         if [[ $SYSTEM_TYPE = "linux" ]]; then
-            url=http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/bigWigSummary
+            url=http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64
         elif [[ $SYSTEM_TYPE = "mac" ]]; then
-            url=http://hgdownload.cse.ucsc.edu/admin/exe/macOSX.x86_64/bigWigSummary
+            url=http://hgdownload.cse.ucsc.edu/admin/exe/macOSX.x86_64
         fi
-        downloader "$url" "${BW_PATH}/bigWigSummary" \
-        && chmod +x "${BW_PATH}/bigWigSummary" \
-        && echo "export PATH=\"${BW_PATH}:\$PATH\"" >> "${INSTALL_DIR}/paths"
+        for prog in bigWigSummary bigWigToBedGraph bedGraphToBigWig; do
+            downloader "$url/$prog" "${BW_PATH}/${prog}" \
+            && chmod +x "${BW_PATH}/$prog" 
+        done
+        echo "export PATH=\"${BW_PATH}:\$PATH\"" >> "${INSTALL_DIR}/paths"
 
     )
 }
@@ -520,12 +537,12 @@ echo "${TO_INSTALL}" | grep "tabix" > /dev/null \
         ||  install_tabix > $TABIX_INSTALL_LOG 2>&1 && log "Done, see ${TABIX_INSTALL_LOG}.";
     } || log "skipping tabix installation"
 
-# bigWigSummary installation -----------------------------------------
-echo "${TO_INSTALL}" | grep "bigWigSummary" > /dev/null \
+# UCSC tools installation -------------------------------------------
+echo "${TO_INSTALL}" | grep "ucsc" > /dev/null \
     && {
-        log "Installing bigWigSummary to ${BW_PATH}. Follow ${BW_INSTALL_LOG} for details." \
-        && install_bigwigsummary > $BW_INSTALL_LOG 2>&1 && log "Done, see ${BW_INSTALL_LOG}.";
-    } || log "skipping bigWigSummary installation"
+        log "Installing UCSC tools to ${BW_PATH}. Follow ${BW_INSTALL_LOG} for details." \
+        && install_ucsctools > $BW_INSTALL_LOG 2>&1 && log "Done, see ${BW_INSTALL_LOG}.";
+    } || log "skipping UCSC tool installation"
 
 
 # Miniconda installation ---------------------------------------------
