@@ -629,13 +629,7 @@ fi
     # Metaseq installation
     log "Installing Python requirements for metaseq and metaseq itself.  $(tailinfo ${METASEQ_INSTALL_LOG})"
 
-if [[ $TRAVIS_CI = 1 ]]; then
-    log "-t was specified, so installing from this directory"
-    pip install . > ${METASEQ_INSTALL_LOG} \
-    && log "Done, see ${METASEQ_INSTALL_LOG}" \
-    || { log "Error installing from this directory, see ${METASEQ_INSTALL_LOG}"; exit 1; }
-
-elif [[ ${GIT_TAG} = "disable" ]]; then
+if [[ ${GIT_TAG} = "disable" ]]; then
     log "used -g=disable, so not installing metaseq"
 
 elif [[ ${GIT_TAG} = "" ]]; then
@@ -643,7 +637,6 @@ elif [[ ${GIT_TAG} = "" ]]; then
     pip install "metaseq==${USE_METASEQ_VERSION}" > $METASEQ_INSTALL_LOG \
     && log "Done, see ${METASEQ_INSTALL_LOG}" \
     || { log "Error installing metaseq from PyPI, see ${METASEQ_INSTALL_LOG}"; exit 1; }
-
 
 else
     if [[ $(check_git) = "no" ]]; then

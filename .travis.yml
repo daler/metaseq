@@ -1,6 +1,6 @@
 language: c
 install:
-    - ./create-metaseq-test-environment.sh -d "${HOME}/tools" -t -m "${HOME}/miniconda" -e metaseq-test -v
+    - ./create-metaseq-test-environment.sh -d "${HOME}/tools" -t -m "${HOME}/miniconda" -e metaseq-test -v -g disable
     - source "${HOME}/tools/miniconda-paths"
     - source "${HOME}/tools/paths"
     - source activate metaseq-test
