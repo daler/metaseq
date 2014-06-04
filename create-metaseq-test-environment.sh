@@ -68,6 +68,7 @@ usage: $0 [options] | check
     Options
     -------
 
+    -h           Print this help message and exit.
 
     -d DIR       Directory where pre-requisistes will be installed.
                  Default is ${INSTALL_DIR}.
@@ -93,6 +94,10 @@ usage: $0 [options] | check
     -v           Verbose mode.  By default, the stdout and stderr from each
                  installation step will be written to a separate log file.  If
                  -v is used, then all output will be written to stdout.
+
+    -t           Special flag used for running tests on travis-ci.org.
+                 Disables interactive prompts and expects to be called from
+                 inside the metaseq source directory.
 
     -g TAG       By default, this script installs the latest metaseq release.
                  Use the -g flag to specify a git tag from the metaseq github
