@@ -3,6 +3,7 @@ install:
     - ./create-metaseq-test-environment.sh -d "${HOME}/tools" -t -m "${HOME}/miniconda" -e metaseq-test
     - source "${HOME}/tools/miniconda-paths"
     - source "${HOME}/tools/paths"
+    - source activate metaseq-test
     - pip install .
 
       # See https://github.com/guillermo-carrasco/bcbio-nextgen-deploy/blob/dabb3903ffdb29743b15c76eb535e7ae14885cad/.travis.yml
