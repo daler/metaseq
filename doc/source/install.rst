@@ -17,7 +17,7 @@ Easy installation method
 ------------------------
 If you are just trying out :mod:`metaseq`, the best way to do so is to download
 the installation script (see the appropriate section below for your operating
-system).  This script works on Mac OSX and Linux, and will:
+system, :ref:`mac` or :ref:`linux`).  This script works on Mac OSX and Linux, and will:
 
     - Download and install `BEDTools
       <http://bedtools.readthedocs.org/en/latest/>`_, `samtools
@@ -47,11 +47,28 @@ want to add the installation locations to your PATH variable (if you're not
 sure what this is, then you should say "yes").  It will print a README.txt file
 with the results and some additional instructions to finalize the installation.
 
-In the end, you will have a complete scientific Python installation, along with
-some commonly-used genomics tools.
 
 
 .. warning::
+
+    The installation script depends on several external servers (UCSC, github,
+    PyPI) beyond our immediate control.  If the script seems to hang for more
+    than a couple of minutes, or you get unxplained error messages, please use
+    Ctrl-C to abort and try again later.
+
+    If you run into difficulties that are not solved by re-running the script,
+    please `open an issue on github <https://github.com/daler/metaseq/issues>`_
+    describing the details of the problem.
+
+In the end, you will have a complete scientific Python installation, along with
+some commonly-used genomics tools.
+
+.. _mac:
+
+Mac OSX
+~~~~~~~
+
+.. note::
 
     On Mac OSX, you will first need to install `Xcode
     <https://developer.apple.com/xcode/>`_, which provides C and C++ compilers.
@@ -59,20 +76,9 @@ some commonly-used genomics tools.
     depends on the version of OSX you are running.  Note that you may have to
     register for a free developer account.
 
-.. note::
-
-    The installation script depends on several external servers (UCSC, github,
-    PyPI) beyond our immediate control.  If the script seems to hang for more
-    than a couple of minutes, please use Ctrl-C to abort and try again later.
-
-    If you run into more difficulties, please `open an issue on github
-    <https://github.com/daler/metaseq/issues>`_ describing the details of the
-    problem.
-
-Mac OSX
-~~~~~~~
 To download the script and perform the installation using default settings,
-paste the following two commands in a Terminal window::
+paste the following two commands in a Terminal window.  The first command
+downloads the script, and the second command runs it::
 
     curl -O https://raw.githubusercontent.com/daler/metaseq/master/create-metaseq-test-environment.sh
 
@@ -80,11 +86,22 @@ paste the following two commands in a Terminal window::
 
     bash create-metaseq-test-environment.sh
 
+.. _linux:
+
 Linux
 ~~~~~
+.. note::
+
+    On Linux, you will need a C and C++ compiler as well as the zlib
+    development libraries, which don't come installed by default.  In Ubuntu,
+    the following command should install these for you::
+
+        sudo apt-get install build-essential zlib1g-dev
+
 On Linux, `wget` is usually available by default instead of `curl`.  So paste
 these two commands into a terminal instead to perform the installation using
-default settings::
+default settings.  The first command downloads the script, and the second
+command runs it::
 
     wget https://raw.githubusercontent.com/daler/metaseq/master/create-metaseq-test-environment.sh
 
