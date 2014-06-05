@@ -478,7 +478,7 @@ install_tabix () {
         exit 1
     fi
     mkdir -p ${TABIX_PATH}
-    ARCHIVE="tabix-${USE_TABIX_VERSION}.tar.bz2"
+    ARCHIVE="${INSTALL_DIR}/tabix-${USE_TABIX_VERSION}.tar.bz2"
     (
         cd "${INSTALL_DIR}" \
         && downloader  "http://sourceforge.net/projects/samtools/files/tabix/tabix-${USE_TABIX_VERSION}.tar.bz2"  ${ARCHIVE} \
@@ -497,7 +497,7 @@ install_samtools () {
         exit 1
     fi
     mkdir -p ${SAMTOOLS_PATH}
-    ARCHIVE="samtools-${USE_SAMTOOLS_VERSION}.tar.bz2"
+    ARCHIVE="${INSTALL_DIR}/samtools-${USE_SAMTOOLS_VERSION}.tar.bz2"
     (
         downloader "https://downloads.sourceforge.net/project/samtools/samtools/${USE_SAMTOOLS_VERSION}/samtools-${USE_SAMTOOLS_VERSION}.tar.bz2" ${ARCHIVE} \
     && tar -xjf "${ARCHIVE}" --directory ${SAMTOOLS_PATH} --strip-components=1 \
