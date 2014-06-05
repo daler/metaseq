@@ -602,7 +602,7 @@ if [[ "${INSTALL_MINICONDA}" == 1 ]]; then
         log "Installing prerequisites into existing environment. $(tailinfo ${ENV_INSTALL_LOG})' without the quotes in another terminal for details."
         conda install \
             pip ipython pytables numexpr pandas \
-            cython matplotlib numpy scipy nose pycurl \
+            cython matplotlib numpy scipy nose pycurl scikit-learn \
             > $ENV_INSTALL_LOG \
         && log "Done, see ${ENV_INSTALL_LOG}" \
         || { log "Error installing prerequisites, please see ${ENV_INSTALL_LOG}"; exit 1; }
@@ -612,7 +612,7 @@ if [[ "${INSTALL_MINICONDA}" == 1 ]]; then
         log "Installing prerequisites into a new environment. $(tailinfo ${ENV_INSTALL_LOG})"
         ${MINICONDA_DIR}/bin/conda create -n "${ENVNAME}" \
             pip ipython pytables numexpr pandas \
-            cython matplotlib numpy scipy nose pycurl \
+            cython matplotlib numpy scipy nose pycurl scikit-learn \
             > $ENV_INSTALL_LOG \
         && log "Done, see ${ENV_INSTALL_LOG}" \
         && log "Activating new environment." \
