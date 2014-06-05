@@ -395,11 +395,10 @@ to show, and then manually call the `_default_callback` like this:
 
 .. parsed-literal::
 
-    score_ct      1047.517457
-    fpkm_ct       1422.448488
-    score_kd      1070.752317
-    fpkm_kd       1671.190119
-    foldchange       1.174869
+    score_ct    1047.517457
+    fpkm_ct     1422.448488
+    score_kd    1070.752317
+    fpkm_kd     1671.190119
     Name: ENST00000253788, dtype: float64
 
 

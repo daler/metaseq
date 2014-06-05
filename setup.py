@@ -16,6 +16,9 @@ except ImportError:
 version_py = os.path.join(os.path.dirname(__file__), 'metaseq', 'version.py')
 version = open(version_py).read().split('=')[-1].strip().replace('"','')
 
+requirements = open(os.path.join(os.path.dirname(__file__), 'requirements.txt')).readlines()
+
+
 long_description = open('README.rst').read()
 setup(
         name='metaseq',
@@ -23,10 +26,7 @@ setup(
         description="Integrative analysis of high-thoughput sequencing data",
         #long_description=long_description,
         license="MIT",
-        install_requires=['bx-python>=0.7.1', 'matplotlib>=1.3.1',
-                          'pysam>=0.7', 'pandas>=0.13.1', 'pycurl',
-                          'pybedtools>=0.6.4', 'gffutils>=0.8', 'urlgrabber',
-                          'argparse', 'PyYAML',],
+        install_requires=requirements,
         packages=find_packages(),
         package_data={
             'metaseq':[

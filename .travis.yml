@@ -1,20 +1,16 @@
 language: c
 install:
-    - sudo apt-get update -qq
-    - sudo apt-get install -qq python-dev python-pip python-yaml g++
-    - sudo pip install conda
-    - sudo conda init
-    - conda create --yes --name test pytables numexpr pandas cython matplotlib pip nose pycurl numpy
-    - export PATH="$HOME/envs/test/bin:$PATH"
-      #- pip install -q -r requirements.txt
+    - ./create-metaseq-test-environment.sh -d "${HOME}/tools" -t -m "${HOME}/miniconda" -e metaseq-test -v -g disable
+    - source "${HOME}/tools/miniconda-paths"
+    - source "${HOME}/tools/paths"
+    - source activate metaseq-test
+    - echo "$(pwd)"
+    - ls -lrth
     - pip install .
+
 
       # See https://github.com/guillermo-carrasco/bcbio-nextgen-deploy/blob/dabb3903ffdb29743b15c76eb535e7ae14885cad/.travis.yml
     - sudo rm -rf /dev/shm && sudo ln -Tsf /run/shm /dev/shm
-
-
-virtualenv:
-    system_site_packages: true
 
 
 script:

@@ -7,6 +7,12 @@ import matplotlib
 import pybedtools
 import subprocess
 import re
+import numpy as np
+
+
+def rebin(x, y, nbin):
+    xi = np.linspace(x.min(), x.max(), nbin)
+    return xi, np.interp(xi, x, y)
 
 
 def chunker(f, n):
@@ -56,6 +62,7 @@ def list_example_files(pattern=None, full_path=False):
         return files
     else:
         return [os.path.basename(i) for i in files]
+
 
 def split_feature(f, n):
     """
