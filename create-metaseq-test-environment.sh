@@ -4,7 +4,7 @@ set -e
 
 # Defaults ------------------------------------------------------
 MINICONDA_DIR="${HOME}/miniconda"
-INSTALL_DIR="$(pwd)/tools"
+INSTALL_DIR="${HOME}/tools"
 TO_INSTALL="bedtools,samtools,tabix,ucsc"
 INSTALL_MINICONDA=1
 ENVNAME="metaseq-test"
@@ -466,6 +466,7 @@ install_bedtools () {
             && tar -xzf "${ARCHIVE}" --directory ${BEDTOOLS_PATH} --strip-components=1 \
             && cd "${BEDTOOLS_PATH}" \
             && make \
+            && rm ${ARCHIVE} \
             && echo "export PATH=\"${BEDTOOLS_PATH}/bin:\$PATH\"" >> "${INSTALL_DIR}/paths"
     )
 }
@@ -484,6 +485,7 @@ install_tabix () {
         && tar -xjf "${ARCHIVE}" --directory ${TABIX_PATH} --strip-components=1 \
         && cd "${TABIX_PATH}" \
         && make \
+        && rm ${ARCHIVE} \
         && echo "export PATH=\"${TABIX_PATH}:\$PATH\"" >> "${INSTALL_DIR}/paths"
     )
 }
@@ -501,6 +503,7 @@ install_samtools () {
     && tar -xjf "${ARCHIVE}" --directory ${SAMTOOLS_PATH} --strip-components=1 \
     && cd "${SAMTOOLS_PATH}" \
     && make \
+    && rm ${ARCHIVE} \
     && echo "export PATH=\"${SAMTOOLS_PATH}:\$PATH\"" >> "${INSTALL_DIR}/paths"
     )
 }
