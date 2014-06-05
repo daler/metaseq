@@ -2,8 +2,9 @@ Installation
 ============
 
 :mod:`metaseq` relies on the standard `Scientific Python Stack
-<http://www.scipy.org/stackspec.html>`_.  Specifically, `NumPy
-<http://www.numpy.org/>`_, `matplotlib <http://matplotlib.org/>`_, and `pandas
+<http://www.scipy.org/stackspec.html>`_, specifically, `NumPy
+<http://www.numpy.org/>`_, `SciPy <http://www.scipy.org/index.html>`_,
+`matplotlib <http://matplotlib.org/>`_, and `pandas
 <http://pandas.pydata.org/>`_. It also relies on standard genomics tools like
 `BEDTools <http://bedtools.readthedocs.org/en/latest/>`_, `samtools
 <http://samtools.sourceforge.net/>`_, and others.
@@ -15,7 +16,8 @@ an installation script that handles all of the complicated work.
 Easy installation method
 ------------------------
 If you are just trying out :mod:`metaseq`, the best way to do so is to download
-the installation script.  This script works on Mac OSX and Linux, and will:
+the installation script (see the appropriate section below for your operating
+system).  This script works on Mac OSX and Linux, and will:
 
     - Download and install `BEDTools
       <http://bedtools.readthedocs.org/en/latest/>`_, `samtools
@@ -25,9 +27,11 @@ the installation script.  This script works on Mac OSX and Linux, and will:
       <http://hgdownload.cse.ucsc.edu/admin/exe/>`_
 
     - Download and install `Miniconda
-      <http://conda.pydata.org/miniconda.html>`_, which sets up an isolated
+      <http://conda.pydata.org/miniconda.html>`_ (a slimmed-down version of the
+      `Anaconda Python distribution
+      <https://store.continuum.io/cshop/anaconda/>`_) which sets up an isolated
       Python environment that is separate from anything you might already have
-      installed
+      installed (see :ref:`whyconda` for more details on this).
 
     - Create an isolated Python environment with `conda
       <http://conda.pydata.org/docs/examples/create.html>`_
@@ -43,29 +47,49 @@ want to add the installation locations to your PATH variable (if you're not
 sure what this is, then you should say "yes").  It will print a README.txt file
 with the results and some additional instructions to finalize the installation.
 
+In the end, you will have a complete scientific Python installation, along with
+some commonly-used genomics tools.
 
-.. note::
+
+.. warning::
 
     On Mac OSX, you will first need to install `Xcode
     <https://developer.apple.com/xcode/>`_, which provides C and C++ compilers.
     You can get Xcode for free directly from Apple, and the version to get
-    depends on the version of OSX you are running.  You may have to register
-    for a free developer account.
+    depends on the version of OSX you are running.  Note that you may have to
+    register for a free developer account.
+
+.. note::
+
+    The installation script depends on several external servers (UCSC, github,
+    PyPI) beyond our immediate control.  If the script seems to hang for more
+    than a couple of minutes, please use Ctrl-C to abort and try again later.
+
+    If you run into more difficulties, please `open an issue on github
+    <https://github.com/daler/metaseq/issues>`_ describing the details of the
+    problem.
 
 Mac OSX
 ~~~~~~~
-Paste the following commands in a Terminal window to download the script and
-perform the installation using default settings::
+To download the script and perform the installation using default settings,
+paste the following two commands in a Terminal window::
 
     curl -O https://raw.githubusercontent.com/daler/metaseq/master/create-metaseq-test-environment.sh
+
+::
+
     bash create-metaseq-test-environment.sh
 
 Linux
 ~~~~~
 On Linux, `wget` is usually available by default instead of `curl`.  So paste
-these commands into a terminal instead::
+these two commands into a terminal instead to perform the installation using
+default settings::
 
     wget https://raw.githubusercontent.com/daler/metaseq/master/create-metaseq-test-environment.sh
+
+::
+
     bash create-metaseq-test-environment.sh
 
 Customizing
@@ -78,38 +102,78 @@ install a subset of the prerequisites, you can view the help with::
 Uninstalling
 ~~~~~~~~~~~~
 
-Uninstalling is straightforward -- as long as you used the default locations,
-then simply remove the `miniconda` directory and the `tools` directory.
+Uninstalling is straightforward.  **Assuming you used the default locations:**
+
+* Delete ``~/miniconda/envs/metaseq-test`` to uninstall just the test
+  environment.
+* Delete ``~/miniconda`` to uninstall the test environment and all of miniconda.
+* Delete ``~/tools`` to uninstall the genomics tools.  Specifically, the
+  installation script creates the following directories and files within
+  `~/tools`:
+
+    * ``bedtools<VERSION>/``  (where BEDTools is installed)
+    * ``samtools<VERSION>/``  (where samtools is installed)
+    * ``tabix<VERSION>/``  (where tabix is installed)
+    * ``ucsc/`` (where bigWigSummary and other UCSC programs are installed)
+    * ``logs/``  (any logs from the installation process)
+    * ``README.txt`` (post-installation instructions)
+    * ``miniconda-paths`` (describes where miniconda was installed)
+    * ``paths`` (describes where genomics tools were installed)
+
+* Optionally, if you added anything to your PATH, you can delete the relevant
+  lines in your `~/.bashrc` or `~/.bash_profile` file, but this is not strictly
+  necessary if these directories are deleted.
 
 
-Detailed installation
----------------------
-If you do not want to use the installation script described above, you can
-install the components needed by :mod:`metaseq` manually.  Note however that
-the installation script offers lots of flexibility, and allows you to
-mix-and-match components.  For example, the script can install just the
-genomics tools but not Miniconda or metaseq itself. This can help speed up the
-installation process. See the help for that script for details.
+
+Custom installation
+-------------------
+Even if you do not want to use the default full installation script described
+above, it can still be useful to install the individual components.  See the
+help for that script for the full details, but useful flags are:
+
+* `-M` disables the miniconda installation
+* `-i` controls which genomics tools are installed
+* `-g` controls which :mod:`metaseq` version to install (specified as tags or commits from
+  github).  The special tag "disable" will disable installation of metaseq.
+
+Some example use-cases:
+
+* Only install BEDTools::
+
+    bash create-metaseq-test-environment.sh -M -i "bedtools" -g disable
+
+* Install just the latest commit of metaseq into your system-wide Python
+  installation (note: you will need to run the script with sudo priviliges,
+  since it uses `pip install`)::
+
+    bash create-metaseq-test-environment.sh -M -i "" -g master
+
+* Same thing, but install it into the test environment::
+
+    bash create-metaseq-test-environment.sh -i "" -g master
+
+
+Manual installation
+-------------------
 
 Step 1: Non-python programs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The following non-Python programs are needed:
 
-* A C/C++ compiler
+* A C and C++ compiler
 * `BEDTools`, `samtools`, and `Tabix`
 * bigWigSummary, bigWigToBedGraph, bedGraphToBigWig
 
-The `installation page for pybedtools
-<https://pythonhosted.org/pybedtools/main.html>`_ has installation instructions
-for these prerequisites.  Alternatively, see the :ref:`from_scratch` section below for
-installation scripts.
+If you don't already have them installed, the installation script described
+above is the easiest way to get these.
 
 
 Step 2. Install Python packages
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Option 1 (recommended): Install from PyPI
-+++++++++++++++++++++++++++++++++++++++++
+Option 1: Install from PyPI
++++++++++++++++++++++++++++
 The most robust method for installing :mod:`metaseq` is to do a 2-stage
 installation.  First, ensure the base prerequisites are installed.  If any of
 these are installed, a message will be printed on the screen indicating so.  Note that the
@@ -141,66 +205,36 @@ Option 2: Install from source
 
 
 
+Footnotes
+---------
 
-.. _from_scratch:
+.. _whyconda:
 
-Installing from scratch
------------------------
+Miniconda instead of virtualenv?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Continuous integration tests are run on `Travis-CI
-<https://travis-ci.org/daler/metaseq>`_.  If you have trouble installing
-dependencies above, the following scripts allow you to re-create a full test
-environment on Ubuntu 12.04 LTS.
+In the past, the standard way of creating isolated environments was to use
+`virtualenv <http://virtualenv.readthedocs.org/en/latest/>`_.  The standard
+procedure is to create a blank environment, and `pip install` all necessary
+requirements, essentially installing everything from scratch.  However, for
+packages like :mod:`metaseq` with many dependencies, installing and compiling
+from scratch can take a lot of time.
 
-The path names are relative to the top-level source directory.
+Recently, the Anaconda Python distribution has provided another way of creating
+isolated environments.  It has made it much easier to install the scienfific
+Python stack because it provides pre-compiled versions of numpy, scipy,
+matplotlib, and other hard-to-install packages.  This drastically reduces the
+amount of time it takes to set up an isolated environment.
 
-`.travis.yml`
-~~~~~~~~~~~~~
-This is the configuration file for Travis-CI; when running on a normal machine
-the commands in the "install" list should be run from the command line.  Then
-the `.travis-test.sh` script (below) can be run.
+We decided to use Miniconda (a slimmed-down version of Anaconda) for the
+:mod:`meteaseq` installation script because it provides the user with an
+isolated environment in a fraction of the time of a full virtualenv
+installation, and does not require a FORTRAN compiler for installing scipy.
 
-You should set the `TRAVIS_BUILD_DIR` environment variable to wherever you want
-the dependencies to be installed.
-
-.. literalinclude:: ../../.travis.yml
-    :language: yaml
-
-
-Python dependencies
--------------------
-Here is a list of dependencies, and why they are needed by :mod:`metaseq`:
-
-:NumPy:
-    fast arrays; required for pandas, scikit-learn, matplotlib, and much of
-    metaseq.
-
-:Cython:
-    dependency for pybedtools, bx-python, statsmodels, pandas
-
-:matplotlib:
-    interactive plotting
-
-:pandas:
-    fast tablular data
-
-:bx-python:
-    accessing bigWig and bigBed files
-
-:pysam:
-    accessing BAM files
-
-:scikit-learn (optional):
-    clustering
-
-:gffutils:
-    GFF and GTF manipulation
-
-:pybedtools:
-    BED, BAM, GTF, GFF, VCF manipulation
-
-:urlgrabber:
-    downloading example data
-
-:PyYAML:
-    config files
+Tests
+~~~~~
+After every change to :mod:`metaseq`, tests are run by the Travis-CI continuous
+integration service.  You can always check the status by visiting
+https://travis-ci.org/daler/metaseq/.  These tests are run by setting up the
+test environment in Ubuntu 12.04 using the `create-metaseq-test-environment.sh`
+script described above.

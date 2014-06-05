@@ -1,5 +1,7 @@
 Metaseq
 =======
+.. image:: https://travis-ci.org/daler/metaseq.svg?branch=master
+    :target: https://travis-ci.org/daler/metaseq
 
 Briefly, the goal of `metaseq` is to tie together lots of existing software into
 a framework for exploring genomic data.  It focuses on flexibility and
@@ -7,19 +9,12 @@ interactive exploration and plotting of disparate genomic data sets.
 
 The main documentation for `metaseq` can be found at http://packages.python.org/metaseq/.
 
-.. image:: https://travis-ci.org/daler/metaseq.svg?branch=master
-    :target: https://travis-ci.org/daler/metaseq
 
 Example 1: Average ChIP-seq signal over promoters
 -------------------------------------------------
-There are multiple ways of viewing this example, depending on how you are
-viewing this document:
 
-* Latest release version on PyPI: `Example 1 <https://pythonhosted.org/metaseq/example_session.html>`_
-* Reading this on GitHub? See `Example 1 <doc/source/example_session.rst>`_.
-* IPython notebook: View on `nbviewer <http://nbviewer.ipython.org/github/daler/metaseq/blob/master/doc/source/example_session.ipynb?create=1>`_
-* Compiled Sphinx docs: :ref:`[relative link within this documentation] <example_session>`,
-
+`Example 1 <https://pythonhosted.org/metaseq/example_session.html>`_ walks you
+through the creation of the following heatmap and line-plot figure:
 
 .. figure:: demo.png
 
@@ -31,13 +26,10 @@ viewing this document:
 
 Example 2: Differential expression scatterplots
 -----------------------------------------------
-There are multiple ways of viewing this example, depending on how you are
-viewing this document.
 
-* Latest release version on PyPI: `Example 2 <https://pythonhosted.org/metaseq/example_session_2.html>`_
-* Reading this on GitHub? See `Example 2 <doc/source/example_session_2.rst>`_.
-* IPython notebook: View on `nbviewer <http://nbviewer.ipython.org/github/daler/metaseq/blob/master/doc/source/example_session_2.ipynb?create=1>`_
-* Compiled Sphinx docs: :ref:`[relative link within this documentation] <example_session_2>`,
+`Example 2 <https://pythonhosted.org/metaseq/example_session_2.html>`_ walks
+you through the creation of the following scatterplot and marginal histogram
+figure:
 
 
 .. figure:: expression-demo.png
