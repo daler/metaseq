@@ -15,9 +15,10 @@ an installation script that handles all of the complicated work.
 
 Easy installation method
 ------------------------
-If you are just trying out :mod:`metaseq`, the best way to do so is to download
-the installation script (see the appropriate section below for your operating
-system, :ref:`mac` or :ref:`linux`).  This script works on Mac OSX and Linux, and will:
+If you are just trying out :mod:`metaseq` we provide an installation script
+that installs all the prerequisites for running :mod:`metaseq` (see the
+appropriate section below for your operating system, :ref:`mac` or
+:ref:`linux`).  This script works on Mac OSX and Linux, and will:
 
     - Download and install `BEDTools
       <http://bedtools.readthedocs.org/en/latest/>`_, `samtools
@@ -67,6 +68,8 @@ some commonly-used genomics tools.
 
 Mac OSX
 ~~~~~~~
+Installation on Mac OSX has been tested on versions 10.6.8 (Snow Leopard) and
+10.9 (Mavericks).
 
 .. note::
 
@@ -90,6 +93,12 @@ downloads the script, and the second command runs it::
 
 Linux
 ~~~~~
+Installation on Linux has been tested on Ubuntu 12.04.1, Ubuntu 14.04, and
+RHLES 5.10.  We noticed that RHLES 5.10 ships with an old version of gcc
+(v4.1.2, from 2007) which causes compilation errors in some Python packages
+(pysam, bx-python).  Upgrading gcc to at least to v4.7.0 (from 2012) eliminates
+these errors.
+
 .. note::
 
     On Linux, you will need a C and C++ compiler as well as the zlib
@@ -103,11 +112,20 @@ these two commands into a terminal instead to perform the installation using
 default settings.  The first command downloads the script, and the second
 command runs it::
 
-    wget https://raw.githubusercontent.com/daler/metaseq/master/create-metaseq-test-environment.sh
+    wget --no-check-certificate https://raw.githubusercontent.com/daler/metaseq/master/create-metaseq-test-environment.sh
 
 ::
 
     bash create-metaseq-test-environment.sh
+
+Windows
+~~~~~~~
+The best approach for installing on Windows is to use a virtual machine running
+Ubuntu (for example, see `VirtualBox <https://www.virtualbox.org/>`_), and
+follow the instructions above for installing :mod:`metaseq` on :ref:`linux`.
+
+An alternative is to install on Windows using `Cygwin
+<http://www.cygwin.com/>`_, but this is untested.
 
 Customizing
 ~~~~~~~~~~~
