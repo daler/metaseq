@@ -16,7 +16,7 @@ TRAVIS_CI=0
 USE_BEDTOOLS_VERSION=2.19.1
 USE_SAMTOOLS_VERSION=0.1.19
 USE_TABIX_VERSION=0.2.6
-USE_METASEQ_VERSION="0.5.3a2"
+
 # ---------------------------------------------------------------
 
 while getopts "hd:i:m:Me:vg:t" x; do
@@ -61,7 +61,7 @@ usage: $0 [options] | check
 
         4) Install Python prerequisites for metaseq in this environment
 
-        5) Install metaseq itself in this environment
+        5) Install the latest metaseq release in this environment
 
     Further instructions are displayed upon successful installation.
 
@@ -113,7 +113,6 @@ usage: $0 [options] | check
         bedtools      : ${USE_BEDTOOLS_VERSION}
         samtools      : ${USE_SAMTOOLS_VERSION}
         tabix         : ${USE_TABIX_VERSION}
-        metaseq       : ${USE_METASEQ_VERSION}
         bigWigSummary : latest version on UCSC servers
 
 
@@ -602,7 +601,7 @@ if [[ "${INSTALL_MINICONDA}" == 1 ]]; then
         log "Installing prerequisites into existing environment. $(tailinfo ${ENV_INSTALL_LOG})' without the quotes in another terminal for details."
         conda install \
             pip ipython pytables numexpr pandas \
-            cython matplotlib numpy scipy nose pycurl \
+            cython matplotlib numpy scipy nose pycurl scikit-learn \
             > $ENV_INSTALL_LOG \
         && log "Done, see ${ENV_INSTALL_LOG}" \
         || { log "Error installing prerequisites, please see ${ENV_INSTALL_LOG}"; exit 1; }
@@ -612,7 +611,7 @@ if [[ "${INSTALL_MINICONDA}" == 1 ]]; then
         log "Installing prerequisites into a new environment. $(tailinfo ${ENV_INSTALL_LOG})"
         ${MINICONDA_DIR}/bin/conda create -n "${ENVNAME}" \
             pip ipython pytables numexpr pandas \
-            cython matplotlib numpy scipy nose pycurl \
+            cython matplotlib numpy scipy nose pycurl scikit-learn \
             > $ENV_INSTALL_LOG \
         && log "Done, see ${ENV_INSTALL_LOG}" \
         && log "Activating new environment." \
@@ -637,7 +636,7 @@ if [[ ${GIT_TAG} = "disable" ]]; then
 
 elif [[ ${GIT_TAG} = "" ]]; then
     log "Installing from PyPI, $(tailinfo ${METASEQ_INSTALL_LOG})"
-    pip install "metaseq==${USE_METASEQ_VERSION}" > $METASEQ_INSTALL_LOG \
+    pip install "metaseq" > $METASEQ_INSTALL_LOG \
     && log "Done, see ${METASEQ_INSTALL_LOG}" \
     || { log "Error installing metaseq from PyPI, see ${METASEQ_INSTALL_LOG}"; exit 1; }
 
