@@ -5,6 +5,8 @@ import numpy as np
 """
 Tools for working with data across sessions.
 """
+
+
 def load_features_and_arrays(prefix, mmap_mode='r'):
     """
     Returns the features and NumPy arrays that were saved with
@@ -23,7 +25,9 @@ def load_features_and_arrays(prefix, mmap_mode='r'):
     arrays = np.load(prefix + '.npz', mmap_mode=mmap_mode)
     return features, arrays
 
-def save_features_and_arrays(features, arrays, prefix, compressed=False, link_features=False, overwrite=False):
+
+def save_features_and_arrays(features, arrays, prefix, compressed=False,
+                             link_features=False, overwrite=False):
     """
     Saves NumPy arrays of processed data, along with the features that
     correspond to each row, to files for later use.
@@ -34,7 +38,7 @@ def save_features_and_arrays(features, arrays, prefix, compressed=False, link_fe
         this will be in GFF format, if BED features were provided it will be in
         BED format, and so on.
 
-        prefix.npz : A NumPy .npz file. 
+        prefix.npz : A NumPy .npz file.
 
     Parameters
     ----------

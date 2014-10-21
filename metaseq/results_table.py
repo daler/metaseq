@@ -351,7 +351,6 @@ class ResultsTable(object):
         gmin = max(xi[x_valid].min(), yi[y_valid].min())
         gmax = min(xi[x_valid].max(), yi[y_valid].max())
 
-
         # Convert any integer indexes into boolean, and create a new list of
         # genes to highlight.  This handles optional hist kwargs.
         allind = np.zeros_like(xi) == 0
@@ -392,7 +391,6 @@ class ResultsTable(object):
         # Set up the object that will handle the marginal histograms
         self.marginal = plotutils.MarginalHistScatter(
             ax, hist_size=hist_size, pad=hist_pad)
-
 
         # Set up kwargs for x and y rug plots
         rug_x_kwargs = dict(
@@ -512,9 +510,7 @@ class ResultsTable(object):
         ax.set_ylabel(ylab)
         ax.axis('tight')
 
-        #ax.axis((xmin - xpad, xmax + xpad, ymin - ypad, ymax + ypad))
         return ax
-
 
     def radviz(self, column_names, transforms=dict(), **kwargs):
         """
@@ -574,9 +570,11 @@ class ResultsTable(object):
         References
         ----------
         [1]  Hoffman,P.E. et al. (1997) DNA visual and analytic data mining. In
-             the Proceedings of the IEEE Visualization. Phoenix, AZ, pp. 437-441.
+             the Proceedings of the IEEE Visualization. Phoenix, AZ, pp.
+             437-441.
         [2] http://www.agocg.ac.uk/reports/visual/casestud/brunsdon/radviz.htm
-        [3] http://pandas.pydata.org/pandas-docs/stable/visualization.html#radviz
+        [3] http://pandas.pydata.org/pandas-docs/stable/visualization.html\
+                #radviz
         """
         # make a copy of data
         x = self.data[column_names].copy()
@@ -610,7 +608,6 @@ class ResultsTable(object):
 
         ax = self.scatter('radviz_x', 'radviz_y', **kwargs)
 
-        # Thanks to 
         ax.add_patch(patches.Circle((0.0, 0.0), radius=1.0, facecolor='none'))
         for xy, name in zip(s, column_names):
             ax.add_patch(patches.Circle(xy, radius=0.025, facecolor='gray'))
@@ -629,8 +626,6 @@ class ResultsTable(object):
 
         ax.axis('equal')
         return ax
-
-
 
     def _id_callback(self, event):
         for i in event.ind:
@@ -698,7 +693,6 @@ class ResultsTable(object):
                 if i:
                     yield result
 
-
         intersect_kwargs = intersect_kwargs or {}
         if not self._cached_features:
             self._cached_features = pybedtools\
@@ -716,7 +710,8 @@ class ResultsTable(object):
         else:
             features = self._cached_features
 
-        hits = list(set([i.name for i in features.intersect(peaks, **intersect_kwargs)]))
+        hits = list(set([i.name for i in features.intersect(
+            peaks, **intersect_kwargs)]))
         return self.data.index.isin(hits)
 
 

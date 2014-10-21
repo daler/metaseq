@@ -308,7 +308,8 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
 
                 if accumulate:
                     if preserve_total:
-                        profile[start_ind:stop_ind] += (score / float((stop_ind - start_ind)))
+                        profile[start_ind:stop_ind] += (
+                            score / float((stop_ind - start_ind)))
                     else:
                         profile[start_ind:stop_ind] += score
 
