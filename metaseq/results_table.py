@@ -985,6 +985,21 @@ class DESeqResults(ResultsTable):
     downregulated.__doc__ = downregulated.__doc__.format(threshdoc=threshdoc)
 
 
+class DESeq2Results(DESeqResults):
+    def __init__(self, data, db=None, header_check=True, **kwargs):
+        import_kwargs = kwargs.pop('import_kwargs', {})
+        if header_check and isinstance(data, basestring):
+            comment_char = import_kwargs.get('comment', '#')
+            for i, line in enumerate(open(data)):
+                if line[0] != comment_char:
+                    break
+            import_kwargs['skiprows'] = i
+        import_kwargs['na_values'] = ['nan']
+        import_kwargs['index_col'] = import_kwargs.pop('index_col', 0)
+        super(DESeqResults, self).__init__(
+            data=data, db=db, import_kwargs=import_kwargs, **kwargs)
+
+
 class LazyDict(object):
     def __init__(self, fn_dict, dbfn, index_file, extra=None, cls=DESeqResults,
                  modifier=None):
