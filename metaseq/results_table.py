@@ -197,6 +197,9 @@ class ResultsTable(object):
     def __sub__(self, other):
         return self.index - other.index
 
+    def __len__(self):
+        return len(self.data)
+
     def scatter(self, x, y, xfunc=None, yfunc=None, xscale=None, yscale=None,
                 xlab=None, ylab=None, genes_to_highlight=None,
                 label_genes=False, marginal_histograms=False,
