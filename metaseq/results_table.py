@@ -657,7 +657,7 @@ class ResultsTable(object):
         return self.__class__(self.data.ix[ind], **self._kwargs)
 
     def genes_with_peak(self, peaks, transform_func=None, split=False,
-                        intersect_kwargs=None, *args, **kwargs):
+                        intersect_kwargs=None, id_attribute='ID', *args, **kwargs):
         """
         Returns a boolean index of genes that have a peak nearby.
 
@@ -683,6 +683,14 @@ class ResultsTable(object):
 
         intersect_kwargs : dict
             kwargs passed to pybedtools.BedTool.intersect.
+
+        id_attribute : str
+            The attribute in the GTF or GFF file that contains the id of the
+            gene. For meaningful results to be returned, a gene's ID be also
+            found in the index of the dataframe.
+
+            For GFF files, typically you'd use `id_attribute="ID"`.  For GTF
+            files, you'd typically use `id_attribute="gene_id"`.
         """
         def _transform_func(x):
             """
@@ -713,7 +721,7 @@ class ResultsTable(object):
         else:
             features = self._cached_features
 
-        hits = list(set([i.name for i in features.intersect(
+        hits = list(set([i[id_attribute] for i in features.intersect(
             peaks, **intersect_kwargs)]))
         return self.data.index.isin(hits)
 
