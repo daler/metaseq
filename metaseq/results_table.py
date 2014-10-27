@@ -430,6 +430,12 @@ class ResultsTable(object):
                     **one_to_one)
 
         # Plot 'em all, and label if specified
+
+        # In order to avoid calling the callback function multiple times when
+        # we have overlapping genes to highlight (e.g., a gene that is both
+        # upregulated AND has a peak), keep track of everything that's been
+        # added so far.
+        self._seen = np.ones_like(xi) == 0
         for block in _genes_to_highlight:
             ind = block[0]
             kwargs = block[1]
@@ -459,16 +465,21 @@ class ResultsTable(object):
             self.marginal.append(
                 xi[ind & x_valid & y_valid],
                 yi[ind & x_valid & y_valid],
-                scatter_kwargs=dict(picker=5, **updated_kwargs),
+                scatter_kwargs=dict(picker=True, **updated_kwargs),
                 hist_kwargs=updated_hist_kwargs,
                 xhist_kwargs=xhist_kwargs,
                 yhist_kwargs=yhist_kwargs,
-                marginal_histograms=_marginal_histograms)
+                marginal_histograms=_marginal_histograms,
+            )
+
             # This is important for callbacks: here we grab the last-created
             # collection,
             coll = self.marginal.scatter_ax.collections[-1]
             coll.df = self.data
-            coll.ind = ind
+            coll.ind = ind & x_valid & y_valid
+            coll._already_seen = coll.ind & self._seen
+
+            self._seen |= coll.ind
 
             color = color_converter(updated_kwargs['color'])
             rug_x_kwargs['color'] = color
@@ -514,13 +525,13 @@ class ResultsTable(object):
                             **label_kwargs)
 
         # register callback
-        if callback is not None:
-            def wrapped_callback(event):
-                return callback(self._id_callback(event))
+        if callback is None:
+            callback = self._default_callback
 
-        else:
-            def wrapped_callback(event):
-                return self._default_callback(self._id_callback(event))
+        def wrapped_callback(event):
+            for _id in self._id_callback(event):
+                callback(_id)
+
 
         ax.figure.canvas.mpl_connect('pick_event', wrapped_callback)
 
@@ -646,8 +657,26 @@ class ResultsTable(object):
         return ax
 
     def _id_callback(self, event):
+        # event.ind is the index into event's x and y data.
+        #
+        # event.artist.ind is the index of the entire artist into the original
+        # dataframe.
+        #
+        # event.artist._already_seen the index into the original dataframe of
+        # items that have been seen by previously-added collections.
+        #
+
+        # For each index `i` in event.ind, whether or not it should be used is
+        # determined by
+        #
+        #   event.artist._already_seen[event.artist.ind][i]
+
+        subset_df = event.artist.df.ix[event.artist.ind]
+        already_seen = event.artist._already_seen[event.artist.ind]
         for i in event.ind:
-            return event.artist.df.ix[event.artist.ind].index[i]
+            if not already_seen[i]:
+                _id = subset_df.index[i]
+                yield _id
 
     def _default_callback(self, i):
         print self.data.ix[i]
