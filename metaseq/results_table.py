@@ -203,7 +203,8 @@ class ResultsTable(object):
     def scatter(self, x, y, xfunc=None, yfunc=None, xscale=None, yscale=None,
                 xlab=None, ylab=None, genes_to_highlight=None,
                 label_genes=False, marginal_histograms=False,
-                general_kwargs=dict(color="k", alpha=0.2, linewidths=0),
+                general_kwargs=dict(color="k", alpha=0.2, linewidths=0,
+                                    picker=True),
                 general_hist_kwargs=None,
                 offset_kwargs={}, label_kwargs=None, ax=None,
                 one_to_one=None, callback=None, xlab_prefix=None,
@@ -361,7 +362,6 @@ class ResultsTable(object):
         # Convert any integer indexes into boolean, and create a new list of
         # genes to highlight.  This handles optional hist kwargs.
 
-
         # We'll compile a new list of genes to highlight.
         _genes_to_highlight = []
 
@@ -465,7 +465,7 @@ class ResultsTable(object):
             self.marginal.append(
                 xi[ind & x_valid & y_valid],
                 yi[ind & x_valid & y_valid],
-                scatter_kwargs=dict(picker=True, **updated_kwargs),
+                scatter_kwargs=dict(**updated_kwargs),
                 hist_kwargs=updated_hist_kwargs,
                 xhist_kwargs=xhist_kwargs,
                 yhist_kwargs=yhist_kwargs,
@@ -477,9 +477,6 @@ class ResultsTable(object):
             coll = self.marginal.scatter_ax.collections[-1]
             coll.df = self.data
             coll.ind = ind & x_valid & y_valid
-            coll._already_seen = coll.ind & self._seen
-
-            self._seen |= coll.ind
 
             color = color_converter(updated_kwargs['color'])
             rug_x_kwargs['color'] = color
@@ -531,7 +528,6 @@ class ResultsTable(object):
         def wrapped_callback(event):
             for _id in self._id_callback(event):
                 callback(_id)
-
 
         ax.figure.canvas.mpl_connect('pick_event', wrapped_callback)
 
@@ -661,22 +657,10 @@ class ResultsTable(object):
         #
         # event.artist.ind is the index of the entire artist into the original
         # dataframe.
-        #
-        # event.artist._already_seen the index into the original dataframe of
-        # items that have been seen by previously-added collections.
-        #
-
-        # For each index `i` in event.ind, whether or not it should be used is
-        # determined by
-        #
-        #   event.artist._already_seen[event.artist.ind][i]
-
         subset_df = event.artist.df.ix[event.artist.ind]
-        already_seen = event.artist._already_seen[event.artist.ind]
         for i in event.ind:
-            if not already_seen[i]:
-                _id = subset_df.index[i]
-                yield _id
+            _id = subset_df.index[i]
+            yield _id
 
     def _default_callback(self, i):
         print self.data.ix[i]
@@ -701,7 +685,8 @@ class ResultsTable(object):
         return self.__class__(self.data.ix[ind], **self._kwargs)
 
     def genes_with_peak(self, peaks, transform_func=None, split=False,
-                        intersect_kwargs=None, id_attribute='ID', *args, **kwargs):
+                        intersect_kwargs=None, id_attribute='ID', *args,
+                        **kwargs):
         """
         Returns a boolean index of genes that have a peak nearby.
 
