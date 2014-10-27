@@ -73,8 +73,9 @@ def save_features_and_arrays(features, arrays, prefix, compressed=False, link_fe
             force_flag = '-f'
         else:
             force_flag = ''
+
         cmds = [
-            'ln', '-s', force_flag, features_filename, prefix + '.features']
+            'ln', '-s', force_flag, os.path.abspath(features_filename), prefix + '.features']
         os.system(' '.join(cmds))
     else:
         pybedtools.BedTool(features).saveas(prefix + '.features')
