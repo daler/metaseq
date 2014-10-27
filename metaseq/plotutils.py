@@ -930,9 +930,17 @@ class MarginalHistScatter(object):
 
         # Only plot hists if there's valid data
         if len(hx) > 0:
-            axhistx.hist(hx, **xhk)
+            if len(hx) == 1:
+                _xhk = _updatecopy(orig=xhk, update_with=dict(bins=[hx[0], hx[0]]), keys=['bins'])
+                axhistx.hist(hx, **_xhk)
+            else:
+                axhistx.hist(hx, **xhk)
         if len(hy) > 0:
-            axhisty.hist(hy, **yhk)
+            if len(hy) == 1:
+                _yhk = _updatecopy(orig=yhk, update_with=dict(bins=[hy[0], hy[0]]), keys=['bins'])
+                axhisty.hist(hy, **_yhk)
+            else:
+                axhisty.hist(hy, **yhk)
 
         # Turn off unnecessary labels -- for these, use the scatter's axes
         # labels
