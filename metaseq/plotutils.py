@@ -886,8 +886,8 @@ class MarginalHistScatter(object):
         yhist_kwargs.update(dict(orientation='horizontal'))
 
         # Plot the scatter
-        self.scatter_ax.scatter(x, y, **scatter_kwargs)
-        self.scatter_ax.collections[-1].labels = labels
+        coll = self.scatter_ax.scatter(x, y, **scatter_kwargs)
+        coll.labels = labels
 
         if not marginal_histograms:
             return

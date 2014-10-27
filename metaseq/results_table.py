@@ -245,10 +245,11 @@ class ResultsTable(object):
             `ind` using `label_kwargs`.
 
         callback : callable
-            Function to call upon clicking a point. Default is to print the
-            gene name, but an example of another useful callback would be
-            a mini-browser connected to a genomic_signal object from which the
-            expression data were calculated.
+            Function to call upon clicking a point. Must accept a single
+            argument which is the gene ID. Default is to print the gene name,
+            but an example of another useful callback would be a mini-browser
+            connected to a genomic_signal object from which the expression data
+            were calculated.
 
         one_to_one : None or dict
             If not None, a dictionary of matplotlib.plot kwargs that will be
@@ -330,10 +331,12 @@ class ResultsTable(object):
             ax = fig.add_subplot(111)
 
         if label_kwargs is None:
-            label_kwargs = dict(horizontalalignment='right',
-                                verticalalignment='center', style='italic',
-                                bbox=dict(facecolor='w', edgecolor='None',
-                                          alpha=0.5))
+            label_kwargs = dict(
+                horizontalalignment='right',
+                verticalalignment='center',
+                style='italic',
+                bbox=dict(facecolor='w', edgecolor='None', alpha=0.5)
+            )
 
         # Clean data ---------------------------------------------------------
         xi = xfunc(_x)
@@ -351,21 +354,29 @@ class ResultsTable(object):
         x_valid = ~(x_is_pos_inf | x_is_neg_inf | x_is_nan)
         y_valid = ~(y_is_pos_inf | y_is_neg_inf | y_is_nan)
 
+        # global min/max
         gmin = max(xi[x_valid].min(), yi[y_valid].min())
         gmax = min(xi[x_valid].max(), yi[y_valid].max())
 
         # Convert any integer indexes into boolean, and create a new list of
         # genes to highlight.  This handles optional hist kwargs.
-        allind = np.zeros_like(xi) == 0
+
+
+        # We'll compile a new list of genes to highlight.
         _genes_to_highlight = []
+
         for block in genes_to_highlight:
             ind = block[0]
+
+            # Convert to boolean
             if ind.dtype != 'bool':
                 new_ind = (np.zeros_like(xi) == 0)
                 new_ind[ind] = True
                 _genes_to_highlight.append(
                     tuple([new_ind] + list(block[1:]))
                 )
+
+            # If it's a DataFrame, we only want the boolean values;
             else:
                 if hasattr(ind, 'values'):
                     ind = ind.values
@@ -373,8 +384,10 @@ class ResultsTable(object):
                     tuple([ind] + list(block[1:]))
                 )
 
-        # Remove any genes that will be plotted by genes_to_highlight.  This
+        # Now we remove any genes from in allind (which will be plotted using
+        # `general_kwargs`) that will be plotted by genes_to_highlight.  This
         # avoids double-plotting.
+        allind = np.zeros_like(xi) == 0
         for block in _genes_to_highlight:
             ind = block[0]
             allind[ind] = False
@@ -385,7 +398,7 @@ class ResultsTable(object):
             keys=['color', 'alpha'])
 
         # Put the non-highlighted genes at the beginning of _genes_to_highlight
-        # so we can just iterate over that.
+        # list so we can just iterate over one list
         _genes_to_highlight.insert(
             0,
             (allind, general_kwargs, general_hist_kwargs)
@@ -416,7 +429,7 @@ class ResultsTable(object):
                     [gmin, gmax],
                     **one_to_one)
 
-        # Plot any specially-highlighted genes, and label if specified
+        # Plot 'em all, and label if specified
         for block in _genes_to_highlight:
             ind = block[0]
             kwargs = block[1]
@@ -451,6 +464,8 @@ class ResultsTable(object):
                 xhist_kwargs=xhist_kwargs,
                 yhist_kwargs=yhist_kwargs,
                 marginal_histograms=_marginal_histograms)
+            # This is important for callbacks: here we grab the last-created
+            # collection,
             coll = self.marginal.scatter_ax.collections[-1]
             coll.df = self.data
             coll.ind = ind
