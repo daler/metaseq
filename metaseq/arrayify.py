@@ -7,6 +7,7 @@ import pybedtools
 import numpy as np
 import _genomic_signal
 
+
 class Binner(object):
     def __init__(self, genome, windowsize, chrom=None, window_cache_dir=".",
                  npz_dir='.', metric='mean0'):
@@ -121,7 +122,8 @@ class Binner(object):
             tmp_output = pybedtools.BedTool._tmp()
             windows = self.make_windows(chrom)
 
-            outfile = os.path.join(outdir,
+            outfile = os.path.join(
+                outdir,
                 '{basename}.{chrom}.{windowsize}.{metric}'.format(**locals())
                 + '.npz')
             cmds = [
@@ -138,5 +140,3 @@ class Binner(object):
             outfiles.append(outfile)
             del x, y, df
         return outfiles
-
-

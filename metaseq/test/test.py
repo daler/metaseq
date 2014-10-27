@@ -327,7 +327,7 @@ def test_invalid_arguments():
         'bigwig': (
             dict(read_strand=True),
             dict(fragment_size=100),
-            dict(shift_width=100), 
+            dict(shift_width=100),
             dict(use_score=True),
             dict(preserve_total=True),
         ),

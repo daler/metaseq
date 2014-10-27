@@ -96,7 +96,8 @@ def imshow(arr, x=None, ax=None, vmin=None, vmax=None, percentile=True,
             vmax = arr.max()
 
     cmap = colormap_adjust.smart_colormap(vmin, vmax)
-    _imshow_kwargs = dict(origin='lower', cmap=cmap, vmin=vmin, vmax=vmax, aspect='auto')
+    _imshow_kwargs = dict(origin='lower', cmap=cmap, vmin=vmin, vmax=vmax,
+                          aspect='auto')
     if imshow_kwargs is not None:
         _imshow_kwargs.update(imshow_kwargs)
 
@@ -267,7 +268,8 @@ def fdrcorrection(pvals, alpha=0.05, method='indep'):
 
     This covers Benjamini/Hochberg for independent or positively correlated and
     Benjamini/Yekutieli for general or negatively correlated tests. Both are
-    available in the function multipletests, as method=`fdr_bh`, resp. `fdr_by`.
+    available in the function multipletests, as method=`fdr_bh`, resp.
+    `fdr_by`.
 
     Parameters
     ----------
@@ -287,16 +289,16 @@ def fdrcorrection(pvals, alpha=0.05, method='indep'):
     Notes
     -----
 
-    If there is prior information on the fraction of true hypothesis, then alpha
-    should be set to alpha * m/m_0 where m is the number of tests,
-    given by the p-values, and m_0 is an estimate of the true hypothesis.
-    (see Benjamini, Krieger and Yekuteli)
+    If there is prior information on the fraction of true hypothesis, then
+    alpha should be set to alpha * m/m_0 where m is the number of tests, given
+    by the p-values, and m_0 is an estimate of the true hypothesis.  (see
+    Benjamini, Krieger and Yekuteli)
 
-    The two-step method of Benjamini, Krieger and Yekutiel that estimates the number
-    of false hypotheses will be available (soon).
+    The two-step method of Benjamini, Krieger and Yekutiel that estimates the
+    number of false hypotheses will be available (soon).
 
-    Method names can be abbreviated to first letter, 'i' or 'p' for fdr_bh and 'n' for
-    fdr_by.
+    Method names can be abbreviated to first letter, 'i' or 'p' for fdr_bh and
+    'n' for fdr_by.
 
     '''
     pvals = np.asarray(pvals)
@@ -308,11 +310,11 @@ def fdrcorrection(pvals, alpha=0.05, method='indep'):
     if method in ['i', 'indep', 'p', 'poscorr']:
         ecdffactor = _ecdf(pvals_sorted)
     elif method in ['n', 'negcorr']:
-        cm = np.sum(1./np.arange(1, len(pvals_sorted)+1))   #corrected this
+        cm = np.sum(1./np.arange(1, len(pvals_sorted)+1))  # corrected this
         ecdffactor = _ecdf(pvals_sorted) / cm
-##    elif method in ['n', 'negcorr']:
-##        cm = np.sum(np.arange(len(pvals)))
-##        ecdffactor = ecdf(pvals_sorted)/cm
+#    elif method in ['n', 'negcorr']:
+#        cm = np.sum(np.arange(len(pvals)))
+#        ecdffactor = ecdf(pvals_sorted)/cm
     else:
         raise ValueError('only indep and necorr implemented')
     reject = pvals_sorted <= ecdffactor*alpha
@@ -322,7 +324,7 @@ def fdrcorrection(pvals, alpha=0.05, method='indep'):
 
     pvals_corrected_raw = pvals_sorted / ecdffactor
     pvals_corrected = np.minimum.accumulate(pvals_corrected_raw[::-1])[::-1]
-    pvals_corrected[pvals_corrected>1] = 1
+    pvals_corrected[pvals_corrected > 1] = 1
     return reject[sortrevind], pvals_corrected[sortrevind]
 
 
@@ -884,8 +886,8 @@ class MarginalHistScatter(object):
         yhist_kwargs.update(dict(orientation='horizontal'))
 
         # Plot the scatter
-        self.scatter_ax.scatter(x, y, **scatter_kwargs)
-        self.scatter_ax.collections[-1].labels = labels
+        coll = self.scatter_ax.scatter(x, y, **scatter_kwargs)
+        coll.labels = labels
 
         if not marginal_histograms:
             return
@@ -928,9 +930,17 @@ class MarginalHistScatter(object):
 
         # Only plot hists if there's valid data
         if len(hx) > 0:
-            axhistx.hist(hx, **xhk)
+            if len(hx) == 1:
+                _xhk = _updatecopy(orig=xhk, update_with=dict(bins=[hx[0], hx[0]]), keys=['bins'])
+                axhistx.hist(hx, **_xhk)
+            else:
+                axhistx.hist(hx, **xhk)
         if len(hy) > 0:
-            axhisty.hist(hy, **yhk)
+            if len(hy) == 1:
+                _yhk = _updatecopy(orig=yhk, update_with=dict(bins=[hy[0], hy[0]]), keys=['bins'])
+                axhisty.hist(hy, **_yhk)
+            else:
+                axhisty.hist(hy, **yhk)
 
         # Turn off unnecessary labels -- for these, use the scatter's axes
         # labels

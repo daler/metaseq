@@ -197,10 +197,14 @@ class ResultsTable(object):
     def __sub__(self, other):
         return self.index - other.index
 
+    def __len__(self):
+        return len(self.data)
+
     def scatter(self, x, y, xfunc=None, yfunc=None, xscale=None, yscale=None,
                 xlab=None, ylab=None, genes_to_highlight=None,
                 label_genes=False, marginal_histograms=False,
-                general_kwargs=dict(color="k", alpha=0.2, linewidths=0),
+                general_kwargs=dict(color="k", alpha=0.2, linewidths=0,
+                                    picker=True),
                 general_hist_kwargs=None,
                 offset_kwargs={}, label_kwargs=None, ax=None,
                 one_to_one=None, callback=None, xlab_prefix=None,
@@ -242,10 +246,11 @@ class ResultsTable(object):
             `ind` using `label_kwargs`.
 
         callback : callable
-            Function to call upon clicking a point. Default is to print the
-            gene name, but an example of another useful callback would be
-            a mini-browser connected to a genomic_signal object from which the
-            expression data were calculated.
+            Function to call upon clicking a point. Must accept a single
+            argument which is the gene ID. Default is to print the gene name,
+            but an example of another useful callback would be a mini-browser
+            connected to a genomic_signal object from which the expression data
+            were calculated.
 
         one_to_one : None or dict
             If not None, a dictionary of matplotlib.plot kwargs that will be
@@ -327,10 +332,12 @@ class ResultsTable(object):
             ax = fig.add_subplot(111)
 
         if label_kwargs is None:
-            label_kwargs = dict(horizontalalignment='right',
-                                verticalalignment='center', style='italic',
-                                bbox=dict(facecolor='w', edgecolor='None',
-                                          alpha=0.5))
+            label_kwargs = dict(
+                horizontalalignment='right',
+                verticalalignment='center',
+                style='italic',
+                bbox=dict(facecolor='w', edgecolor='None', alpha=0.5)
+            )
 
         # Clean data ---------------------------------------------------------
         xi = xfunc(_x)
@@ -348,22 +355,28 @@ class ResultsTable(object):
         x_valid = ~(x_is_pos_inf | x_is_neg_inf | x_is_nan)
         y_valid = ~(y_is_pos_inf | y_is_neg_inf | y_is_nan)
 
+        # global min/max
         gmin = max(xi[x_valid].min(), yi[y_valid].min())
         gmax = min(xi[x_valid].max(), yi[y_valid].max())
 
-
         # Convert any integer indexes into boolean, and create a new list of
         # genes to highlight.  This handles optional hist kwargs.
-        allind = np.zeros_like(xi) == 0
+
+        # We'll compile a new list of genes to highlight.
         _genes_to_highlight = []
+
         for block in genes_to_highlight:
             ind = block[0]
+
+            # Convert to boolean
             if ind.dtype != 'bool':
                 new_ind = (np.zeros_like(xi) == 0)
                 new_ind[ind] = True
                 _genes_to_highlight.append(
                     tuple([new_ind] + list(block[1:]))
                 )
+
+            # If it's a DataFrame, we only want the boolean values;
             else:
                 if hasattr(ind, 'values'):
                     ind = ind.values
@@ -371,8 +384,10 @@ class ResultsTable(object):
                     tuple([ind] + list(block[1:]))
                 )
 
-        # Remove any genes that will be plotted by genes_to_highlight.  This
+        # Now we remove any genes from in allind (which will be plotted using
+        # `general_kwargs`) that will be plotted by genes_to_highlight.  This
         # avoids double-plotting.
+        allind = np.zeros_like(xi) == 0
         for block in _genes_to_highlight:
             ind = block[0]
             allind[ind] = False
@@ -383,7 +398,7 @@ class ResultsTable(object):
             keys=['color', 'alpha'])
 
         # Put the non-highlighted genes at the beginning of _genes_to_highlight
-        # so we can just iterate over that.
+        # list so we can just iterate over one list
         _genes_to_highlight.insert(
             0,
             (allind, general_kwargs, general_hist_kwargs)
@@ -392,7 +407,6 @@ class ResultsTable(object):
         # Set up the object that will handle the marginal histograms
         self.marginal = plotutils.MarginalHistScatter(
             ax, hist_size=hist_size, pad=hist_pad)
-
 
         # Set up kwargs for x and y rug plots
         rug_x_kwargs = dict(
@@ -415,7 +429,13 @@ class ResultsTable(object):
                     [gmin, gmax],
                     **one_to_one)
 
-        # Plot any specially-highlighted genes, and label if specified
+        # Plot 'em all, and label if specified
+
+        # In order to avoid calling the callback function multiple times when
+        # we have overlapping genes to highlight (e.g., a gene that is both
+        # upregulated AND has a peak), keep track of everything that's been
+        # added so far.
+        self._seen = np.ones_like(xi) == 0
         for block in _genes_to_highlight:
             ind = block[0]
             kwargs = block[1]
@@ -445,14 +465,18 @@ class ResultsTable(object):
             self.marginal.append(
                 xi[ind & x_valid & y_valid],
                 yi[ind & x_valid & y_valid],
-                scatter_kwargs=dict(picker=5, **updated_kwargs),
+                scatter_kwargs=dict(**updated_kwargs),
                 hist_kwargs=updated_hist_kwargs,
                 xhist_kwargs=xhist_kwargs,
                 yhist_kwargs=yhist_kwargs,
-                marginal_histograms=_marginal_histograms)
+                marginal_histograms=_marginal_histograms,
+            )
+
+            # This is important for callbacks: here we grab the last-created
+            # collection,
             coll = self.marginal.scatter_ax.collections[-1]
             coll.df = self.data
-            coll.ind = ind
+            coll.ind = ind & x_valid & y_valid
 
             color = color_converter(updated_kwargs['color'])
             rug_x_kwargs['color'] = color
@@ -498,13 +522,12 @@ class ResultsTable(object):
                             **label_kwargs)
 
         # register callback
-        if callback is not None:
-            def wrapped_callback(event):
-                return callback(self._id_callback(event))
+        if callback is None:
+            callback = self._default_callback
 
-        else:
-            def wrapped_callback(event):
-                return self._default_callback(self._id_callback(event))
+        def wrapped_callback(event):
+            for _id in self._id_callback(event):
+                callback(_id)
 
         ax.figure.canvas.mpl_connect('pick_event', wrapped_callback)
 
@@ -512,9 +535,7 @@ class ResultsTable(object):
         ax.set_ylabel(ylab)
         ax.axis('tight')
 
-        #ax.axis((xmin - xpad, xmax + xpad, ymin - ypad, ymax + ypad))
         return ax
-
 
     def radviz(self, column_names, transforms=dict(), **kwargs):
         """
@@ -574,9 +595,11 @@ class ResultsTable(object):
         References
         ----------
         [1]  Hoffman,P.E. et al. (1997) DNA visual and analytic data mining. In
-             the Proceedings of the IEEE Visualization. Phoenix, AZ, pp. 437-441.
+             the Proceedings of the IEEE Visualization. Phoenix, AZ, pp.
+             437-441.
         [2] http://www.agocg.ac.uk/reports/visual/casestud/brunsdon/radviz.htm
-        [3] http://pandas.pydata.org/pandas-docs/stable/visualization.html#radviz
+        [3] http://pandas.pydata.org/pandas-docs/stable/visualization.html\
+                #radviz
         """
         # make a copy of data
         x = self.data[column_names].copy()
@@ -610,7 +633,6 @@ class ResultsTable(object):
 
         ax = self.scatter('radviz_x', 'radviz_y', **kwargs)
 
-        # Thanks to 
         ax.add_patch(patches.Circle((0.0, 0.0), radius=1.0, facecolor='none'))
         for xy, name in zip(s, column_names):
             ax.add_patch(patches.Circle(xy, radius=0.025, facecolor='gray'))
@@ -630,11 +652,15 @@ class ResultsTable(object):
         ax.axis('equal')
         return ax
 
-
-
     def _id_callback(self, event):
+        # event.ind is the index into event's x and y data.
+        #
+        # event.artist.ind is the index of the entire artist into the original
+        # dataframe.
+        subset_df = event.artist.df.ix[event.artist.ind]
         for i in event.ind:
-            return event.artist.df.ix[event.artist.ind].index[i]
+            _id = subset_df.index[i]
+            yield _id
 
     def _default_callback(self, i):
         print self.data.ix[i]
@@ -659,7 +685,8 @@ class ResultsTable(object):
         return self.__class__(self.data.ix[ind], **self._kwargs)
 
     def genes_with_peak(self, peaks, transform_func=None, split=False,
-                        intersect_kwargs=None, *args, **kwargs):
+                        intersect_kwargs=None, id_attribute='ID', *args,
+                        **kwargs):
         """
         Returns a boolean index of genes that have a peak nearby.
 
@@ -685,6 +712,14 @@ class ResultsTable(object):
 
         intersect_kwargs : dict
             kwargs passed to pybedtools.BedTool.intersect.
+
+        id_attribute : str
+            The attribute in the GTF or GFF file that contains the id of the
+            gene. For meaningful results to be returned, a gene's ID be also
+            found in the index of the dataframe.
+
+            For GFF files, typically you'd use `id_attribute="ID"`.  For GTF
+            files, you'd typically use `id_attribute="gene_id"`.
         """
         def _transform_func(x):
             """
@@ -697,7 +732,6 @@ class ResultsTable(object):
             for i in result:
                 if i:
                     yield result
-
 
         intersect_kwargs = intersect_kwargs or {}
         if not self._cached_features:
@@ -716,7 +750,8 @@ class ResultsTable(object):
         else:
             features = self._cached_features
 
-        hits = list(set([i.name for i in features.intersect(peaks, **intersect_kwargs)]))
+        hits = list(set([i[id_attribute] for i in features.intersect(
+            peaks, **intersect_kwargs)]))
         return self.data.index.isin(hits)
 
 
@@ -977,6 +1012,21 @@ class DESeqResults(ResultsTable):
     disenriched.__doc__ = disenriched.__doc__.format(threshdoc=threshdoc)
     upregulated.__doc__ = upregulated.__doc__.format(threshdoc=threshdoc)
     downregulated.__doc__ = downregulated.__doc__.format(threshdoc=threshdoc)
+
+
+class DESeq2Results(DESeqResults):
+    def __init__(self, data, db=None, header_check=True, **kwargs):
+        import_kwargs = kwargs.pop('import_kwargs', {})
+        if header_check and isinstance(data, basestring):
+            comment_char = import_kwargs.get('comment', '#')
+            for i, line in enumerate(open(data)):
+                if line[0] != comment_char:
+                    break
+            import_kwargs['skiprows'] = i
+        import_kwargs['na_values'] = ['nan']
+        import_kwargs['index_col'] = import_kwargs.pop('index_col', 0)
+        super(DESeqResults, self).__init__(
+            data=data, db=db, import_kwargs=import_kwargs, **kwargs)
 
 
 class LazyDict(object):

@@ -130,7 +130,8 @@ class BigWigAdapter(BaseAdapter):
         raise NotImplementedError(
             "__getitem__ not implemented for %s" % self.__class__.__name__)
 
-    def summarize(self, interval, bins=None, method='summarize', function='mean'):
+    def summarize(self, interval, bins=None, method='summarize',
+                  function='mean'):
 
         # We may be dividing by zero in some cases, which raises a warning in
         # NumPy based on the IEEE 754 standard (see
@@ -157,7 +158,8 @@ class BigWigAdapter(BaseAdapter):
             if function in ['mean', 'min', 'max', 'std', 'coverage']:
                 return self.ucsc_summarize(interval, bins, function=function)
             else:
-                raise ValueError('function "%s" not supported by UCSC\'s bigWigSummary')
+                raise ValueError('function "%s" not supported by UCSC\'s'
+                                 'bigWigSummary')
 
         else:
             bw = BigWigFile(open(self.fn))

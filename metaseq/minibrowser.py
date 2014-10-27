@@ -157,14 +157,15 @@ class ChIPSeqMiniBrowser(BaseMiniBrowser):
             included, since the mini-browser always displays the plus strand.
 
         ip_style, control_style : dict
-            Kwargs to pass to Axes.fill_between (e.g. colors, alpha, line styles)
+            Kwargs to pass to Axes.fill_between (e.g. colors, alpha, line
+            styles)
 
         peaks_style : dict
             Kwargs to pass to PolyCollection (e.g., face_color, edgewidth)
 
         max_bins : int
-            Maximum number of bins to use when getting genomic_signal.  This can
-            be overridden by providing the `bins` kwarg in
+            Maximum number of bins to use when getting genomic_signal.  This
+            can be overridden by providing the `bins` kwarg in
             `local_coverage_kwargs`.
 
         Notes
@@ -217,30 +218,28 @@ class ChIPSeqMiniBrowser(BaseMiniBrowser):
             control_ax = plt.subplot(gs[1], sharex=ip_ax, sharey=ip_ax)
             peaks_ax = plt.subplot(gs[2], sharex=ip_ax)
             gene_ax = plt.subplot(gs[3], sharex=ip_ax)
-            axes = {'ip': ip_ax, 
+            axes = {'ip': ip_ax,
                     'control': control_ax,
                     'peaks': peaks_ax,
                     'genes': gene_ax,
                     }
-
 
         elif self.db and self.peaks is None:
             gs = gridspec.GridSpec(3, 1, height_ratios=[1, 1, .5])
             ip_ax = plt.subplot(gs[0])
             control_ax = plt.subplot(gs[1], sharex=ip_ax, sharey=ip_ax)
             gene_ax = plt.subplot(gs[2], sharex=ip_ax)
-            axes = {'ip': ip_ax, 
+            axes = {'ip': ip_ax,
                     'control': control_ax,
                     'genes': gene_ax,
                     }
-
 
         elif self.db is None and self.peaks:
             gs = gridspec.GridSpec(3, 1, height_ratios=[1, 1, .3])
             ip_ax = plt.subplot(gs[0])
             control_ax = plt.subplot(gs[1], sharex=ip_ax, sharey=ip_ax)
             peaks_ax = plt.subplot(gs[2], sharex=ip_ax)
-            axes = {'ip': ip_ax, 
+            axes = {'ip': ip_ax,
                     'control': control_ax,
                     'peaks': peaks_ax,
                     }
@@ -249,7 +248,7 @@ class ChIPSeqMiniBrowser(BaseMiniBrowser):
             gs = gridspec.GridSpec(2, 1, height_ratios=[1, 1])
             ip_ax = plt.subplot(gs[0])
             control_ax = plt.subplot(gs[1], sharex=ip_ax, sharey=ip_ax)
-            axes = {'ip': ip_ax, 
+            axes = {'ip': ip_ax,
                     'control': control_ax,
                     }
 
@@ -279,8 +278,8 @@ class ChIPSeqMiniBrowser(BaseMiniBrowser):
 
     def ip_panel(self, ax, feature):
         bins = self._bins(feature)
-        x, y = self.ip.local_coverage(feature, bins=bins,
-                                          **self.local_coverage_kwargs)
+        x, y = self.ip.local_coverage(
+            feature, bins=bins, **self.local_coverage_kwargs)
         if isinstance(self.ip, _genomic_signal.BamSignal):
             y /= (self.ip.mapped_read_count() / 1e6)
         ax.fill_between(x, y, y2=0, **self.ip_style)
@@ -293,8 +292,8 @@ class ChIPSeqMiniBrowser(BaseMiniBrowser):
 
     def control_panel(self, ax, feature):
         bins = self._bins(feature)
-        x, y = self.control.local_coverage(feature, bins=bins,
-                                               **self.local_coverage_kwargs)
+        x, y = self.control.local_coverage(
+            feature, bins=bins, **self.local_coverage_kwargs)
         if isinstance(self.control, _genomic_signal.BamSignal):
             y /= (self.control.mapped_read_count() / 1e6)
         ax.fill_between(x, y, y2=0, **self.control_style)
@@ -390,9 +389,9 @@ class ChIPSeqMiniBrowser(BaseMiniBrowser):
         ax.axis('tight')
 
         # add lines indicating extent of current feature
-        #vline_kwargs = dict(color='k', linestyle='--')
-        #ax.axvline(feature.start, **vline_kwargs)
-        #ax.axvline(feature.stop, **vline_kwargs)
+        # vline_kwargs = dict(color='k', linestyle='--')
+        # ax.axvline(feature.start, **vline_kwargs)
+        # ax.axvline(feature.stop, **vline_kwargs)
 
         # Make a new feature to represent the region plus surrounding genes
         interval = pybedtools.create_interval_from_list(feature.fields)
@@ -555,7 +554,7 @@ class PeakMiniBrowser(SignalMiniBrowser):
         features = bedtool.intersect([feature], u=True)
         track = Track(features)
         ax.add_collection(track)
-        #ax.axis('tight')
+        # ax.axis('tight')
         return feature
 
 

@@ -125,7 +125,6 @@ def cmap_center_point_adjust(cmap, range, center):
 
 
 if __name__ == '__main__':
-    ### create some 2D histogram-type data
     def func3(x, y):
         return (1 - x / 2 + x ** 5 + y ** 3) * numpy.exp(-x ** 2 - y ** 2)
     x = numpy.linspace(-3.0, 3.0, 60)

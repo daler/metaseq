@@ -39,6 +39,7 @@ import filetype_adapters
 import helpers
 from helpers import rebin
 
+
 def supported_formats():
     """
     Returns list of formats supported by metaseq's genomic signal objects.
