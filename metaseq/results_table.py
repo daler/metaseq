@@ -210,7 +210,7 @@ class ResultsTable(object):
                 one_to_one=None, callback=None, xlab_prefix=None,
                 ylab_prefix=None, sizefunc=None, hist_size=0.3, hist_pad=0.0,
                 nan_offset=0.015, pos_offset=0.99, linelength=0.01,
-                neg_offset=0.005):
+                neg_offset=0.005, figure_kwargs=None):
         """
         Do-it-all method for making annotated scatterplots.
 
@@ -328,7 +328,9 @@ class ResultsTable(object):
             genes_to_highlight = []
 
         if ax is None:
-            fig = plt.figure()
+            if figure_kwargs is None:
+                figure_kwargs = {}
+            fig = plt.figure(**figure_kwargs)
             ax = fig.add_subplot(111)
 
         if label_kwargs is None:
