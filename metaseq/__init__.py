@@ -10,3 +10,4 @@ import integration.chipseq
 import colormap_adjust
 import results_table
 from version import __version__
+import persistence
