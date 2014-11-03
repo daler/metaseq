@@ -31,7 +31,9 @@ def imshow(arr, x=None, ax=None, vmin=None, vmax=None, percentile=True,
            strip=False, features=None, conf=0.95, line_kwargs=None,
            sort_by=None, fill_kwargs=None, figsize=(5, 12),
            width_ratios=(4, 1), height_ratios=(4, 1),
-           subplot_params=dict(wspace=0.1, hspace=0.1), imshow_kwargs=None):
+           subplot_params=dict(wspace=0.1, hspace=0.1), imshow_kwargs=None,
+           subset_by=None, subset_order=None,
+           ):
     """
     Parameters
     ----------
@@ -110,6 +112,19 @@ def imshow(arr, x=None, ax=None, vmin=None, vmax=None, percentile=True,
         array_ax = fig.array_axes
     else:
         array_ax = ax
+
+    if subset_by is not None:
+        if not isinstance(subset_by, np.ndarray):
+            subset_by = np.array(subset_by)
+        if subset_order is None:
+            subset_order = sort(subset_by.unique())
+        new_ind = []
+        for s in subset_order:
+            subset_ind = subset_by == s
+            new_ind.append(ind[subset_ind])
+        new_ind = np.concatenate(new_ind)
+        ind = new_ind
+
 
     mappable = array_ax.imshow(
         arr[ind, :],
