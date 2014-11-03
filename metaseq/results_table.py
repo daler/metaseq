@@ -757,17 +757,12 @@ class ResultsTable(object):
         return self.data.index.isin(hits)
 
 
-class DESeqResults(ResultsTable):
-    def __init__(self, data, db=None, header_check=True,
-                 remove_deseq_extra=True, **kwargs):
+class DifferentialExpressionResults(ResultsTable):
+    pval_column = 'padj'
+    lfc_column = 'log2FoldChange'
+    mean_column = 'baseMean'
 
-        to_remove = [
-            'not_aligned',
-            'no_feature',
-            'ambiguous',
-            'alignment_not_unique',
-            'too_low_aQual']
-
+    def __init__(self, data, db=None, header_check=True, **kwargs):
         import_kwargs = kwargs.pop('import_kwargs', {})
         if header_check and isinstance(data, basestring):
             comment_char = import_kwargs.get('comment', '#')
@@ -778,36 +773,35 @@ class DESeqResults(ResultsTable):
         import_kwargs['na_values'] = ['nan']
 
         import_kwargs['index_col'] = import_kwargs.pop('index_col', 0)
-        super(DESeqResults, self).__init__(
+        super(DifferentialExpressionResults, self).__init__(
             data=data, db=db, import_kwargs=import_kwargs, **kwargs)
-        self.data.log2FoldChange = self.data.log2FoldChange.astype(float)
-        self.data.foldChange = self.data.foldChange.astype(float)
-        if remove_deseq_extra:
-            self.data = self.data[~self.data.index.isin(to_remove)]
 
-    def changed(self, thresh=0.05, idx=True, col='padj'):
+    def changed(self, thresh=0.05, idx=True):
         """
         Changed features.
 
         {threshdoc}
         """
-        ind = self.data[col] <= thresh
+        ind = self.data[self.pval_column] <= thresh
         if idx:
             return ind
         return self[ind]
 
-    def unchanged(self, thresh=0.05, idx=True, col='padj'):
+    def unchanged(self, thresh=0.05, idx=True):
         """
         Changed features.
 
         {threshdoc}
         """
-        ind = (self.data[col] > thresh) | np.isnan(self.data[col])
+        ind = (
+            (self.data[self.pval_column] > thresh)
+            | np.isnan(self.data[self.pval_column])
+        )
         if idx:
             return ind
         return self[ind]
 
-    def enriched(self, thresh=0.05, idx=True, col='padj'):
+    def enriched(self, thresh=0.05, idx=True):
         """
         Enriched features.
 
@@ -815,29 +809,35 @@ class DESeqResults(ResultsTable):
         """
         return self.upregulated(thresh=thresh, idx=idx)
 
-    def upregulated(self, thresh=0.05, idx=True, col='padj'):
+    def upregulated(self, thresh=0.05, idx=True):
         """
         Upregulated features.
 
         {threshdoc}
         """
-        ind = (self.data[col] <= thresh) & (self.data['log2FoldChange'] > 0)
+        ind = (
+            (self.data[self.pval_column] <= thresh)
+            & (self.data[self.lfc_column] > 0)
+        )
         if idx:
             return ind
         return self[ind]
 
-    def downregulated(self, thresh=0.05, idx=True, col='padj'):
+    def downregulated(self, thresh=0.05, idx=True):
         """
         Downregulated features.
 
         {threshdoc}
         """
-        ind = (self.data[col] <= thresh) & (self.data['log2FoldChange'] < 0)
+        ind = (
+            (self.data[self.pval_column] <= thresh)
+            & (self.data[self.lfc_column] < 0)
+        )
         if idx:
             return ind
         return self[ind]
 
-    def disenriched(self, thresh=0.05, idx=True, col='padj'):
+    def disenriched(self, thresh=0.05, idx=True):
         """
         Disenriched features.
 
@@ -845,7 +845,7 @@ class DESeqResults(ResultsTable):
         """
         return self.downregulated(thresh=thresh, idx=idx)
 
-    def ma_plot(self, thresh, col='padj', up_kwargs=None, dn_kwargs=None,
+    def ma_plot(self, thresh, up_kwargs=None, dn_kwargs=None,
                 zero_line=None, **kwargs):
         """
         MA plot
@@ -861,9 +861,6 @@ class DESeqResults(ResultsTable):
         thresh : float
             Features with values <= `thresh` will be highlighted in the plot.
 
-        col : str
-            Column name that `thresh` will be applied to
-
         up_kwargs, dn_kwargs : None or dict
             Kwargs passed to matplotlib's scatter(), used for styling up/down
             regulated features (defined by `thresh` and `col`)
@@ -874,27 +871,50 @@ class DESeqResults(ResultsTable):
         """
         genes_to_highlight = kwargs.pop('genes_to_highlight', [])
         genes_to_highlight.append(
-            (self.upregulated(thresh, col=col),
+            (self.upregulated(thresh),
              up_kwargs or dict(color='r')))
         genes_to_highlight.append(
-            (self.downregulated(thresh, col=col),
+            (self.downregulated(thresh),
              dn_kwargs or dict(color='b')))
         if zero_line is None:
             zero_line = {}
-        x = 'baseMean'
-        y = 'log2FoldChange'
+        x = self.mean_column
+        y = self.lfc_column
 
         if 'xfunc' not in kwargs:
-            xfunc = np.log1p
+            kwargs['xfunc'] = np.log
         ax = self.scatter(
             x=x,
             y=y,
-            xfunc=xfunc,
             genes_to_highlight=genes_to_highlight,
             **kwargs)
         if zero_line:
             ax.axhline(0, **zero_line)
         return ax
+
+    threshdoc = """
+    Parameters
+    ----------
+    thresh : float
+        Only features with <= `thresh` will be returned
+
+    idx : bool
+        If True, a boolean index will be returned.  If False, a new object will
+        be returned that has been subsetted.
+    """
+    enriched.__doc__ = enriched.__doc__.format(threshdoc=threshdoc)
+    disenriched.__doc__ = disenriched.__doc__.format(threshdoc=threshdoc)
+    upregulated.__doc__ = upregulated.__doc__.format(threshdoc=threshdoc)
+    downregulated.__doc__ = downregulated.__doc__.format(threshdoc=threshdoc)
+
+
+class EdgeRResults(DifferentialExpressionResults):
+    pval_column = 'FDR'
+    lfc_column = 'logFC'
+    mean_column = 'logCPM'
+
+
+class DESeqResults(DifferentialExpressionResults):
 
     def colormapped_bedfile(self, genome, cmap=None):
         """
@@ -997,38 +1017,11 @@ class DESeqResults(ResultsTable):
         fout.close()
         return fn
 
-    threshdoc = """
-    Parameters
-    ----------
-    thresh : float
-        Only features with <= `thresh` will be returned
-
-    idx : bool
-        If True, a boolean index will be returned.  If False, a new object will
-        be returned that has been subsetted.
-
-    col : str
-        Name of the column to apply `thresh` to
-    """
-    enriched.__doc__ = enriched.__doc__.format(threshdoc=threshdoc)
-    disenriched.__doc__ = disenriched.__doc__.format(threshdoc=threshdoc)
-    upregulated.__doc__ = upregulated.__doc__.format(threshdoc=threshdoc)
-    downregulated.__doc__ = downregulated.__doc__.format(threshdoc=threshdoc)
-
 
 class DESeq2Results(DESeqResults):
-    def __init__(self, data, db=None, header_check=True, **kwargs):
-        import_kwargs = kwargs.pop('import_kwargs', {})
-        if header_check and isinstance(data, basestring):
-            comment_char = import_kwargs.get('comment', '#')
-            for i, line in enumerate(open(data)):
-                if line[0] != comment_char:
-                    break
-            import_kwargs['skiprows'] = i
-        import_kwargs['na_values'] = ['nan']
-        import_kwargs['index_col'] = import_kwargs.pop('index_col', 0)
-        super(DESeqResults, self).__init__(
-            data=data, db=db, import_kwargs=import_kwargs, **kwargs)
+    pval_column = 'padj'
+    lfc_column = 'log2FoldChange'
+    mean_column = 'baseMean'
 
 
 class LazyDict(object):
@@ -1083,7 +1076,10 @@ class LazyDict(object):
         self._dict = {}
         self.dbfn = dbfn
         self.index = [i.strip() for i in open(index_file)]
-        self.extra = extra.ix[self.index]
+        if extra is not None:
+            self.extra = extra.ix[self.index]
+        else:
+            self.extra = extra
         self.modifier = modifier
         self._cls = cls
 
