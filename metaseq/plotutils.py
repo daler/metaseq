@@ -1,7 +1,7 @@
 """
 Module with handy utilities for plotting genomic signal
 """
-from itertools import groupby
+import itertools
 import matplotlib
 from matplotlib import pyplot as plt
 from matplotlib import mlab
@@ -136,44 +136,70 @@ def imshow(arr, x=None, ax=None, vmin=None, vmax=None, percentile=True,
     if imshow_kwargs is not None:
         _imshow_kwargs.update(imshow_kwargs)
 
-    if sort_by is not None:
-        ind = np.argsort(sort_by)
-    else:
-        ind = np.arange(arr.shape[0])
+    # previously we did an argsort first; with subsetting we don't want to do
+    # that yet....
+    #if sort_by is not None:
+    #    ind = np.argsort(sort_by)
+    #else:
+    #    ind = np.arange(arr.shape[0])
+
+    if sort_by is None:
+        sort_by = np.arange(arr.shape[0])
 
     if ax is None:
         array_ax = fig.array_axes
     else:
         array_ax = ax
 
-    if subset_by is not None:
-        if not isinstance(subset_by, np.ndarray):
-            subset_by = np.array(subset_by)
-        if subset_order is None:
-            subset_order = sort(subset_by.unique())
-        new_ind = []
-        for s in subset_order:
-            subset_ind = subset_by == s
-            new_ind.append(ind[subset_ind])
-        new_ind = np.concatenate(new_ind)
-        ind = new_ind
+    # If not provided, assume all in the same subset.
+    if subset_by is None:
+        subset_by = np.zeros(arr.shape[0])
 
+    # Ensure always array, since we're doing indexing tricks
+    if not isinstance(subset_by, np.ndarray):
+        subset_by = np.array(subset_by)
+
+    # If not provided, use sorted order
+    if subset_order is None:
+        subset_order = sorted(np.unique(subset_by))
+
+    inds = []
+    for cls in subset_order:
+        subset_ind = np.nonzero(subset_by == cls)[0]
+        subset_sort_by = sort_by[subset_ind]
+        subset_argsort_by = np.argsort(subset_sort_by)
+        inds.append(subset_ind[subset_argsort_by])
+    ind = np.concatenate(ind)
 
     mappable = array_ax.imshow(
         arr[ind, :],
         extent=(x.min(), x.max(), 0, arr.shape[0]),
         **_imshow_kwargs
     )
+
+    if line_kwargs is None:
+        line_kwargs = {}
+    if fill_kwargs is None:
+        fill_kwargs = {}
+
+    if isinstance(line_kwargs, dict):
+        line_kwargs = [line_kwargs]
+    if isinstance(fill_kwargs, dict):
+        fill_kwargs = [fill_kwargs]
+
+    _line_kwargs = itertools.cycle(line_kwargs)
+    _fill_kwargs = itertools.cycle(fill_kwargs)
+
     if ax is None:
         plt.colorbar(mappable, fig.cax)
-        ci_plot(
-            x,
-            arr,
-            ax=fig.line_axes,
-            line_kwargs=line_kwargs,
-            fill_kwargs=fill_kwargs,
-        )
-
+        for subset_ind, label, _lkw, _fkw in zip(inds, subset_order, _line_kwargs, _fill_kwargs):
+            ci_plot(
+                x,
+                arr[subset_ind],
+                ax=fig.line_axes,
+                line_kwargs=_lkw,
+                fill_kwargs=_fkw,
+            )
         return fig
     else:
         return ax.figure
@@ -232,7 +258,7 @@ def calculate_limits(array_dict, method='global', percentiles=None, limit=()):
     elif hasattr(method, '__call__'):
         d = {}
         sorted_keys = sorted(array_dict.keys(), key=method)
-        for group, keys in groupby(sorted_keys, method):
+        for group, keys in itertools.groupby(sorted_keys, method):
             keys = list(keys)
             all_arrays = np.concatenate([array_dict[i] for i in keys])
             if percentiles:
@@ -563,7 +589,7 @@ def clustered_sortind(x, k=10, scorefunc=None):
     pos = 0
     breaks = []
     ind = np.argsort(scores)
-    for k, g in groupby(labels[ind]):
+    for k, g in itertoos.groupby(labels[ind]):
         pos += len(list(g))
         breaks.append(pos)
 
