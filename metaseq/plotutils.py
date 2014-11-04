@@ -169,7 +169,7 @@ def imshow(arr, x=None, ax=None, vmin=None, vmax=None, percentile=True,
         subset_sort_by = sort_by[subset_ind]
         subset_argsort_by = np.argsort(subset_sort_by)
         inds.append(subset_ind[subset_argsort_by])
-    ind = np.concatenate(ind)
+    ind = np.concatenate(inds)
 
     mappable = array_ax.imshow(
         arr[ind, :],
