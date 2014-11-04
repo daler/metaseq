@@ -28,12 +28,11 @@ def ci_plot(x, arr, conf=0.95, ax=None, line_kwargs=None, fill_kwargs=None):
 
 
 def imshow(arr, x=None, ax=None, vmin=None, vmax=None, percentile=True,
-           strip=False, features=None, conf=0.95, line_kwargs=None,
-           sort_by=None, fill_kwargs=None, figsize=(5, 12),
+           strip=False, features=None, conf=0.95, sort_by=None,
+           line_kwargs=None, fill_kwargs=None, imshow_kwargs=None, figsize=(5, 12),
            width_ratios=(4, 1), height_ratios=(4, 1),
-           subplot_params=dict(wspace=0.1, hspace=0.1), imshow_kwargs=None,
-           subset_by=None, subset_order=None,
-           ):
+           subplot_params=dict(wspace=0.1, hspace=0.1),
+           subset_by=None, subset_order=None,):
     """
     Parameters
     ----------
@@ -47,7 +46,7 @@ def imshow(arr, x=None, ax=None, vmin=None, vmax=None, percentile=True,
         ignore any additional arguments provided that apply to figure-level
         configuration or to the average line plot.  For example, `figsize`,
         `width_ratios`, `height_ratios`, `subplot_params`, `line_kwargs`, and
-        `fill_kwargs` will be ignored.
+        `fill_kwargs` will all be ignored.
 
     vmin, vmax : float
 
@@ -61,15 +60,49 @@ def imshow(arr, x=None, ax=None, vmin=None, vmax=None, percentile=True,
     features : pybedtools.BedTool or string filename
         Features used to construct the array
 
+    conf : float
+        Confidence interval to use in line plot.
+
     sort_by : array-like
-        Use the provided array to sort the array (e.g., expression).  This
-        array is argsorted to get the proper order.
+        Use the provided array to sort the array (e.g., an array of expression
+        values).  This array will be argsorted to get the proper order.
 
     line_kwargs, fill_kwargs : dict
         Passed directly to `ci_plot`.
 
     figsize : tuple
         (Width, height) of the figure to create.
+
+    imshow_kwargs : dict
+        Passed directly to matplotlib.pyplot.imshow.  By default, arguments
+        used are `origin='lower'`, `aspect="auto"` and a colormap from
+        colormap_adjust.smart_colormap generated using the provided `vmin` and
+        `vmax`.
+
+    width_ratios, height_ratios: tuple
+        These tuples are passed to the `new_shell` function.  The default
+        values set up a 2x2 configuration of panels for heatmap, line plot,
+        colorbar axes, and optional strip plot.  However modifying
+        `width_ratios` or `height_ratios` can be used to create more or fewer panels.
+
+    subplot_params : dict
+        Passed to Figure.subplots_adjust
+
+    subset_by : array
+        An array of any type (but usually int or str) that contains a class
+        label for each row in the heatmap array.  For example, to subset by
+        expression, an array the values of "up", "down", or "unchanged" at each
+        of the positions could be provided.
+
+        Note that the heatmap array is first sorted by `sort_by` and then split
+        into groups according to `subset_by`, so each subset remains sorted by
+        `sort_by`.
+
+    subset_order : list-like
+        This provides the order in which the subsets are plotted.  Since the
+        default imshow arguments contain `origin="lower"`, these will be
+        plotted in order starting at the bottom of the heatmap.
+
     """
     if ax is None:
         fig = new_shell(
