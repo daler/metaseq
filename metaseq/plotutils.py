@@ -205,6 +205,43 @@ def imshow(arr, x=None, ax=None, vmin=None, vmax=None, percentile=True,
         return ax.figure
 
 
+def add_labels_to_subsets(ax, subset_by, subset_order, text_kwargs=None,
+                          add_hlines=True, hline_kwargs=None):
+    """
+    Assumes that imshow() was called with `subsets` and `subset_order`.
+
+    Parameters
+    ----------
+    ax : matplotlib.Axes
+        The axes to label.  Generally you can use `fig.array_axes` attribute of
+        the Figure object returned by `metaseq.plotutils.imshow`.
+
+    subset_by, subset_order : array, list
+        See `metaseq.plotutils.imshow()` docstring; these should be the same
+        `subsets` and `subset_order` that were provided to that function.
+    """
+
+    _text_kwargs = dict(transform=ax.get_yaxis_transform())
+    if text_kwargs:
+        _text_kwargs.update(text_kwargs)
+
+    _hline_kwargs = dict(color='k')
+    if hline_kwargs:
+        _hline_kwargs.update(hline_kwargs)
+    pos = 0
+    for label in subset_order:
+        ind = subset_by == label
+        last_pos = pos
+        pos += sum(ind)
+        if add_hlines:
+            ax.axhline(pos, **_hline_kwargs)
+        ax.text(
+            1.1,
+            last_pos + (pos - last_pos)/2.0,
+            label,
+            **_text_kwargs)
+
+
 def calculate_limits(array_dict, method='global', percentiles=None, limit=()):
     """
     Calculate limits for a group of arrays in a flexible manner.
