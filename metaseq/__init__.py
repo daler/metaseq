@@ -9,5 +9,6 @@ import integration
 import integration.chipseq
 import colormap_adjust
 import results_table
+import tableprinter
 from version import __version__
 import persistence
