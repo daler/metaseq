@@ -16,6 +16,7 @@ TRAVIS_CI=0
 USE_BEDTOOLS_VERSION=2.21.0
 USE_SAMTOOLS_VERSION=0.1.19
 USE_TABIX_VERSION=0.2.6
+MINICONDA_VERSION=3.7.0
 
 # ---------------------------------------------------------------
 
@@ -567,9 +568,9 @@ echo "${TO_INSTALL}" | grep "ucsc" > /dev/null \
 if [[ "${INSTALL_MINICONDA}" == 1 ]]; then
     log "Installing Miniconda to ${MINICONDA_DIR}. $(tailinfo ${MINICONDA_INSTALL_LOG})"
     if [[ $SYSTEM_TYPE = "mac" ]]; then
-        url="http://repo.continuum.io/miniconda/Miniconda-3.5.2-MacOSX-x86_64.sh"
+        url="http://repo.continuum.io/miniconda/Miniconda-${MINICONDA_VERSION}-MacOSX-x86_64.sh"
     else
-        url="http://repo.continuum.io/miniconda/Miniconda-3.5.2-Linux-x86_64.sh"
+        url="http://repo.continuum.io/miniconda/Miniconda-${MINICONDA_VERSION}-Linux-x86_64.sh"
     fi
 
     # Only download and install if it doesn't already exist.
