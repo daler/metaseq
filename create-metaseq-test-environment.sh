@@ -558,7 +558,7 @@ echo "${TO_INSTALL}" | grep "tabix" > /dev/null \
 # UCSC tools installation -------------------------------------------
 echo "${TO_INSTALL}" | grep "ucsc" > /dev/null \
     && {
-        log "Installing UCSC tools to ${BW_PATH}. $(tailinfo {BW_INSTALL_LOG})" \
+        log "Installing UCSC tools to ${BW_PATH}. $(tailinfo ${BW_INSTALL_LOG})" \
         && install_ucsctools > $BW_INSTALL_LOG 2>&1 && log "Done, see ${BW_INSTALL_LOG}.";
     } || log "skipping UCSC tool installation"
 
