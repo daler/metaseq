@@ -27,6 +27,8 @@ API docs
    :toctree: autodocs
    :template: auto_template.rst
 
+   metaseq._genomic_signal.BaseSignal
+   metaseq._genomic_signal.IntervalSignal
    metaseq._genomic_signal.BigWigSignal
    metaseq._genomic_signal.BamSignal
    metaseq._genomic_signal.BigBedSignal
@@ -49,6 +51,9 @@ API docs
 
    metaseq.results_table.ResultsTable
    metaseq.results_table.DESeqResults
+   metaseq.results_table.DESeq2Results
+   metaseq.results_table.EdgeRResults
+   metaseq.results_table.LazyDict
 
 ----
 
@@ -89,13 +94,27 @@ API docs
     :nosignatures:
     :toctree: autodocs
 
-    metaseq.plotutils.nice_log
+    metaseq.plotutils.imshow
+    metaseq.plotutils.add_labels_to_subsets
+    metaseq.plotutils.clustered_sortind
+    metaseq.plotutils.calculate_limits
+    metaseq.plotutils.ci_plot
+    metaseq.plotutils.ci
     metaseq.plotutils.tip_zscores
     metaseq.plotutils.tip_fdr
+    metaseq.plotutils.nice_log
     metaseq.plotutils.prepare_logged
     metaseq.plotutils.matrix_and_line_shell
-    metaseq.plotutils.clustered_sortind
     metaseq.plotutils.input_ip_plots
+
+.. rubric:: Classes
+
+.. autosummary::
+    :nosignatures:
+    :toctree: autodocs
+    :template: auto_template.rst
+
+    metaseq.plotutils.MarginalHistScatter
 
 ----
 

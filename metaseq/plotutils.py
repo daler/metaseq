@@ -14,6 +14,29 @@ from scipy import stats
 
 
 def ci_plot(x, arr, conf=0.95, ax=None, line_kwargs=None, fill_kwargs=None):
+    """
+    Plots the mean and 95% ci for the given array on the given axes
+
+    Parameters
+    ----------
+    x : 1-D array-like
+        x values for the plot
+
+    arr : 2-D array-like
+        The array to calculate mean and std for
+
+    conf : float [.5 - 1]
+        Confidence interval to use
+
+    ax : matplotlib.Axes
+        The axes object on which to plot
+
+    line_kwargs : dict
+        Additional kwargs passed to Axes.plot
+
+    fill_kwargs : dict
+        Additiona kwargs passed to Axes.fill_between
+    """
     if ax is None:
         fig = plt.figure()
         ax = fig.add_subplot(111)
@@ -34,6 +57,8 @@ def imshow(arr, x=None, ax=None, vmin=None, vmax=None, percentile=True,
            subplot_params=dict(wspace=0.1, hspace=0.1),
            subset_by=None, subset_order=None,):
     """
+    Do-it-all function to help with plotting heatmaps
+
     Parameters
     ----------
     arr : array-like
@@ -208,6 +233,8 @@ def imshow(arr, x=None, ax=None, vmin=None, vmax=None, percentile=True,
 def add_labels_to_subsets(ax, subset_by, subset_order, text_kwargs=None,
                           add_hlines=True, hline_kwargs=None):
     """
+    Helper function for adding labels to subsets within a heatmap.
+
     Assumes that imshow() was called with `subsets` and `subset_order`.
 
     Parameters
