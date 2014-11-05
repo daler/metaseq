@@ -13,31 +13,34 @@ import gffutils
 import pybedtools
 from pybedtools import featurefuncs
 
+_base_doc = """%s
+The underlying pandas.DataFrame is always available with the `data`
+attribute.
+
+Any attributes not explicitly in this class will be looked for in the
+underlying pandas.DataFrame.
+
+Parameters
+----------
+data : string or pandas.DataFrame
+    If string, assumes it's a filename and calls
+    pandas.read_table(data, **import_kwargs).
+
+db : string or gffutils.FeatureDB
+    Optional database that can be used to generate features
+
+import_kwargs : dict
+    These arguments will be passed to pandas.read_table() if `data` is
+    a filename.
+"""
+
 
 class ResultsTable(object):
-    def __init__(self, data, db=None, import_kwargs=None):
+    __doc__ = _base_doc % dedent(
         """
         Wrapper around a pandas.DataFrame that adds additional functionality.
-
-        The underlying pandas.DataFrame is always available with the `data`
-        attribute.
-
-        Any attributes not explicitly in ResultsTable will be looked for in the
-        underlying pandas.DataFrame.
-
-        Parameters
-        ----------
-        data : string or pandas.DataFrame
-            If string, assumes it's a filename and calls
-            pandas.read_table(data, **import_kwargs).
-
-        db : string or gffutils.FeatureDB
-            Optional database that can be used to generate features
-
-        import_kwargs : dict
-            These arguments will be passed to pandas.read_table() if `data` is
-            a filename.
-        """
+        """)
+    def __init__(self, data, db=None, import_kwargs=None):
         if isinstance(data, basestring):
             import_kwargs = import_kwargs or {}
             data = pandas.read_table(data, **import_kwargs)
@@ -758,6 +761,15 @@ class ResultsTable(object):
 
 
 class DifferentialExpressionResults(ResultsTable):
+
+    __doc__ = _base_doc % dedent("""
+    A ResultsTable subclass for working with differential expression results.
+
+    Adds methods for up/down regulation, ma_plot, and sets class variables for
+    which columns should be considered for pval, log fold change, and mean
+    values. This class acts as a parent for subclasses like DESeqResults,
+    EdgeRResults, and others/
+    """)
     pval_column = 'padj'
     lfc_column = 'log2FoldChange'
     mean_column = 'baseMean'
@@ -909,13 +921,28 @@ class DifferentialExpressionResults(ResultsTable):
 
 
 class EdgeRResults(DifferentialExpressionResults):
+    __doc__ = _base_doc % dedent(
+        """
+        Class for working with results from edgeR.
+
+        Just like a DifferentialExpressionResults object, but sets the
+        pval_column, lfc_column, and mean_column to the names used in edgeR's
+        output.
+        """)
     pval_column = 'FDR'
     lfc_column = 'logFC'
     mean_column = 'logCPM'
 
 
 class DESeqResults(DifferentialExpressionResults):
+    __doc__ = _base_doc % dedent(
+        """
+        Class for working with results from DESeq.
 
+        Just like a DifferentialExpressionResults object, but sets the
+        pval_column, lfc_column, and mean_column to the names used in edgeR's
+        output.
+        """)
     def colormapped_bedfile(self, genome, cmap=None):
         """
         Create a BED file with padj encoded as color
@@ -1019,6 +1046,14 @@ class DESeqResults(DifferentialExpressionResults):
 
 
 class DESeq2Results(DESeqResults):
+    __doc__ = _base_doc % dedent(
+        """
+        Class for working with results from DESeq2.
+
+        Just like a DifferentialExpressionResults object, but sets the
+        pval_column, lfc_column, and mean_column to the names used in edgeR's
+        output.
+        """)
     pval_column = 'padj'
     lfc_column = 'log2FoldChange'
     mean_column = 'baseMean'
@@ -1163,6 +1198,3 @@ if __name__ == "__main__":
         genes_to_highlight=[
             (e.data.index.isin(['FBgn0041721']), dict(color='b', s=50))
         ],
-    )
-
-    plt.show()
