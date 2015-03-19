@@ -1,4 +1,5 @@
 scipy>=0.10.1
+biopython
 scikit-learn
 bx-python>=0.7.1
 Cython
