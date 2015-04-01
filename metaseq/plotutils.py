@@ -653,7 +653,7 @@ def clustered_sortind(x, k=10, scorefunc=None):
     pos = 0
     breaks = []
     ind = np.argsort(scores)
-    for k, g in itertoos.groupby(labels[ind]):
+    for k, g in itertools.groupby(labels[ind]):
         pos += len(list(g))
         breaks.append(pos)
 
