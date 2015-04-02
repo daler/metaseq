@@ -1,6 +1,4 @@
-
 .. _example_session_2:
-
 Example 2: Differential expression scatterplots
 ===============================================
 
@@ -503,12 +501,10 @@ The `genes_to_highlight` argument takes a list of tuples. Each tuple
 consists of two items: an index (boolean or integer, doesn't matter) and
 a style dictionary. This dictionary is passed directly to
 `matplotlib.scatter`, so you can use any supported arguments here.
-
  
 .. note:: 
 
     There are actually other kwargs you can use in the style dictionary -- for example, `names`, `marginal_histograms`, `xhist_kwargs`, and `yhist_kwargs`.  These are `metaseq`-specific and will be explained later.
-
 Here's the plot with up/downregulated genes highlighted:
 
 .. code:: python
