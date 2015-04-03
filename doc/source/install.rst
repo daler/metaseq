@@ -1,3 +1,5 @@
+.. _installation:
+
 Installation
 ============
 
@@ -15,6 +17,23 @@ an installation script that handles all of the complicated work.
 
 Easy installation method
 ------------------------
+If you already do genomics work, you probably already have most of the
+prerequistes installed. In that case, you can simply run::
+
+    pip install metaseq
+
+Otherwise, see the instructions for your operating system below for an
+all-in-one installation script which will give you a complete scientific Python
+installation along with some commonly-used genomics tools.
+
+
+* :ref:`Install on Mac OSX <mac>`
+* :ref:`Install on Linux <linux>`
+* :ref:`Install on Windows <windows>`
+
+
+.. _whatitsdoing:
+
 If you are just trying out :mod:`metaseq` we provide an installation script
 that installs all the prerequisites for running :mod:`metaseq` (see the
 appropriate section below for your operating system, :ref:`mac` or
@@ -61,8 +80,6 @@ with the results and some additional instructions to finalize the installation.
     please `open an issue on github <https://github.com/daler/metaseq/issues>`_
     describing the details of the problem.
 
-In the end, you will have a complete scientific Python installation, along with
-some commonly-used genomics tools.
 
 .. _mac:
 
@@ -88,6 +105,8 @@ downloads the script, and the second command runs it::
 ::
 
     bash create-metaseq-test-environment.sh
+
+Learn more about :ref:`what it's doing <whatitsdoing>`.
 
 .. _linux:
 
@@ -118,14 +137,48 @@ command runs it::
 
     bash create-metaseq-test-environment.sh
 
+
+Learn more about :ref:`what it's doing <whatitsdoing>`.
+
+.. _windows:
+
 Windows
 ~~~~~~~
-The best approach for installing on Windows is to use a virtual machine running
-Ubuntu (for example, see `VirtualBox <https://www.virtualbox.org/>`_), and
-follow the instructions above for installing :mod:`metaseq` on :ref:`linux`.
+It is difficult to do bioinformatics work on Windows. The most convenient
+option will be to run Ubuntu Linux on your Windows machine, and follow the
+Linux instructions above to install metaseq and requirements (options 1 or
+2 below). Alternatively, you could install Cygwin and compile everything
+yourself, but this is untested.
 
-An alternative is to install on Windows using `Cygwin
-<http://www.cygwin.com/>`_, but this is untested.
+Option 1: Dual boot Windows and Ubuntu
+++++++++++++++++++++++++++++++++++++++
+See instructions here: https://wiki.ubuntu.com/WubiGuide.
+
+:Advantages: You'll get the best performance
+
+:Disadvantages: When you want to switch between Windows and Ubuntu you need to restart your computer
+
+Option 2: Run Ubuntu on a virtual machine
++++++++++++++++++++++++++++++++++++++++++
+See instructions here: http://www.instructables.com/id/Introduction-38/.
+
+:Advantages: You can start Ubuntu just like another program
+
+:Disadvantages: Some additional complexity in setup, and performance won't be as good.
+
+
+Option 3: Install Cygwin
+++++++++++++++++++++++++
+#. Install `Cygwin <https://www.cygwin.com/>`_.
+#. Install the `Anaconda Python Distribution <http://continuum.io/downloads>`_.
+#. Download and install `BEDTools <http://bedtools.readthedocs.org/en/latest/>`_, 
+   `samtools <http://samtools.sourceforge.net/>`_,
+   `tabix <http://samtools.sourceforge.net/tabix.shtml>`_,
+   and the UCSC tools `bigWigSummary, bigWigToBedGraph, and bedGraphToBigWig <http://hgdownload.cse.ucsc.edu/admin/exe/>`_
+#. Activate the Anaconda Python distribution environment, and install metaseq with::
+
+    pip install metaseq
+
 
 Customizing
 ~~~~~~~~~~~
@@ -239,7 +292,6 @@ Option 2: Install from source
     python setup.py develop
 
 
-
 Footnotes
 ---------
 
@@ -262,7 +314,7 @@ matplotlib, and other hard-to-install packages.  This drastically reduces the
 amount of time it takes to set up an isolated environment.
 
 We decided to use Miniconda (a slimmed-down version of Anaconda) for the
-:mod:`meteaseq` installation script because it provides the user with an
+:mod:`metaseq` installation script because it provides the user with an
 isolated environment in a fraction of the time of a full virtualenv
 installation, and does not require a FORTRAN compiler for installing scipy.
 
