@@ -49,8 +49,11 @@ html:
 	cat ../README.rst | sed "s|\`Example 1 <https://pythonhosted.org/metaseq/example_session.html>\`_|:ref:\`Example 1 <example_session>\`|g" | sed "s|\`Example 2 <https://pythonhosted.org/metaseq/example_session_2.html>\`_|:ref:\`Example 2 <example_session_2>\`|g" > source/README.rst
 	-rm -r source/autodocs
 	-rm -r $(BUILDDIR)/html
-	(cd source && ipython nbconvert --to rst example_session.ipynb && sed -i "s/\`\`/\`/g" example_session.rst)
-	(cd source && ipython nbconvert --to rst example_session_2.ipynb && sed -i "s/\`\`/\`/g" example_session_2.rst)
+	-rm -r source/metaseq-example
+	-rm -r source/example.npz
+	-rm -r source/example.features
+	(cd source && runipy example_session.ipynb example_session_run.ipynb && ipython nbconvert --to rst example_session_run.ipynb && sed -i "s/\`\`/\`/g" example_session.rst && mv example_session_run.ipynb example_session.ipynb)
+	(cd source && runipy example_session_2.ipynb example_session_2_run.ipynb && ipython nbconvert --to rst example_session_2_run.ipynb && sed -i "s/\`\`/\`/g" example_session_2.rst && mv example_session_2_run.ipynb example_session_2.ipynb)
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	cp source/demo.png $(BUILDDIR)/html/demo.png
 	cp source/demo.png ..
