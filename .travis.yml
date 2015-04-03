@@ -6,8 +6,8 @@ install:
     - source activate metaseq-test
     - echo "$(pwd)"
     - ls -lrth
+    - sudo apt-get install pandoc
     - pip install ipython
-    - conda install pandoc
     - pip install runipy
     - pip install sphinx
     - pip install .
