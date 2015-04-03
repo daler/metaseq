@@ -10,13 +10,10 @@ The IPython Notebook of this example can be found in the source
 directory (`doc/source/example_session.ipynb`) or at
 http://nbviewer.ipython.org/github/daler/metaseq/blob/master/doc/source/example\_session.ipynb
 
-
 .. code:: python
 
     # Enable in-line plots for this example
     %matplotlib inline
-    
-
 Example data
 ------------
 
@@ -27,28 +24,38 @@ prepared data:
 
 .. code:: python
 
-    # Directory to be created; example data will be downloaded here
-    example_dir = "metaseq-example"
-.. code:: python
-
-    !if [ -e $example_dir ]; then echo "already exists"; \
-    elif ! [ -e $example_dir ]; then \
-    mkdir -p $example_dir; \
-    (cd $example_dir \
-      && wget https://raw.githubusercontent.com/daler/metaseq-example-data/master/metaseq-example-data.tar.gz \
-      && tar -xzf metaseq-example-data.tar.gz \
-      && rm metaseq-example-data.tar.gz) \
-    ;fi
+    %%bash
+    example_dir="metaseq-example"
+    if [ -e $example_dir ]; then echo "already exists";
+    else
+        mkdir -p $example_dir
+        (cd $example_dir \
+        && wget --progress=dot:giga https://raw.githubusercontent.com/daler/metaseq-example-data/master/metaseq-example-data.tar.gz \
+        && tar -xzf metaseq-example-data.tar.gz \
+        && rm metaseq-example-data.tar.gz)
+    fi
 
 .. parsed-literal::
 
-    already exists
+    --2015-04-03 12:51:44--  https://raw.githubusercontent.com/daler/metaseq-example-data/master/metaseq-example-data.tar.gz
+    Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 199.27.75.133
+    Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|199.27.75.133|:443... connected.
+    HTTP request sent, awaiting response... 200 OK
+    Length: 96655384 (92M) [application/octet-stream]
+    Saving to: ‘metaseq-example-data.tar.gz’
+    
+         0K ........ ........ ........ ........ 34% 34.7M 2s
+     32768K ........ ........ ........ ........ 69% 83.3M 1s
+     65536K ........ ........ ........ ....    100% 83.8M=1.6s
+    
+    2015-04-03 12:51:47 (56.1 MB/s) - ‘metaseq-example-data.tar.gz’ saved [96655384/96655384]
+    
 
 
 .. code:: python
 
     # From now on, we can just use `data_dir`
-    data_dir = example_dir + '/data'
+    data_dir = 'metaseq-example/data'
 .. code:: python
 
     # What did we get?
@@ -134,7 +141,7 @@ is on the "+" strand, TSS is the start position of the first exon \* if
 the transcript is on the "-" strand, TSS is the end position of the last
 exon
 
-Luckily, `gffutils` <https://github.com/daler/gffutils>`__ is able to
+Luckily, ``gffutils` <https://github.com/daler/gffutils>`__ is able to
 infer transcripts and genes from a GTF file. The inferred transcripts
 and genes are already in the prepared `gffutils` database, at
 `$data_dir/Homo_sapiens.GRCh37.66_chr17.gtf.db`. First we connect to
@@ -145,7 +152,7 @@ it:
     import os
     import gffutils
     db = gffutils.FeatureDB(os.path.join(data_dir, 'Homo_sapiens.GRCh37.66_chr17.gtf.db'))
-We'll use `pybedtools` <https://github.com/daler/pybedtools>`__ for
+We'll use ``pybedtools` <https://github.com/daler/pybedtools>`__ for
 interval manipulation.
 
 Here we create a generator function that iterates through all annotated
@@ -296,7 +303,7 @@ input. Let’s construct meaningful values for the x-axis, from -1000 to
 
     import numpy as np
     x = np.linspace(-1000, 1000, 100)
-Then plot, using standard `matplotlib` <http://matplotlib.org/>`__
+Then plot, using standard ``matplotlib` <http://matplotlib.org/>`__
 commands:
 
 .. code:: python
@@ -344,7 +351,7 @@ commands:
     ax.legend(loc='best');
 
 
-.. image:: example_session_files/example_session_32_0.png
+.. image:: example_session_run_files/example_session_run_30_0.png
 
 
 Adding a heatmap
@@ -402,7 +409,7 @@ here the arguments are described:
     )
 
 
-.. image:: example_session_files/example_session_37_0.png
+.. image:: example_session_run_files/example_session_run_35_0.png
 
 
 .. code:: python
@@ -438,6 +445,11 @@ sort the rows by their mean value:
         # This is new: sort by mean signal
         sort_by=normalized_subtracted.mean(axis=1)
     )
+
+
+.. image:: example_session_run_files/example_session_run_38_0.png
+
+
 .. code:: python
 
     fig = plt.figure()
@@ -462,6 +474,11 @@ sort the rows by their mean value:
         sort_by=sort_by,
     )
 
+
+
+.. image:: example_session_run_files/example_session_run_39_0.png
+
+
 We can use any number of arbitrary sorting methods. For example, this
 sorts the rows by the position of the highest signal in the row. Note
 that the line plot, which is the column-wise average, remains unchanged
@@ -483,6 +500,11 @@ differently.
         # This is new: sort by mean signal
         sort_by=np.argmax(normalized_subtracted, axis=1)
     )
+
+
+.. image:: example_session_run_files/example_session_run_41_0.png
+
+
 Customizing the axes styles
 ---------------------------
 
@@ -499,6 +521,11 @@ Let's go back to the sorted-by-mean version.
         fill_kwargs=dict(color='k', alpha=0.3),
         sort_by=normalized_subtracted.mean(axis=1)
     )
+
+
+.. image:: example_session_run_files/example_session_run_43_0.png
+
+
 Now we'll make some tweaks to the plot. The figure returned by
 `metaseq.plotutils.imshow` has attributes `array_axes`,
 `line_axes`, and `cax`, which can be used as an easy way to get
@@ -527,6 +554,13 @@ additional tweaks:
     
     fig.cax.set_ylabel("Enrichment")
     fig
+
+
+
+
+.. image:: example_session_run_files/example_session_run_45_0.png
+
+
 
 Integrating with RNA-seq expression data
 ========================================
@@ -582,6 +616,62 @@ columns, `score` and `fpkm`:
     
     print len(control.data)
     control.data.head()
+
+.. parsed-literal::
+
+    85699
+
+
+
+
+.. raw:: html
+
+    <div style="max-height:1000px;max-width:1500px;overflow:auto;">
+    <table border="1" class="dataframe">
+      <thead>
+        <tr style="text-align: right;">
+          <th></th>
+          <th>score</th>
+          <th>fpkm</th>
+        </tr>
+        <tr>
+          <th>id</th>
+          <th></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>ENST00000456328</th>
+          <td> 108.293111</td>
+          <td> 1.118336</td>
+        </tr>
+        <tr>
+          <th>ENST00000515242</th>
+          <td>  87.233019</td>
+          <td> 0.830617</td>
+        </tr>
+        <tr>
+          <th>ENST00000518655</th>
+          <td> 175.175609</td>
+          <td> 2.367682</td>
+        </tr>
+        <tr>
+          <th>ENST00000473358</th>
+          <td> 343.232679</td>
+          <td> 9.795265</td>
+        </tr>
+        <tr>
+          <th>ENST00000408384</th>
+          <td>   0.000000</td>
+          <td> 0.000000</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+
+
 RNA-seq data wrangling: aligning RNA-seq data with ChIP-seq data
 ----------------------------------------------------------------
 
@@ -606,6 +696,13 @@ the transcript ID information is stored:
     # Inspect the GTF file originally used to create the array
     
     print tsses_1kb[0]
+
+
+.. parsed-literal::
+
+    chr17	gffutils_derived	transcript	37025255	37027255	.	+	.	transcript_id "ENST00000318008"; gene_id "ENSG00000002834";
+    
+
 
 The Ensembl transcript ID is stored in the `transcript_id` field of
 the GTF attributes:
@@ -640,6 +737,62 @@ table had all transcripts. By reindexing the table to match the
 
     print len(control)
     control.data.head()
+
+.. parsed-literal::
+
+    5708
+
+
+
+
+.. raw:: html
+
+    <div style="max-height:1000px;max-width:1500px;overflow:auto;">
+    <table border="1" class="dataframe">
+      <thead>
+        <tr style="text-align: right;">
+          <th></th>
+          <th>score</th>
+          <th>fpkm</th>
+        </tr>
+        <tr>
+          <th>id</th>
+          <th></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>ENST00000318008</th>
+          <td> 433.958279</td>
+          <td> 19.246250</td>
+        </tr>
+        <tr>
+          <th>ENST00000419929</th>
+          <td>        NaN</td>
+          <td>       NaN</td>
+        </tr>
+        <tr>
+          <th>ENST00000433206</th>
+          <td>  40.938322</td>
+          <td>  0.328118</td>
+        </tr>
+        <tr>
+          <th>ENST00000435347</th>
+          <td> 450.179142</td>
+          <td> 21.655531</td>
+        </tr>
+        <tr>
+          <th>ENST00000443937</th>
+          <td> 451.761068</td>
+          <td> 21.905318</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+
+
 Also note that second transcript, with NaN values. It turns out that
 transcript was not in the original RNA-seq results data table:
 
@@ -650,6 +803,15 @@ transcript was not in the original RNA-seq results data table:
         import_kwargs=dict(index_col=0))
     
     'ENST00000419929' in original_control.data.index
+
+
+
+.. parsed-literal::
+
+    False
+
+
+
 This may be because the experiment from GEO used something other than
 Ensembl annotations when running the analysis. It's actually not clear
 from the GEO entry what they used. Anyway, in order to make sure the
@@ -671,7 +833,7 @@ RNA-seq data wrangling: join control and knockdown data
 -------------------------------------------------------
 
 Now for some more data-wrangling. We'll use basic
-`pandas` <http://pandas.pydata.org/>`__ operations to merge the
+``pandas` <http://pandas.pydata.org/>`__ operations to merge the
 control and knockdown data together into a single table. We'll also
 create a new log2foldchange column.
 
@@ -684,6 +846,78 @@ create a new log2foldchange column.
     data['log2foldchange'] = np.log2(data.fpkm_knockdown / data.fpkm_control)
     data.head()
 
+
+
+
+.. raw:: html
+
+    <div style="max-height:1000px;max-width:1500px;overflow:auto;">
+    <table border="1" class="dataframe">
+      <thead>
+        <tr style="text-align: right;">
+          <th></th>
+          <th>score_control</th>
+          <th>fpkm_control</th>
+          <th>score_knockdown</th>
+          <th>fpkm_knockdown</th>
+          <th>log2foldchange</th>
+        </tr>
+        <tr>
+          <th>id</th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>ENST00000318008</th>
+          <td> 433.958279</td>
+          <td> 19.246250</td>
+          <td> 386.088132</td>
+          <td> 13.529179</td>
+          <td>-0.508503</td>
+        </tr>
+        <tr>
+          <th>ENST00000419929</th>
+          <td>        NaN</td>
+          <td>       NaN</td>
+          <td>        NaN</td>
+          <td>       NaN</td>
+          <td>      NaN</td>
+        </tr>
+        <tr>
+          <th>ENST00000433206</th>
+          <td>  40.938322</td>
+          <td>  0.328118</td>
+          <td> 181.442415</td>
+          <td>  2.517192</td>
+          <td> 2.939529</td>
+        </tr>
+        <tr>
+          <th>ENST00000435347</th>
+          <td> 450.179142</td>
+          <td> 21.655531</td>
+          <td> 436.579186</td>
+          <td> 19.617419</td>
+          <td>-0.142600</td>
+        </tr>
+        <tr>
+          <th>ENST00000443937</th>
+          <td> 451.761068</td>
+          <td> 21.905318</td>
+          <td> 431.172759</td>
+          <td> 18.859090</td>
+          <td>-0.216021</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+
+
 We can investigate some basic stats:
 
 .. code:: python
@@ -693,6 +927,13 @@ We can investigate some basic stats:
     
     print "up:", sum(data.log2foldchange > 1)
     print "down:", sum(data.log2foldchange < -1)
+
+
+.. parsed-literal::
+
+    up: 735
+    down: 514
+
 
 Integrating RNA-seq data with the heatmap
 -----------------------------------------
@@ -726,6 +967,11 @@ one is 3x the height of the other two.
     # so we can now create the new axes.
     bottom_axes = plt.subplot(fig.gs[2, 0])
 
+
+
+.. image:: example_session_run_files/example_session_run_67_0.png
+
+
 The `metaseq.plotutils.ci_plot` function takes an array and plots the
 mean signal +/- 95% CI bands. This was actually called automatically
 before for our line plot of average signal across all TSSes.
@@ -745,18 +991,89 @@ genes.
     # This is a pandas.Series, True where the log2foldchange was >1
     upregulated = (data.log2foldchange > 1)
     upregulated
+
+
+
+.. parsed-literal::
+
+    id
+    ENST00000318008    False
+    ENST00000419929    False
+    ENST00000433206     True
+    ENST00000435347    False
+    ENST00000443937    False
+    ENST00000359238    False
+    ENST00000393405     True
+    ENST00000439357    False
+    ENST00000452859     True
+    ENST00000003834     True
+    ENST00000379061    False
+    ENST00000457710    False
+    ENST00000003607    False
+    ENST00000540200     True
+    ENST00000158166     True
+    ...
+    ENST00000562182    False
+    ENST00000564549    False
+    ENST00000566140    False
+    ENST00000566930    False
+    ENST00000567452    False
+    ENST00000569893    False
+    ENST00000569279    False
+    ENST00000565271    False
+    ENST00000567351    False
+    ENST00000569284    False
+    ENST00000569543    False
+    ENST00000565120    False
+    ENST00000562555    False
+    ENST00000570002    False
+    ENST00000565472    False
+    Name: log2foldchange, Length: 5708, dtype: bool
+
+
+
 .. code:: python
 
     # This gets us the underlying boolean NumPy array which we
     # can use to subset the array
     index = upregulated.values
     index
+
+
+
+.. parsed-literal::
+
+    array([False, False,  True, ..., False, False, False], dtype=bool)
+
+
+
 .. code:: python
 
     # This is the subset of the array where the TSS of the transcript
     # went up in the ATF3 knockdown
     upregulated_chipseq_signal = normalized_subtracted[index, :]
     upregulated_chipseq_signal
+
+
+
+.. parsed-literal::
+
+    array([[ 1.03915645, -1.84141782,  0.03746102, ..., -1.84141782,
+             3.11746936,  3.11746936],
+           [-1.84141782,  2.07831291,  0.        , ...,  1.03915645,
+             1.03915645, -2.88057427],
+           [-2.88057427,  2.07831291,  2.07831291, ...,  0.        ,
+             1.03915645, -1.84141782],
+           ..., 
+           [ 1.03915645, -1.84141782,  1.27605155, ...,  0.        ,
+             0.        , -2.88057427],
+           [ 0.        , -2.88057427,  0.        , ..., -0.80226136,
+             1.86838231,  4.15662582],
+           [ 0.        ,  0.        ,  0.        , ..., -1.84141782,
+            -1.84141782, -8.64172281]])
+
+
+
 .. code:: python
 
     # We can combine the above steps into the following:
@@ -813,6 +1130,13 @@ labels, legend, vertical lines at zero):
     bottom_axes.legend(loc='best', frameon=False, fontsize=8, labelspacing=.3, handletextpad=0.2)
     fig.subplots_adjust(left=0.3, right=0.8, bottom=0.05)
     fig
+
+
+
+.. image:: example_session_run_files/example_session_run_76_0.png
+
+
+
 We can save the figure to disk in different formats for manuscript
 preparation:
 
@@ -959,10 +1283,18 @@ randomly.
             )
         ax.axvline(0, color='k', linestyle=':')
         ax.set_title('cluster %s\n(N=%s)' % (cluster_number, len(chunk)))
-        i = b
         cluster_number += 1
         last_break = this_break
           
+
+
+.. image:: example_session_run_files/example_session_run_83_0.png
+
+
+
+.. image:: example_session_run_files/example_session_run_83_1.png
+
+
 Scatterplots of RNA-seq and ChIP-seq signal
 -------------------------------------------
 
@@ -1001,6 +1333,11 @@ with the ChIP-seq array.
         general_kwargs=dict(marker='.', color='0.5', alpha=0.2, s=5),
         one_to_one=dict(color='r', linestyle=':')
     );
+
+
+.. image:: example_session_run_files/example_session_run_85_0.png
+
+
 .. code:: python
 
     # Perhaps a better analysis would be to plot average
@@ -1027,3 +1364,7 @@ with the ChIP-seq array.
         ],
         general_kwargs=dict(marker='.', color='0.5', alpha=0.2, s=5),
         yfunc=np.log2);
+
+
+.. image:: example_session_run_files/example_session_run_86_0.png
+

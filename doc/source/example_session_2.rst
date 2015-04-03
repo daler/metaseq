@@ -134,7 +134,6 @@ Here's what the first few entries look like:
         </tr>
       </tbody>
     </table>
-    <p>5 rows × 2 columns</p>
     </div>
 
 
@@ -189,7 +188,6 @@ Here's what the first few entries look like:
         </tr>
       </tbody>
     </table>
-    <p>5 rows × 2 columns</p>
     </div>
 
 
@@ -265,7 +263,6 @@ use standard `pandas` routines:
         </tr>
       </tbody>
     </table>
-    <p>5 rows × 4 columns</p>
     </div>
 
 
@@ -363,7 +360,7 @@ later, but for now, let's plot the FPKM of control vs knockdown:
         y='fpkm_kd');
 
 
-.. image:: example_session_2_files/example_session_2_29_0.png
+.. image:: example_session_2_run_files/example_session_2_run_29_0.png
 
 
 If you're following along in a terminal with interactive `matplotlib`
@@ -452,7 +449,7 @@ Here's the next version of the scatterplot:
         );
 
 
-.. image:: example_session_2_files/example_session_2_38_0.png
+.. image:: example_session_2_run_files/example_session_2_run_38_0.png
 
 
 Of course, we can specify axes labels either directly in the method call
@@ -479,7 +476,7 @@ with `xlab` or `ylab`, or after the fact using standard
                     
 
 
-.. image:: example_session_2_files/example_session_2_40_0.png
+.. image:: example_session_2_run_files/example_session_2_run_40_0.png
 
 
 Let's highlight some genes. How about those that change expression > 2
@@ -526,7 +523,7 @@ Here's the plot with up/downregulated genes highlighted:
         );          
 
 
-.. image:: example_session_2_files/example_session_2_46_0.png
+.. image:: example_session_2_run_files/example_session_2_run_46_0.png
 
 
 We can add a 1-to-1 line for reference:
@@ -550,7 +547,7 @@ We can add a 1-to-1 line for reference:
         ); 
 
 
-.. image:: example_session_2_files/example_session_2_48_0.png
+.. image:: example_session_2_run_files/example_session_2_run_48_0.png
 
 
 Let's change the plot style a bit. The `general_kwargs` argument
@@ -580,7 +577,7 @@ adjusting their alpha:
         ); 
 
 
-.. image:: example_session_2_files/example_session_2_50_0.png
+.. image:: example_session_2_run_files/example_session_2_run_50_0.png
 
 
 Marginal histograms
@@ -612,7 +609,7 @@ everything:
         ); 
 
 
-.. image:: example_session_2_files/example_session_2_52_0.png
+.. image:: example_session_2_run_files/example_session_2_run_52_0.png
 
 
 As a contrived example to illustrate the flexibility for plotting
@@ -669,7 +666,7 @@ marginal histograms, lets:
 
 
 
-.. image:: example_session_2_files/example_session_2_54_0.png
+.. image:: example_session_2_run_files/example_session_2_run_54_0.png
 
 
 Let's clean up the plot by adding a legend (using `label` in
@@ -753,7 +750,7 @@ nicely match the order of the histograms.
 
 
 
-.. image:: example_session_2_files/example_session_2_56_0.png
+.. image:: example_session_2_run_files/example_session_2_run_56_0.png
 
 
 We'd also like to add a title. But how to access the top-most axes?
@@ -784,6 +781,6 @@ histograms axes as well.
 
 
 
-.. image:: example_session_2_files/example_session_2_58_0.png
+.. image:: example_session_2_run_files/example_session_2_run_58_0.png
 
 

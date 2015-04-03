@@ -6,7 +6,7 @@ install:
     - source activate metaseq-test
     - echo "$(pwd)"
     - ls -lrth
-    - pip install ipython[all]
+    - pip install ipython
     - pip install runipy
     - pip install sphinx
     - pip install .
