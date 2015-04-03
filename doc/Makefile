@@ -14,6 +14,8 @@ ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) sou
 # the i18n builder cannot share the environment and doctrees with the others
 I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) source
 
+NBCONVERT_CMD = ipython nbconvert --ExecutePreprocessor.enabled=True --to=rst
+
 .PHONY: help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest gettext
 
 help:
@@ -52,8 +54,8 @@ html:
 	-rm -r source/metaseq-example
 	-rm -r source/example.npz
 	-rm -r source/example.features
-	(cd source && runipy example_session.ipynb example_session_run.ipynb && ipython nbconvert --to rst example_session_run.ipynb && sed  "s/\`\`/\`/g" example_session_run.rst > example_session.rst && mv example_session_run.ipynb example_session.ipynb)
-	(cd source && runipy example_session_2.ipynb example_session_2_run.ipynb && ipython nbconvert --to rst example_session_2_run.ipynb && sed "s/\`\`/\`/g" example_session_2_run.rst > example_session_2.rst && mv example_session_2_run.ipynb example_session_2.ipynb)
+	(cd source && ./notebook-runner.sh example_session.ipynb)
+	(cd source && ./notebook-runner.sh example_session_2.ipynb)
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	cp source/demo.png $(BUILDDIR)/html/demo.png
 	cp source/demo.png ..

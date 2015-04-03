@@ -34,6 +34,7 @@ Import what we'll be using:
     import pybedtools
     import gffutils
     from gffutils.helpers import asinterval
+    import os
 We'll be using tables prepared from Cufflinks GTF output from GEO
 entries GSM847565 and GSM847566. These represent results control and
 ATF3 knockdown experiments in the K562 human cell line. You can read
@@ -44,10 +45,27 @@ Let's get the example files:
 
 .. code:: python
 
-    # Get example filenames
-    
-    control_filename = example_filename('GSM847565_SL2585.table')
-    knockdown_filename = example_filename('GSM847566_SL2592.table')
+    %%bash
+    example_dir="metaseq-example"
+    if [ -e $example_dir ]; then echo "already exists";
+    else
+        mkdir -p $example_dir
+        (cd $example_dir \
+        && wget --progress=dot:giga https://raw.githubusercontent.com/daler/metaseq-example-data/master/metaseq-example-data.tar.gz \
+        && tar -xzf metaseq-example-data.tar.gz \
+        && rm metaseq-example-data.tar.gz)
+    fi
+
+.. parsed-literal::
+
+    already exists
+
+
+.. code:: python
+
+    data_dir = 'metaseq-example/data'
+    control_filename = os.path.join(data_dir, 'GSM847565_SL2585.table')
+    knockdown_filename = os.path.join(data_dir, 'GSM847566_SL2592.table')
 Let's take a quick peak to see what these files look like:
 
 .. code:: python
@@ -297,7 +315,7 @@ chromosome 17 of the hg19 human genome assembly:
 
     # Get gene annotations for chr17
     
-    gtf = metaseq.example_filename('Homo_sapiens.GRCh37.66_chr17.gtf')
+    gtf = os.path.join(data_dir, 'Homo_sapiens.GRCh37.66_chr17.gtf')
     print open(gtf).readline()
 
 .. parsed-literal::
@@ -360,7 +378,7 @@ later, but for now, let's plot the FPKM of control vs knockdown:
         y='fpkm_kd');
 
 
-.. image:: example_session_2_run_files/example_session_2_run_29_0.png
+.. image:: example_session_2_files/example_session_2_30_0.png
 
 
 If you're following along in a terminal with interactive `matplotlib`
@@ -449,7 +467,7 @@ Here's the next version of the scatterplot:
         );
 
 
-.. image:: example_session_2_run_files/example_session_2_run_38_0.png
+.. image:: example_session_2_files/example_session_2_39_0.png
 
 
 Of course, we can specify axes labels either directly in the method call
@@ -476,7 +494,7 @@ with `xlab` or `ylab`, or after the fact using standard
                     
 
 
-.. image:: example_session_2_run_files/example_session_2_run_40_0.png
+.. image:: example_session_2_files/example_session_2_41_0.png
 
 
 Let's highlight some genes. How about those that change expression > 2
@@ -523,7 +541,7 @@ Here's the plot with up/downregulated genes highlighted:
         );          
 
 
-.. image:: example_session_2_run_files/example_session_2_run_46_0.png
+.. image:: example_session_2_files/example_session_2_47_0.png
 
 
 We can add a 1-to-1 line for reference:
@@ -547,7 +565,7 @@ We can add a 1-to-1 line for reference:
         ); 
 
 
-.. image:: example_session_2_run_files/example_session_2_run_48_0.png
+.. image:: example_session_2_files/example_session_2_49_0.png
 
 
 Let's change the plot style a bit. The `general_kwargs` argument
@@ -577,7 +595,7 @@ adjusting their alpha:
         ); 
 
 
-.. image:: example_session_2_run_files/example_session_2_run_50_0.png
+.. image:: example_session_2_files/example_session_2_51_0.png
 
 
 Marginal histograms
@@ -609,7 +627,7 @@ everything:
         ); 
 
 
-.. image:: example_session_2_run_files/example_session_2_run_52_0.png
+.. image:: example_session_2_files/example_session_2_53_0.png
 
 
 As a contrived example to illustrate the flexibility for plotting
@@ -666,7 +684,7 @@ marginal histograms, lets:
 
 
 
-.. image:: example_session_2_run_files/example_session_2_run_54_0.png
+.. image:: example_session_2_files/example_session_2_55_0.png
 
 
 Let's clean up the plot by adding a legend (using `label` in
@@ -750,7 +768,7 @@ nicely match the order of the histograms.
 
 
 
-.. image:: example_session_2_run_files/example_session_2_run_56_0.png
+.. image:: example_session_2_files/example_session_2_57_0.png
 
 
 We'd also like to add a title. But how to access the top-most axes?
@@ -781,6 +799,6 @@ histograms axes as well.
 
 
 
-.. image:: example_session_2_run_files/example_session_2_run_58_0.png
+.. image:: example_session_2_files/example_session_2_59_0.png
 
 

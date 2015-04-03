@@ -37,18 +37,18 @@ prepared data:
 
 .. parsed-literal::
 
-    --2015-04-03 12:51:44--  https://raw.githubusercontent.com/daler/metaseq-example-data/master/metaseq-example-data.tar.gz
+    --2015-04-03 15:08:47--  https://raw.githubusercontent.com/daler/metaseq-example-data/master/metaseq-example-data.tar.gz
     Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 199.27.75.133
     Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|199.27.75.133|:443... connected.
     HTTP request sent, awaiting response... 200 OK
     Length: 96655384 (92M) [application/octet-stream]
     Saving to: ‘metaseq-example-data.tar.gz’
     
-         0K ........ ........ ........ ........ 34% 34.7M 2s
-     32768K ........ ........ ........ ........ 69% 83.3M 1s
-     65536K ........ ........ ........ ....    100% 83.8M=1.6s
+         0K ........ ........ ........ ........ 34% 33.2M 2s
+     32768K ........ ........ ........ ........ 69% 78.5M 1s
+     65536K ........ ........ ........ ....    100% 44.4M=2.0s
     
-    2015-04-03 12:51:47 (56.1 MB/s) - ‘metaseq-example-data.tar.gz’ saved [96655384/96655384]
+    2015-04-03 15:08:51 (46.0 MB/s) - ‘metaseq-example-data.tar.gz’ saved [96655384/96655384]
     
 
 
@@ -351,7 +351,7 @@ commands:
     ax.legend(loc='best');
 
 
-.. image:: example_session_run_files/example_session_run_30_0.png
+.. image:: example_session_files/example_session_30_0.png
 
 
 Adding a heatmap
@@ -409,7 +409,7 @@ here the arguments are described:
     )
 
 
-.. image:: example_session_run_files/example_session_run_35_0.png
+.. image:: example_session_files/example_session_35_0.png
 
 
 .. code:: python
@@ -447,36 +447,7 @@ sort the rows by their mean value:
     )
 
 
-.. image:: example_session_run_files/example_session_run_38_0.png
-
-
-.. code:: python
-
-    fig = plt.figure()
-    ax1 = fig.add_subplot(121)
-    ax2 = fig.add_subplot(122)
-    sort_by = arrays['ip'].mean(axis=1)
-    fig = metaseq.plotutils.imshow(
-        # These are the same arguments as above.
-        arrays['input'],
-        x=x,
-        ax=ax1,
-        vmin=5, vmax=99,  percentile=True,
-        sort_by=sort_by
-    
-    )
-    fig = metaseq.plotutils.imshow(
-        # These are the same arguments as above.
-        arrays['ip'],
-        x=x,
-        ax=ax2,
-        vmin=5, vmax=99,  percentile=True,
-        sort_by=sort_by,
-    )
-
-
-
-.. image:: example_session_run_files/example_session_run_39_0.png
+.. image:: example_session_files/example_session_38_0.png
 
 
 We can use any number of arbitrary sorting methods. For example, this
@@ -502,7 +473,7 @@ differently.
     )
 
 
-.. image:: example_session_run_files/example_session_run_41_0.png
+.. image:: example_session_files/example_session_40_0.png
 
 
 Customizing the axes styles
@@ -523,7 +494,7 @@ Let's go back to the sorted-by-mean version.
     )
 
 
-.. image:: example_session_run_files/example_session_run_43_0.png
+.. image:: example_session_files/example_session_42_0.png
 
 
 Now we'll make some tweaks to the plot. The figure returned by
@@ -558,7 +529,7 @@ additional tweaks:
 
 
 
-.. image:: example_session_run_files/example_session_run_45_0.png
+.. image:: example_session_files/example_session_44_0.png
 
 
 
@@ -969,7 +940,7 @@ one is 3x the height of the other two.
 
 
 
-.. image:: example_session_run_files/example_session_run_67_0.png
+.. image:: example_session_files/example_session_66_0.png
 
 
 The `metaseq.plotutils.ci_plot` function takes an array and plots the
@@ -1133,7 +1104,7 @@ labels, legend, vertical lines at zero):
 
 
 
-.. image:: example_session_run_files/example_session_run_76_0.png
+.. image:: example_session_files/example_session_75_0.png
 
 
 
@@ -1288,11 +1259,11 @@ randomly.
           
 
 
-.. image:: example_session_run_files/example_session_run_83_0.png
+.. image:: example_session_files/example_session_82_0.png
 
 
 
-.. image:: example_session_run_files/example_session_run_83_1.png
+.. image:: example_session_files/example_session_82_1.png
 
 
 Scatterplots of RNA-seq and ChIP-seq signal
@@ -1335,7 +1306,7 @@ with the ChIP-seq array.
     );
 
 
-.. image:: example_session_run_files/example_session_run_85_0.png
+.. image:: example_session_files/example_session_84_0.png
 
 
 .. code:: python
@@ -1366,5 +1337,5 @@ with the ChIP-seq array.
         yfunc=np.log2);
 
 
-.. image:: example_session_run_files/example_session_run_86_0.png
+.. image:: example_session_files/example_session_85_0.png
 
