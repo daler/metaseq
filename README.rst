@@ -15,6 +15,13 @@ interactive exploration and plotting of disparate genomic data sets.
 
 The main documentation for `metaseq` can be found at http://packages.python.org/metaseq/.
 
+If you use `metaseq` in your work, please cite the following publication:
+
+    Dale, R. K., Matzat, L. H. & Lei, E. P. metaseq: a Python package for
+    integrative genome-wide analysis reveals relationships between chromatin
+    insulators and associated nuclear mRNA. Nucleic Acids Res. 42, 9158–9170
+    (2014). http://www.ncbi.nlm.nih.gov/pubmed/25063299
+
 
 Example 1: Average ChIP-seq signal over promoters
 -------------------------------------------------
