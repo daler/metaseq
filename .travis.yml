@@ -10,7 +10,7 @@ install:
     - pip install ipython
     - pip install runipy
     - pip install sphinx
-    - pip instal numpydoc
+    - pip install numpydoc
     - pip install .
 
 
