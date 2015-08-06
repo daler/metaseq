@@ -2,13 +2,17 @@
 Example 1: Average ChIP-seq signal over promoters
 =================================================
 
-This example demonstrates the use of :mod:`metaseq` for performing a
-common task when analyzing ChIP-seq data: what does transcription factor
-binding signal look like near transcription start sites (TSS)?
+This example demonstrates the use of `metaseq` for performing a common
+task when analyzing ChIP-seq data: what does transcription factor
+binding signal look like near transcription start sites?
 
 The IPython Notebook of this example can be found in the source
 directory (`doc/source/example_session.ipynb`) or at
 http://nbviewer.ipython.org/github/daler/metaseq/blob/master/doc/source/example\_session.ipynb
+
+The syntax of this document follows that of the IPython notebook. For
+example, calls out to the shell are prefixed with a "`!`\ "; if not
+then the code is run in Python.
 
 .. code:: python
 
@@ -37,18 +41,18 @@ prepared data:
 
 .. parsed-literal::
 
-    --2015-04-03 15:15:28--  https://raw.githubusercontent.com/daler/metaseq-example-data/master/metaseq-example-data.tar.gz
-    Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 199.27.75.133
-    Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|199.27.75.133|:443... connected.
+    --2015-08-06 11:11:20--  https://raw.githubusercontent.com/daler/metaseq-example-data/master/metaseq-example-data.tar.gz
+    Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 23.235.46.133
+    Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|23.235.46.133|:443... connected.
     HTTP request sent, awaiting response... 200 OK
     Length: 96655384 (92M) [application/octet-stream]
     Saving to: ‘metaseq-example-data.tar.gz’
     
-         0K ........ ........ ........ ........ 34% 34.6M 2s
-     32768K ........ ........ ........ ........ 69% 58.3M 1s
-     65536K ........ ........ ........ ....    100% 42.2M=2.1s
+         0K ........ ........ ........ ........ 34% 20.2M 3s
+     32768K ........ ........ ........ ........ 69% 13.6M 2s
+     65536K ........ ........ ........ ....    100% 31.7M=4.8s
     
-    2015-04-03 15:15:30 (43.0 MB/s) - ‘metaseq-example-data.tar.gz’ saved [96655384/96655384]
+    2015-08-06 11:11:26 (19.1 MB/s) - ‘metaseq-example-data.tar.gz’ saved [96655384/96655384]
     
 
 
