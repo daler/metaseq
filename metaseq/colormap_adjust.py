@@ -61,7 +61,7 @@ def smart_colormap(vmin, vmax, color_high='#b11902', hue_low=0.6):
     new_rgb = colorsys.hsv_to_rgb(*hsv)
     new_hex = matplotlib.colors.rgb2hex(new_rgb)
 
-    zeropoint = -vmin / (vmax - vmin)
+    zeropoint = abs(-vmin / (vmax - vmin))
 
     # Create a new colormap using the new hue-shifted color as the low end
     new_cmap = matplotlib.colors.LinearSegmentedColormap.from_list(
