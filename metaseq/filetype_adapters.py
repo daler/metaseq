@@ -52,7 +52,7 @@ class BamAdapter(BaseAdapter):
 
     def __getitem__(self, key):
         iterator = self.fileobj.fetch(
-            key.chrom,
+            str(key.chrom),
             key.start,
             key.stop)
         for r in iterator:
