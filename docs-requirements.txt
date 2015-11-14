@@ -1,0 +1,5 @@
+sphinx
+nbconvert
+pygments
+numpydoc
+jupyter

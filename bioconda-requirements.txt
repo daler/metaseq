@@ -1,0 +1,5 @@
+bedtools
+ucsc-bedgraphtobigwig
+ucsc-bedtobigbed
+ucsc-bigwigsummary
+ucsc-bigwigtobedgraph
