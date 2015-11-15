@@ -61,7 +61,6 @@ html:
 	cp source/demo.png ..
 	cp source/expression-demo.png $(BUILDDIR)/html/expression-demo.png
 	cp source/expression-demo.png ..
-	(cd $(BUILDDIR)/html && zip -rq docs.zip .)
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
