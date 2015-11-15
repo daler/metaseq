@@ -6,8 +6,8 @@ Metaseq
 .. image:: https://badge.fury.io/py/metaseq.svg
     :target: http://badge.fury.io/py/metaseq
 
-.. image:: https://pypip.in/d/metaseq/badge.png
-    :target: https://pypi.python.org/pypi/metaseq
+.. image:: https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat-square
+    :target: http://bioconda.github.io
 
 Briefly, the goal of `metaseq` is to tie together lots of existing software into
 a framework for exploring genomic data.  It focuses on flexibility and
