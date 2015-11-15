@@ -119,11 +119,7 @@ fi
 !head -n5 $control_filename
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre>id  score   fpkm
-ENST00000456328     108.293110992801        1.1183355144
-ENST00000515242     87.2330185289764        0.8306172562
-ENST00000518655     175.175608597549        2.3676823979
-ENST00000473358     343.232678519699        9.7952652359
+<div class="highlight-python"><div class="highlight"><pre>head: cannot open ‘metaseq-example/data/GSM847565_SL2585.table’ for reading: No such file or directory
 </pre></div>
 </div>
 <p>As documented at <a class="reference external" href="http://cufflinks.cbcb.umd.edu/manual.html#gtfout">http://cufflinks.cbcb.umd.edu/manual.html#gtfout</a>, the
@@ -142,98 +138,96 @@ of it.</p>
 <span class="n">knockdown</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="n">knockdown_filename</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 </pre></div>
 </div>
+<div class="highlight-python"><div class="highlight"><pre>---------------------------------------------------------------------------
+
+IOError                                   Traceback (most recent call last)
+
+&lt;ipython-input-6-ea52ce20b3cd&gt; in &lt;module&gt;()
+      1 # Create two pandas.DataFrames
+      2
+----&gt; 3 control = pandas.read_table(control_filename, index_col=0)
+      4 knockdown = pandas.read_table(knockdown_filename, index_col=0)
+
+
+/home/ryan/anaconda2/lib/python2.7/site-packages/pandas/io/parsers.pyc in parser_f(filepath_or_buffer, sep, dialect, compression, doublequote, escapechar, quotechar, quoting, skipinitialspace, lineterminator, header, index_col, names, prefix, skiprows, skipfooter, skip_footer, na_values, true_values, false_values, delimiter, converters, dtype, usecols, engine, delim_whitespace, as_recarray, na_filter, compact_ints, use_unsigned, low_memory, buffer_lines, warn_bad_lines, error_bad_lines, keep_default_na, thousands, comment, decimal, parse_dates, keep_date_col, dayfirst, date_parser, memory_map, float_precision, nrows, iterator, chunksize, verbose, encoding, squeeze, mangle_dupe_cols, tupleize_cols, infer_datetime_format, skip_blank_lines)
+    489                     skip_blank_lines=skip_blank_lines)
+    490
+--&gt; 491         return _read(filepath_or_buffer, kwds)
+    492
+    493     parser_f.__name__ = name
+
+
+/home/ryan/anaconda2/lib/python2.7/site-packages/pandas/io/parsers.pyc in _read(filepath_or_buffer, kwds)
+    266
+    267     # Create the parser.
+--&gt; 268     parser = TextFileReader(filepath_or_buffer, **kwds)
+    269
+    270     if (nrows is not None) and (chunksize is not None):
+
+
+/home/ryan/anaconda2/lib/python2.7/site-packages/pandas/io/parsers.pyc in __init__(self, f, engine, **kwds)
+    581             self.options[&#39;has_index_names&#39;] = kwds[&#39;has_index_names&#39;]
+    582
+--&gt; 583         self._make_engine(self.engine)
+    584
+    585     def _get_options_with_defaults(self, engine):
+
+
+/home/ryan/anaconda2/lib/python2.7/site-packages/pandas/io/parsers.pyc in _make_engine(self, engine)
+    722     def _make_engine(self, engine=&#39;c&#39;):
+    723         if engine == &#39;c&#39;:
+--&gt; 724             self._engine = CParserWrapper(self.f, **self.options)
+    725         else:
+    726             if engine == &#39;python&#39;:
+
+
+/home/ryan/anaconda2/lib/python2.7/site-packages/pandas/io/parsers.pyc in __init__(self, src, **kwds)
+   1091         kwds[&#39;allow_leading_cols&#39;] = self.index_col is not False
+   1092
+-&gt; 1093         self._reader = _parser.TextReader(src, **kwds)
+   1094
+   1095         # XXX
+
+
+pandas/parser.pyx in pandas.parser.TextReader.__cinit__ (pandas/parser.c:3229)()
+
+
+pandas/parser.pyx in pandas.parser.TextReader._setup_parser_source (pandas/parser.c:6042)()
+
+
+IOError: File metaseq-example/data/GSM847565_SL2585.table does not exist
+</pre></div>
+</div>
 <p>Here&#8217;s what the first few entries look like:</p>
 <div class="code python highlight-python"><div class="highlight"><pre><span class="n">control</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>score</th>
-      <th>fpkm</th>
-    </tr>
-    <tr>
-      <th>id</th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>ENST00000456328</th>
-      <td>108.293111</td>
-      <td>1.118336</td>
-    </tr>
-    <tr>
-      <th>ENST00000515242</th>
-      <td>87.233019</td>
-      <td>0.830617</td>
-    </tr>
-    <tr>
-      <th>ENST00000518655</th>
-      <td>175.175609</td>
-      <td>2.367682</td>
-    </tr>
-    <tr>
-      <th>ENST00000473358</th>
-      <td>343.232679</td>
-      <td>9.795265</td>
-    </tr>
-    <tr>
-      <th>ENST00000408384</th>
-      <td>0.000000</td>
-      <td>0.000000</td>
-    </tr>
-  </tbody>
-</table>
-</div><div class="code python highlight-python"><div class="highlight"><pre><span class="n">knockdown</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre>---------------------------------------------------------------------------
+
+NameError                                 Traceback (most recent call last)
+
+&lt;ipython-input-7-cb6fe241701c&gt; in &lt;module&gt;()
+----&gt; 1 control.head()
+
+
+NameError: name &#39;control&#39; is not defined
 </pre></div>
 </div>
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>score</th>
-      <th>fpkm</th>
-    </tr>
-    <tr>
-      <th>id</th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>ENST00000456328</th>
-      <td>290.752543</td>
-      <td>6.503301</td>
-    </tr>
-    <tr>
-      <th>ENST00000515242</th>
-      <td>253.364453</td>
-      <td>4.790326</td>
-    </tr>
-    <tr>
-      <th>ENST00000518655</th>
-      <td>23.190962</td>
-      <td>0.174388</td>
-    </tr>
-    <tr>
-      <th>ENST00000473358</th>
-      <td>510.475081</td>
-      <td>33.409877</td>
-    </tr>
-    <tr>
-      <th>ENST00000408384</th>
-      <td>0.000000</td>
-      <td>0.000000</td>
-    </tr>
-  </tbody>
-</table>
-</div><p>These are two separate objects. It will be easier to work with the data
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">knockdown</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre>---------------------------------------------------------------------------
+
+NameError                                 Traceback (most recent call last)
+
+&lt;ipython-input-8-82d26392ff39&gt; in &lt;module&gt;()
+----&gt; 1 knockdown.head()
+
+
+NameError: name &#39;knockdown&#39; is not defined
+</pre></div>
+</div>
+<p>These are two separate objects. It will be easier to work with the data
 if we first combine the data into a single dataframe. For this we will
 use standard <cite>pandas</cite> routines:</p>
 <div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Merge control and knockdown into one DataFrame</span>
@@ -242,67 +236,38 @@ use standard <cite>pandas</cite> routines:</p>
 <span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>score_ct</th>
-      <th>fpkm_ct</th>
-      <th>score_kd</th>
-      <th>fpkm_kd</th>
-    </tr>
-    <tr>
-      <th>id</th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>ENST00000456328</th>
-      <td>108.293111</td>
-      <td>1.118336</td>
-      <td>290.752543</td>
-      <td>6.503301</td>
-    </tr>
-    <tr>
-      <th>ENST00000515242</th>
-      <td>87.233019</td>
-      <td>0.830617</td>
-      <td>253.364453</td>
-      <td>4.790326</td>
-    </tr>
-    <tr>
-      <th>ENST00000518655</th>
-      <td>175.175609</td>
-      <td>2.367682</td>
-      <td>23.190962</td>
-      <td>0.174388</td>
-    </tr>
-    <tr>
-      <th>ENST00000473358</th>
-      <td>343.232679</td>
-      <td>9.795265</td>
-      <td>510.475081</td>
-      <td>33.409877</td>
-    </tr>
-    <tr>
-      <th>ENST00000408384</th>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-    </tr>
-  </tbody>
-</table>
-</div><p>Now we&#8217;ll create a <a class="reference internal" href="autodocs/metaseq.results_table.ResultsTable.html#metaseq.results_table.ResultsTable" title="metaseq.results_table.ResultsTable"><code class="xref py py-class docutils literal"><span class="pre">metaseq.results_table.ResultsTable</span></code></a> out of
+<div class="highlight-python"><div class="highlight"><pre>---------------------------------------------------------------------------
+
+NameError                                 Traceback (most recent call last)
+
+&lt;ipython-input-9-bc8776811e0b&gt; in &lt;module&gt;()
+      1 # Merge control and knockdown into one DataFrame
+      2
+----&gt; 3 df = pandas.merge(control, knockdown, left_index=True, right_index=True, suffixes=(&#39;_ct&#39;, &#39;_kd&#39;))
+      4 df.head()
+
+
+NameError: name &#39;control&#39; is not defined
+</pre></div>
+</div>
+<p>Now we&#8217;ll create a <a class="reference internal" href="autodocs/metaseq.results_table.ResultsTable.html#metaseq.results_table.ResultsTable" title="metaseq.results_table.ResultsTable"><code class="xref py py-class docutils literal"><span class="pre">metaseq.results_table.ResultsTable</span></code></a> out of
 it:</p>
 <div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Create a ResultsTable</span>
 
 <span class="n">d</span> <span class="o">=</span> <span class="n">ResultsTable</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre>---------------------------------------------------------------------------
+
+NameError                                 Traceback (most recent call last)
+
+&lt;ipython-input-10-a69b74b13289&gt; in &lt;module&gt;()
+      1 # Create a ResultsTable
+      2
+----&gt; 3 d = ResultsTable(df)
+
+
+NameError: name &#39;df&#39; is not defined
 </pre></div>
 </div>
 <p><code class="xref py py-class docutils literal"><span class="pre">ResultsTable</span></code> objects are wrappers around <cite>pandas.DataFrame</cite>
@@ -313,7 +278,17 @@ You can always access the <cite>DataFrame</cite> with the <cite>.data</cite> att
 <span class="k">print</span> <span class="nb">type</span><span class="p">(</span><span class="n">d</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre>&lt;class &#39;metaseq.results_table.ResultsTable&#39;&gt; &lt;class &#39;pandas.core.frame.DataFrame&#39;&gt;
+<div class="highlight-python"><div class="highlight"><pre>---------------------------------------------------------------------------
+
+NameError                                 Traceback (most recent call last)
+
+&lt;ipython-input-11-6d9a91ff4b4a&gt; in &lt;module&gt;()
+      1 # DataFrame is always accessible via .data
+      2
+----&gt; 3 print type(d), type(d.data)
+
+
+NameError: name &#39;d&#39; is not defined
 </pre></div>
 </div>
 <p>The <cite>metaseq</cite> example data includes a GFF file of the genes on
@@ -324,7 +299,17 @@ chromosome 17 of the hg19 human genome assembly:</p>
 <span class="k">print</span> <span class="nb">open</span><span class="p">(</span><span class="n">gtf</span><span class="p">)</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre>chr17       protein_coding  exon    30898   31270   .       -       .        gene_id &quot;ENSG00000187939&quot;; transcript_id &quot;ENST00000343572&quot;; exon_number &quot;1&quot;; gene_name &quot;DOC2B&quot;; gene_biotype &quot;protein_coding&quot;; transcript_name &quot;DOC2B-201&quot;;
+<div class="highlight-python"><div class="highlight"><pre>---------------------------------------------------------------------------
+
+IOError                                   Traceback (most recent call last)
+
+&lt;ipython-input-12-00167a2dc9a7&gt; in &lt;module&gt;()
+      2
+      3 gtf = os.path.join(data_dir, &#39;Homo_sapiens.GRCh37.66_chr17.gtf&#39;)
+----&gt; 4 print open(gtf).readline()
+
+
+IOError: [Errno 2] No such file or directory: &#39;metaseq-example/data/Homo_sapiens.GRCh37.66_chr17.gtf&#39;
 </pre></div>
 </div>
 </div>
@@ -355,8 +340,27 @@ IDs, we&#8217;ll need to create a list of Ensembl transcript IDs on chromosome
 <span class="k">print</span> <span class="s">&quot;chr17 subset:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">d2</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre>original: 85699
-chr17 subset: 5708
+<div class="highlight-python"><div class="highlight"><pre>---------------------------------------------------------------------------
+
+ValueError                                Traceback (most recent call last)
+
+&lt;ipython-input-13-a612724925b8&gt; in &lt;module&gt;()
+      2
+      3 # Here we use pybedtools, but the list of names can come from anywhere
+----&gt; 4 names = list(set([i[&#39;transcript_id&#39;] for i in pybedtools.BedTool(gtf)]))
+      5 names.sort()
+      6
+
+
+/home/ryan/proj/pybedtools/pybedtools/bedtool.pyc in __init__(self, fn, from_string, remote)
+    448                 else:
+    449                     if not os.path.exists(fn):
+--&gt; 450                         raise ValueError(&#39;File &quot;%s&quot; does not exist&#39; % fn)
+    451                     self._isbam = isBAM(fn)
+    452
+
+
+ValueError: File &quot;metaseq-example/data/Homo_sapiens.GRCh37.66_chr17.gtf&quot; does not exist
 </pre></div>
 </div>
 </div>
@@ -373,7 +377,20 @@ later, but for now, let&#8217;s plot the FPKM of control vs knockdown:</p>
     <span class="n">y</span><span class="o">=</span><span class="s">&#39;fpkm_kd&#39;</span><span class="p">);</span>
 </pre></div>
 </div>
-<img alt="_images/example_session_2_30_0.png" src="_images/example_session_2_30_0.png" />
+<div class="highlight-python"><div class="highlight"><pre>---------------------------------------------------------------------------
+
+NameError                                 Traceback (most recent call last)
+
+&lt;ipython-input-14-c89bac4e95d5&gt; in &lt;module&gt;()
+      1 # Scatterplot of control vs knockdown FPKM
+----&gt; 2 d2.scatter(
+      3     x=&#39;fpkm_ct&#39;,
+      4     y=&#39;fpkm_kd&#39;);
+
+
+NameError: name &#39;d2&#39; is not defined
+</pre></div>
+</div>
 <p>If you&#8217;re following along in a terminal with interactive <cite>matplotlib</cite>
 plots, you can click on a point to see what gene it is. In this IPython
 Notebook (and the HTML documentation generated from it), we don&#8217;t have
@@ -384,18 +401,33 @@ to show, and then manually call the <cite>_default_callback</cite> like this:</p
 <span class="n">interesting_gene</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span class="s">&#39;ENST00000253788&#39;</span>
+<div class="highlight-python"><div class="highlight"><pre>---------------------------------------------------------------------------
+
+NameError                                 Traceback (most recent call last)
+
+&lt;ipython-input-15-b34f1e9e54d4&gt; in &lt;module&gt;()
+      1 # arbitrary gene for demonstration purposes
+----&gt; 2 interesting_gene = np.argmax(d2.fpkm_ct)
+      3 interesting_gene
+
+
+NameError: name &#39;d2&#39; is not defined
 </pre></div>
 </div>
 <div class="code python highlight-python"><div class="highlight"><pre><span class="c"># What happens if you were to click on the points in an interactive session</span>
 <span class="n">d2</span><span class="o">.</span><span class="n">_default_callback</span><span class="p">(</span><span class="n">interesting_gene</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre>score_ct    1047.517457
-fpkm_ct     1422.448488
-score_kd    1070.752317
-fpkm_kd     1671.190119
-Name: ENST00000253788, dtype: float64
+<div class="highlight-python"><div class="highlight"><pre>---------------------------------------------------------------------------
+
+NameError                                 Traceback (most recent call last)
+
+&lt;ipython-input-16-9540a839c0c0&gt; in &lt;module&gt;()
+      1 # What happens if you were to click on the points in an interactive session
+----&gt; 2 d2._default_callback(interesting_gene)
+
+
+NameError: name &#39;d2&#39; is not defined
 </pre></div>
 </div>
 <p>Clicking around interactively on the points is a great way to get a feel
@@ -408,10 +440,34 @@ do something like this:</p>
 <span class="n">d2</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;log_fpkm_ct&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">d2</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">fpkm_ct</span><span class="p">)</span>
 </pre></div>
 </div>
+<div class="highlight-python"><div class="highlight"><pre>---------------------------------------------------------------------------
+
+NameError                                 Traceback (most recent call last)
+
+&lt;ipython-input-17-fbc7024579d6&gt; in &lt;module&gt;()
+      1 # Adding extra variables gets verbose and cluttered
+----&gt; 2 d2.data[&#39;log_fpkm_ct&#39;] = np.log1p(d2.data.fpkm_ct)
+
+
+NameError: name &#39;d2&#39; is not defined
+</pre></div>
+</div>
 <p>But when playing around with different scales, this quickly pollutes the
 dataframe with extra columns. Let&#8217;s delete that column . . .</p>
 <div class="code python highlight-python"><div class="highlight"><pre><span class="c"># We&#39;ll use a better way, so delete it.</span>
 <span class="k">del</span> <span class="n">d2</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;log_fpkm_ct&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre>---------------------------------------------------------------------------
+
+NameError                                 Traceback (most recent call last)
+
+&lt;ipython-input-18-4d210761d8a2&gt; in &lt;module&gt;()
+      1 # We&#39;ll use a better way, so delete it.
+----&gt; 2 del d2.data[&#39;log_fpkm_ct&#39;]
+
+
+NameError: name &#39;d2&#39; is not defined
 </pre></div>
 </div>
 <p>. . . and show another way.</p>
@@ -440,7 +496,21 @@ start of new stuff to pay attention to:</p>
     <span class="p">);</span>
 </pre></div>
 </div>
-<img alt="_images/example_session_2_39_0.png" src="_images/example_session_2_39_0.png" />
+<div class="highlight-python"><div class="highlight"><pre>---------------------------------------------------------------------------
+
+NameError                                 Traceback (most recent call last)
+
+&lt;ipython-input-19-a373bfdb1f0a&gt; in &lt;module&gt;()
+      4     return np.log2(x + 1)
+      5
+----&gt; 6 d2.scatter(
+      7     x=&#39;fpkm_ct&#39;,
+      8     y=&#39;fpkm_kd&#39;,
+
+
+NameError: name &#39;d2&#39; is not defined
+</pre></div>
+</div>
 <p>Of course, we can specify axes labels either directly in the method call
 with <cite>xlab</cite> or <cite>ylab</cite>, or after the fact using standard
 <cite>matplotlib</cite> functionality:</p>
@@ -461,7 +531,21 @@ with <cite>xlab</cite> or <cite>ylab</cite>, or after the fact using standard
 <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&#39;Knockdown, log2(FPKM + 1)&#39;</span><span class="p">);</span>
 </pre></div>
 </div>
-<img alt="_images/example_session_2_41_0.png" src="_images/example_session_2_41_0.png" />
+<div class="highlight-python"><div class="highlight"><pre>---------------------------------------------------------------------------
+
+NameError                                 Traceback (most recent call last)
+
+&lt;ipython-input-20-b07bf7e2c24d&gt; in &lt;module&gt;()
+      1 # Manually specify x and y labels
+      2
+----&gt; 3 ax = d2.scatter(
+      4     x=&#39;fpkm_ct&#39;,
+      5     y=&#39;fpkm_kd&#39;,
+
+
+NameError: name &#39;d2&#39; is not defined
+</pre></div>
+</div>
 <p>Let&#8217;s highlight some genes. How about those that change expression &gt; 2
 fold in upon knockdown in red, and &lt; 2 fold in blue? While we&#8217;re at it,
 let&#8217;s add another variable to the dataframe.</p>
@@ -470,6 +554,21 @@ let&#8217;s add another variable to the dataframe.</p>
 <span class="n">d2</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;foldchange&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">d2</span><span class="o">.</span><span class="n">fpkm_kd</span> <span class="o">/</span> <span class="n">d2</span><span class="o">.</span><span class="n">fpkm_ct</span>
 <span class="n">up</span> <span class="o">=</span> <span class="p">(</span><span class="n">d2</span><span class="o">.</span><span class="n">foldchange</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
 <span class="n">dn</span> <span class="o">=</span> <span class="p">(</span><span class="n">d2</span><span class="o">.</span><span class="n">foldchange</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre>---------------------------------------------------------------------------
+
+NameError                                 Traceback (most recent call last)
+
+&lt;ipython-input-21-caca8583918e&gt; in &lt;module&gt;()
+      1 # Crude differential expression detection....
+      2
+----&gt; 3 d2.data[&#39;foldchange&#39;] = d2.fpkm_kd / d2.fpkm_ct
+      4 up = (d2.foldchange &gt; 2).values
+      5 dn = (d2.foldchange &lt; 0.5).values
+
+
+NameError: name &#39;d2&#39; is not defined
 </pre></div>
 </div>
 <p>The way to highlight genes is with the <cite>genes_to_highlight</cite> argument.
@@ -501,7 +600,21 @@ a style dictionary. This dictionary is passed directly to
     <span class="p">);</span>
 </pre></div>
 </div>
-<img alt="_images/example_session_2_47_0.png" src="_images/example_session_2_47_0.png" />
+<div class="highlight-python"><div class="highlight"><pre>---------------------------------------------------------------------------
+
+NameError                                 Traceback (most recent call last)
+
+&lt;ipython-input-22-d6229169fe96&gt; in &lt;module&gt;()
+      2 # in different colors
+      3
+----&gt; 4 d2.scatter(
+      5     x=&#39;fpkm_ct&#39;,
+      6     y=&#39;fpkm_kd&#39;,
+
+
+NameError: name &#39;d2&#39; is not defined
+</pre></div>
+</div>
 <p>We can add a 1-to-1 line for reference:</p>
 <div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Add a 1:1 line</span>
 
@@ -520,7 +633,21 @@ a style dictionary. This dictionary is passed directly to
     <span class="p">);</span>
 </pre></div>
 </div>
-<img alt="_images/example_session_2_49_0.png" src="_images/example_session_2_49_0.png" />
+<div class="highlight-python"><div class="highlight"><pre>---------------------------------------------------------------------------
+
+NameError                                 Traceback (most recent call last)
+
+&lt;ipython-input-23-84f12c18c744&gt; in &lt;module&gt;()
+      1 # Add a 1:1 line
+      2
+----&gt; 3 d2.scatter(
+      4     x=&#39;fpkm_ct&#39;,
+      5     y=&#39;fpkm_kd&#39;,
+
+
+NameError: name &#39;d2&#39; is not defined
+</pre></div>
+</div>
 <p>Let&#8217;s change the plot style a bit. The <cite>general_kwargs</cite> argument
 determines the base style of all points. By default, it&#8217;s
 <cite>dict(color=&#8217;k&#8217;, alpha=0.2, linewidths=0)</cite>. Let&#8217;s change the default
@@ -545,7 +672,21 @@ adjusting their alpha:</p>
     <span class="p">);</span>
 </pre></div>
 </div>
-<img alt="_images/example_session_2_51_0.png" src="_images/example_session_2_51_0.png" />
+<div class="highlight-python"><div class="highlight"><pre>---------------------------------------------------------------------------
+
+NameError                                 Traceback (most recent call last)
+
+&lt;ipython-input-24-98c401c2913c&gt; in &lt;module&gt;()
+      2 # default gray small dots; make changed genes stand out more
+      3
+----&gt; 4 d2.scatter(
+      5     x=&#39;fpkm_ct&#39;,
+      6     y=&#39;fpkm_kd&#39;,
+
+
+NameError: name &#39;d2&#39; is not defined
+</pre></div>
+</div>
 </div>
 <div class="section" id="marginal-histograms">
 <h2>Marginal histograms<a class="headerlink" href="#marginal-histograms" title="Permalink to this headline">¶</a></h2>
@@ -572,7 +713,21 @@ everything:</p>
     <span class="p">);</span>
 </pre></div>
 </div>
-<img alt="_images/example_session_2_53_0.png" src="_images/example_session_2_53_0.png" />
+<div class="highlight-python"><div class="highlight"><pre>---------------------------------------------------------------------------
+
+NameError                                 Traceback (most recent call last)
+
+&lt;ipython-input-25-d1178199cd8c&gt; in &lt;module&gt;()
+      1 # Add marginal histograms
+      2
+----&gt; 3 d2.scatter(
+      4     x=&#39;fpkm_ct&#39;,
+      5     y=&#39;fpkm_kd&#39;,
+
+
+NameError: name &#39;d2&#39; is not defined
+</pre></div>
+</div>
 <p>As a contrived example to illustrate the flexibility for plotting
 marginal histograms, lets:</p>
 <ul class="simple">
@@ -624,7 +779,21 @@ marginal histograms, lets:</p>
 <span class="p">);</span>
 </pre></div>
 </div>
-<img alt="_images/example_session_2_55_0.png" src="_images/example_session_2_55_0.png" />
+<div class="highlight-python"><div class="highlight"><pre>---------------------------------------------------------------------------
+
+NameError                                 Traceback (most recent call last)
+
+&lt;ipython-input-26-45d629b943cb&gt; in &lt;module&gt;()
+      2 # 50 bins, don&#39;t show unchanged genes, and remove outlines
+      3
+----&gt; 4 d2.scatter(
+      5     x=&#39;fpkm_ct&#39;,
+      6     y=&#39;fpkm_kd&#39;,
+
+
+NameError: name &#39;d2&#39; is not defined
+</pre></div>
+</div>
 <p>Let&#8217;s clean up the plot by adding a legend (using <cite>label</cite> in
 <cite>genes_to_highlight</cite>), and adding it outside the axes. While we&#8217;re at
 it we&#8217;ll add a title, too.</p>
@@ -701,7 +870,21 @@ nicely match the order of the histograms.</p>
 <span class="n">leg</span><span class="o">.</span><span class="n">get_title</span><span class="p">()</span><span class="o">.</span><span class="n">set_weight</span><span class="p">(</span><span class="s">&#39;bold&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="_images/example_session_2_57_0.png" src="_images/example_session_2_57_0.png" />
+<div class="highlight-python"><div class="highlight"><pre>---------------------------------------------------------------------------
+
+NameError                                 Traceback (most recent call last)
+
+&lt;ipython-input-27-6e76d697877d&gt; in &lt;module&gt;()
+      1 matplotlib.rcParams[&#39;font.family&#39;] = &quot;Arial&quot;
+----&gt; 2 ax = d2.scatter(
+      3     x=&#39;fpkm_ct&#39;,
+      4     y=&#39;fpkm_kd&#39;,
+      5     xfunc=log2p1,
+
+
+NameError: name &#39;d2&#39; is not defined
+</pre></div>
+</div>
 <p>We&#8217;d also like to add a title. But how to access the top-most axes?</p>
 <p>Whenever the <cite>scatter</cite> method is called, the <cite>MarginalHistograms</cite>
 object created as a by-product of the plotting is stored in the
@@ -723,7 +906,21 @@ histograms axes as well.</p>
 <span class="n">fig</span>
 </pre></div>
 </div>
-<img alt="_images/example_session_2_59_0.png" src="_images/example_session_2_59_0.png" />
+<div class="highlight-python"><div class="highlight"><pre>---------------------------------------------------------------------------
+
+NameError                                 Traceback (most recent call last)
+
+&lt;ipython-input-28-b6607291bc90&gt; in &lt;module&gt;()
+      1
+      2 # Another trick: every time `d2.scatter` is called,
+----&gt; 3 top_axes = d2.marginal.top_hists[-1]
+      4 top_axes.set_title(&#39;Differential expression, ATF3 knockdown&#39;);
+      5
+
+
+NameError: name &#39;d2&#39; is not defined
+</pre></div>
+</div>
 </div>
 </div>
 
