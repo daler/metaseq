@@ -9,6 +9,7 @@ import multiprocessing
 from metaseq.array_helpers import ArgumentError
 import numpy as np
 from nose.tools import assert_raises
+from nose.plugins.skip import SkipTest
 gs = {}
 for kind in ['bed', 'bam', 'bigbed', 'bigwig']:
     gs[kind] = metaseq.genomic_signal(metaseq.example_filename('gdc.%s' % kind), kind)
@@ -24,7 +25,10 @@ def test_tointerval():
 def test_local_count():
 
     def check(kind, coord, expected, stranded):
-        result = gs[kind].local_count(coord, stranded=stranded)
+        try:
+            result = gs[kind].local_count(coord, stranded=stranded)
+        except NotImplementedError:
+            raise SkipTest("Incompatible bx-python version for bigBed")
         assert result == expected, (kind, coord, result)
 
     for kind in ['bam', 'bigbed', 'bed']:
@@ -42,7 +46,10 @@ def test_local_count():
 
 def test_local_coverage_stranded():
     def check(kind, coord, expected):
-        result = gs[kind].local_coverage(coord)
+        try:
+            result = gs[kind].local_coverage(coord)
+        except NotImplementedError:
+            raise SkipTest("Incompatible bx-python version for bigBed")
         assert np.all(result[0] == expected[0]) and np.all(result[1] == expected[1]), (kind, coord, result)
 
     for kind in ['bam', 'bigbed', 'bed', 'bigwig']:
@@ -68,7 +75,10 @@ def test_local_coverage_stranded():
 
 def test_local_coverage_shifted():
     def check(kind, coord, shift_width, expected):
-        result = gs[kind].local_coverage(coord, shift_width=shift_width)
+        try:
+            result = gs[kind].local_coverage(coord, shift_width=shift_width)
+        except NotImplementedError:
+            raise SkipTest("Incompatible bx-python version for bigBed")
         assert np.all(result[0] == expected[0]) and np.all(result[1] == expected[1]), (kind, coord, result)
 
     for kind in ['bam', 'bigbed', 'bed']:
@@ -106,7 +116,10 @@ def test_local_coverage_read_strand():
     excludes bigwig since strand doesn't make sense for that format.
     """
     def check(kind, coord, read_strand, expected):
-        result = gs[kind].local_coverage(coord, read_strand=read_strand)
+        try:
+            result = gs[kind].local_coverage(coord, read_strand=read_strand)
+        except NotImplementedError:
+            raise SkipTest("Incompatible bx-python version for bigBed")
         assert np.all(result[0] == expected[0]) and np.all(result[1] == expected[1]), (kind, coord, result)
 
     for kind in ['bam', 'bigbed', 'bed']:
@@ -129,7 +142,10 @@ def test_local_coverage_read_strand():
 
 def test_local_coverage_fragment_size():
     def check(kind, coord, fragment_size, expected):
-        result = gs[kind].local_coverage(coord, fragment_size=fragment_size)
+        try:
+            result = gs[kind].local_coverage(coord, fragment_size=fragment_size)
+        except NotImplementedError:
+            raise SkipTest("Incompatible bx-python version for bigBed")
         assert np.all(result[0] == expected[0]) and np.all(result[1] == expected[1]), (kind, coord, result)
 
     for kind in ['bam', 'bigbed', 'bed']:
@@ -160,7 +176,10 @@ def test_local_coverage_fragment_size():
 
 def test_local_coverage_score():
     def check(kind, coord, expected):
-        result = gs[kind].local_coverage(coord, use_score=True)
+        try:
+            result = gs[kind].local_coverage(coord, use_score=True)
+        except NotImplementedError:
+            raise SkipTest("Incompatible bx-python version for bigBed")
         assert np.all(result[0] == expected[0]) and np.all(result[1] == expected[1]), (kind, coord, result)
 
     for kind in ['bigbed', 'bed']:
@@ -188,7 +207,10 @@ def test_local_coverage_full():
     the full un-binned data.
     """
     def check(kind, coord, processes, expected):
-        result = gs[kind].local_coverage(coord, processes=processes)
+        try:
+            result = gs[kind].local_coverage(coord, processes=processes)
+        except NotImplementedError:
+            raise SkipTest("Incompatible bx-python version for bigBed")
         assert np.all(result[0] == expected[0]) and np.all(result[1] == expected[1]), (kind, coord, result)
 
     for kind in ['bam', 'bigbed', 'bed', 'bigwig']:
@@ -227,7 +249,10 @@ def test_local_coverage_binned():
         if kind == 'bigwig':
             result = gs[kind].local_coverage(coord, bins=8, method='get_as_array', processes=processes)
         else:
-            result = gs[kind].local_coverage(coord, bins=8, processes=processes)
+            try:
+                result = gs[kind].local_coverage(coord, bins=8, processes=processes)
+            except NotImplementedError:
+                raise SkipTest("Incompatible bx-python version for bigBed")
         try:
             assert np.allclose(result[0], expected[0]) and np.allclose(result[1], expected[1])
         except:
@@ -258,7 +283,10 @@ def test_array_binned():
         if kind == 'bigwig':
             result = gs[kind].array(coord, bins=8, method='get_as_array', processes=processes)
         else:
-            result = gs[kind].array(coord, bins=8, processes=processes)
+            try:
+                result = gs[kind].array(coord, bins=8, processes=processes)
+            except NotImplementedError:
+                raise SkipTest("Incompatible bx-python version for bigBed")
         try:
             assert np.allclose(result, expected)
         except:
@@ -289,7 +317,10 @@ def test_array_binned_preserve_total():
             assert_raises(ArgumentError, gs[kind].array, method='get_as_array', **kwargs)
             return
         else:
-            result = gs[kind].array(**kwargs)
+            try:
+                result = gs[kind].array(**kwargs)
+            except NotImplementedError:
+                raise SkipTest("Incompatible bx-python version for bigBed")
         try:
             assert np.allclose(result, expected)
         except:
@@ -344,7 +375,10 @@ def test_array_ragged():
         if kind == 'bigwig':
             result = gs[kind].array(coord, method='get_as_array', ragged=True, processes=processes)
         else:
-            result = gs[kind].array(coord, processes=processes, ragged=True)
+            try:
+                result = gs[kind].array(coord, processes=processes, ragged=True)
+            except NotImplementedError:
+                raise SkipTest("Incompatible bx-python version for bigBed")
         try:
             if isinstance(result, list):
                 for i, j in zip(result, expected):
@@ -457,7 +491,10 @@ def test_local_coverage_kwarg_errors():
 
 def test_local_coverage_full_multifeature():
     def check(kind, coord, expected):
-        result = gs[kind].local_coverage(coord)
+        try:
+            result = gs[kind].local_coverage(coord)
+        except NotImplementedError:
+            raise SkipTest("Incompatible bx-python version for bigBed")
         assert np.all(result[0] == expected[0]) and np.all(result[1] == expected[1]), (kind, coord, result)
 
     for kind in ['bam', 'bigbed', 'bed', 'bigwig']:

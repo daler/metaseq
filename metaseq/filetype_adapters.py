@@ -14,12 +14,14 @@ over in __getitem__
 """
 from bx.bbi.bigbed_file import BigBedFile
 from bx.bbi.bigwig_file import BigWigFile
+from bx.intervals.io import StrandFormatError
 import numpy as np
 import subprocess
 import pysam
 import pybedtools
 import os
 import sys
+from textwrap import dedent
 
 strand_lookup = {16: '-', 0: '+'}
 
@@ -107,7 +109,21 @@ class BigBedAdapter(BaseAdapter):
         chrom = key.chrom
         start = key.start
         stop = key.end
-        bx_intervals = self.fileobj.get(chrom, start, stop)
+        try:
+            bx_intervals = self.fileobj.get(chrom, start, stop)
+        except StrandFormatError:
+            raise NotImplementedError(dedent(
+                """
+                It appears you have a version of bx-python where bigBed files
+                are temporarily unsupported due to recent changes in the
+                bx-python dependency. In the meantime, please convert bigBed to
+                BAM like this:
+
+                    bigBedToBed {0} tmp.bed
+                    bedtools bedtobam -i tmp.bed > {0}.bam
+
+                and create a genomic signal object using this {0}.bam file.
+                """.format(self.fn)))
         if bx_intervals is None:
             raise StopIteration
         for i in bx_intervals:
