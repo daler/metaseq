@@ -4,4 +4,4 @@ services:
 before_install:
     - docker pull daler/ubuntu-test
 script:
-    - docker run -v `pwd`:/tmp/metaseq daler/ubuntu-test /tmp/metaseq/docker/travis-run.sh
+    - docker run -v `pwd`:/metaseq daler/ubuntu-test /metaseq/docker/travis-run.sh
