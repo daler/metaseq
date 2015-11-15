@@ -1,0 +1,23 @@
+metaseq._genomic_signal.BamSignal
+=================================
+
+.. currentmodule:: metaseq._genomic_signal
+
+.. autoclass:: BamSignal
+    :inherited-members:
+    :show-inheritance:
+    :members:
+
+    
+    .. rubric:: Methods
+    
+    .. autosummary::
+    
+        ~BamSignal.__init__
+        ~BamSignal.array
+        ~BamSignal.genome
+        ~BamSignal.local_count
+        ~BamSignal.local_coverage
+        ~BamSignal.mapped_read_count
+    
+    .. automethod:: __init__ 

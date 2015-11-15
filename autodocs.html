@@ -1,0 +1,494 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>API docs &mdash; metaseq 0.5.6 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.5.6',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/searchtools.js"></script>
+    <link rel="top" title="metaseq 0.5.6 documentation" href="index.html" />
+    <link rel="next" title="metaseq._genomic_signal.genomic_signal" href="autodocs/metaseq._genomic_signal.genomic_signal.html" />
+    <link rel="prev" title="Example 2: Differential expression scatterplots" href="example_session_2.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="autodocs/metaseq._genomic_signal.genomic_signal.html" title="metaseq._genomic_signal.genomic_signal"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="example_session_2.html" title="Example 2: Differential expression scatterplots"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">metaseq 0.5.6 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="api-docs">
+<h1><a class="toc-backref" href="#id1">API docs</a><a class="headerlink" href="#api-docs" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#api-docs" id="id1">API docs</a><ul>
+<li><a class="reference internal" href="#module-metaseq._genomic_signal" id="id2"><code class="xref py py-mod docutils literal"><span class="pre">genomic_signal</span></code></a></li>
+<li><a class="reference internal" href="#module-metaseq.results_table" id="id3"><a class="reference internal" href="#module-metaseq.results_table" title="metaseq.results_table"><code class="xref py py-mod docutils literal"><span class="pre">metaseq.results_table</span></code></a></a></li>
+<li><a class="reference internal" href="#module-metaseq.integration" id="id4"><a class="reference internal" href="#module-metaseq.integration" title="metaseq.integration"><code class="xref py py-mod docutils literal"><span class="pre">metaseq.integration</span></code></a></a></li>
+<li><a class="reference internal" href="#module-metaseq.plotutils" id="id5"><a class="reference internal" href="#module-metaseq.plotutils" title="metaseq.plotutils"><code class="xref py py-mod docutils literal"><span class="pre">metaseq.plotutils</span></code></a></a></li>
+<li><a class="reference internal" href="#module-metaseq.colormap_adjust" id="id6"><a class="reference internal" href="#module-metaseq.colormap_adjust" title="metaseq.colormap_adjust"><code class="xref py py-mod docutils literal"><span class="pre">metaseq.colormap_adjust</span></code></a></a></li>
+<li><a class="reference internal" href="#module-metaseq.minibrowser" id="id7"><a class="reference internal" href="#module-metaseq.minibrowser" title="metaseq.minibrowser"><code class="xref py py-mod docutils literal"><span class="pre">metaseq.minibrowser</span></code></a></a></li>
+<li><a class="reference internal" href="#module-metaseq.filetype_adapters" id="id8"><a class="reference internal" href="#module-metaseq.filetype_adapters" title="metaseq.filetype_adapters"><code class="xref py py-mod docutils literal"><span class="pre">metaseq.filetype_adapters</span></code></a></a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="module-metaseq._genomic_signal">
+<span id="genomic-signal"></span><h2><a class="toc-backref" href="#id2"><code class="xref py py-mod docutils literal"><span class="pre">genomic_signal</span></code></a><a class="headerlink" href="#module-metaseq._genomic_signal" title="Permalink to this headline">¶</a></h2>
+<p>The classes in this module enable random access to a variety of file formats
+(BAM, bigWig, bigBed, BED) using a uniform syntax, and allow you to compute
+coverage across many features in parallel or just a single feature.</p>
+<p>Using classes in the <a class="reference internal" href="#module-metaseq.integration" title="metaseq.integration"><code class="xref py py-mod docutils literal"><span class="pre">metaseq.integration</span></code></a> and <a class="reference internal" href="#module-metaseq.minibrowser" title="metaseq.minibrowser"><code class="xref py py-mod docutils literal"><span class="pre">metaseq.minibrowser</span></code></a>
+modules, you can connect these objects to matplotlib figures that show a window
+into the data, making exploration easy and interactive.</p>
+<p>Generally, the <a class="reference internal" href="autodocs/metaseq._genomic_signal.genomic_signal.html#metaseq._genomic_signal.genomic_signal" title="metaseq._genomic_signal.genomic_signal"><code class="xref py py-func docutils literal"><span class="pre">genomic_signal()</span></code></a> function is all you need &#8211; just provide
+a filename and the format and it will take care of the rest, returning
+a genomic signal of the proper type.</p>
+<p>Adding support for a new format is straightforward:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Write a new adapter for the format in <a class="reference internal" href="#module-metaseq.filetype_adapters" title="metaseq.filetype_adapters"><code class="xref py py-mod docutils literal"><span class="pre">metaseq.filetype_adapters</span></code></a></li>
+<li>Subclass one of the existing classes below, setting the <cite>adapter</cite>
+attribute to be an instance of this new adapter</li>
+<li>Add the new class to the <cite>_registry</cite> dictionary to enable support for the
+file format.</li>
+</ul>
+</div></blockquote>
+<p>Note that to support parallel processing and to avoid repeating code, these
+classes delegate their local_coverage methods to the
+<code class="xref py py-func docutils literal"><span class="pre">metaseq.array_helpers._local_coverage()</span></code> function.</p>
+<hr class="docutils" />
+<p class="rubric">Functions:</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="autodocs/metaseq._genomic_signal.genomic_signal.html#metaseq._genomic_signal.genomic_signal" title="metaseq._genomic_signal.genomic_signal"><code class="xref py py-obj docutils literal"><span class="pre">metaseq._genomic_signal.genomic_signal</span></code></a></td>
+<td>Factory function that makes the right class for the file format.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="autodocs/metaseq._genomic_signal.supported_formats.html#metaseq._genomic_signal.supported_formats" title="metaseq._genomic_signal.supported_formats"><code class="xref py py-obj docutils literal"><span class="pre">metaseq._genomic_signal.supported_formats</span></code></a></td>
+<td>Returns list of formats supported by metaseq&#8217;s genomic signal objects.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Classes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="autodocs/metaseq._genomic_signal.BaseSignal.html#metaseq._genomic_signal.BaseSignal" title="metaseq._genomic_signal.BaseSignal"><code class="xref py py-obj docutils literal"><span class="pre">metaseq._genomic_signal.BaseSignal</span></code></a></td>
+<td>Base class to represent objects from which genomic signal can be calculated/extracted.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="autodocs/metaseq._genomic_signal.IntervalSignal.html#metaseq._genomic_signal.IntervalSignal" title="metaseq._genomic_signal.IntervalSignal"><code class="xref py py-obj docutils literal"><span class="pre">metaseq._genomic_signal.IntervalSignal</span></code></a></td>
+<td>Abstract class for bed, BAM and bigBed files.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="autodocs/metaseq._genomic_signal.BigWigSignal.html#metaseq._genomic_signal.BigWigSignal" title="metaseq._genomic_signal.BigWigSignal"><code class="xref py py-obj docutils literal"><span class="pre">metaseq._genomic_signal.BigWigSignal</span></code></a></td>
+<td>Class for operating on bigWig files</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="autodocs/metaseq._genomic_signal.BamSignal.html#metaseq._genomic_signal.BamSignal" title="metaseq._genomic_signal.BamSignal"><code class="xref py py-obj docutils literal"><span class="pre">metaseq._genomic_signal.BamSignal</span></code></a></td>
+<td>Class for operating on BAM files.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="autodocs/metaseq._genomic_signal.BigBedSignal.html#metaseq._genomic_signal.BigBedSignal" title="metaseq._genomic_signal.BigBedSignal"><code class="xref py py-obj docutils literal"><span class="pre">metaseq._genomic_signal.BigBedSignal</span></code></a></td>
+<td>Class for operating on bigBed files.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="autodocs/metaseq._genomic_signal.BedSignal.html#metaseq._genomic_signal.BedSignal" title="metaseq._genomic_signal.BedSignal"><code class="xref py py-obj docutils literal"><span class="pre">metaseq._genomic_signal.BedSignal</span></code></a></td>
+<td>Class for operating on BED files.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr class="docutils" />
+<div class="section" id="module-metaseq.results_table">
+<span id="metaseq-results-table"></span><h2><a class="toc-backref" href="#id3"><a class="reference internal" href="#module-metaseq.results_table" title="metaseq.results_table"><code class="xref py py-mod docutils literal"><span class="pre">metaseq.results_table</span></code></a></a><a class="headerlink" href="#module-metaseq.results_table" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Classes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="autodocs/metaseq.results_table.ResultsTable.html#metaseq.results_table.ResultsTable" title="metaseq.results_table.ResultsTable"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.results_table.ResultsTable</span></code></a></td>
+<td>Wrapper around a pandas.DataFrame that adds additional functionality.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="autodocs/metaseq.results_table.DESeqResults.html#metaseq.results_table.DESeqResults" title="metaseq.results_table.DESeqResults"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.results_table.DESeqResults</span></code></a></td>
+<td>Class for working with results from DESeq.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="autodocs/metaseq.results_table.DESeq2Results.html#metaseq.results_table.DESeq2Results" title="metaseq.results_table.DESeq2Results"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.results_table.DESeq2Results</span></code></a></td>
+<td>Class for working with results from DESeq2.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="autodocs/metaseq.results_table.EdgeRResults.html#metaseq.results_table.EdgeRResults" title="metaseq.results_table.EdgeRResults"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.results_table.EdgeRResults</span></code></a></td>
+<td>Class for working with results from edgeR.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="autodocs/metaseq.results_table.LazyDict.html#metaseq.results_table.LazyDict" title="metaseq.results_table.LazyDict"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.results_table.LazyDict</span></code></a></td>
+<td>Dictionary-like object that lazily-loads ResultsTable objects.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr class="docutils" />
+<div class="section" id="module-metaseq.integration">
+<span id="metaseq-integration"></span><h2><a class="toc-backref" href="#id4"><a class="reference internal" href="#module-metaseq.integration" title="metaseq.integration"><code class="xref py py-mod docutils literal"><span class="pre">metaseq.integration</span></code></a></a><a class="headerlink" href="#module-metaseq.integration" title="Permalink to this headline">¶</a></h2>
+<p>Module that ties together various parts of <code class="xref py py-mod docutils literal"><span class="pre">metaseq</span></code></p>
+<hr class="docutils" />
+<p class="rubric">Classes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="autodocs/metaseq.integration.chipseq.Chipseq.html#metaseq.integration.chipseq.Chipseq" title="metaseq.integration.chipseq.Chipseq"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.integration.chipseq.Chipseq</span></code></a></td>
+<td>Class for visualizing and interactively exploring ChIP-seq data.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Functions</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="autodocs/metaseq.integration.signal_comparison.compare.html#metaseq.integration.signal_comparison.compare" title="metaseq.integration.signal_comparison.compare"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.integration.signal_comparison.compare</span></code></a></td>
+<td>Compares two genomic signal objects and outputs results as a bedGraph file.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr class="docutils" />
+<div class="section" id="module-metaseq.plotutils">
+<span id="metaseq-plotutils"></span><h2><a class="toc-backref" href="#id5"><a class="reference internal" href="#module-metaseq.plotutils" title="metaseq.plotutils"><code class="xref py py-mod docutils literal"><span class="pre">metaseq.plotutils</span></code></a></a><a class="headerlink" href="#module-metaseq.plotutils" title="Permalink to this headline">¶</a></h2>
+<p>Module with handy utilities for plotting genomic signal</p>
+<p class="rubric">Functions</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="autodocs/metaseq.plotutils.imshow.html#metaseq.plotutils.imshow" title="metaseq.plotutils.imshow"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.plotutils.imshow</span></code></a></td>
+<td>Do-it-all function to help with plotting heatmaps</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="autodocs/metaseq.plotutils.add_labels_to_subsets.html#metaseq.plotutils.add_labels_to_subsets" title="metaseq.plotutils.add_labels_to_subsets"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.plotutils.add_labels_to_subsets</span></code></a></td>
+<td>Helper function for adding labels to subsets within a heatmap.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="autodocs/metaseq.plotutils.clustered_sortind.html#metaseq.plotutils.clustered_sortind" title="metaseq.plotutils.clustered_sortind"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.plotutils.clustered_sortind</span></code></a></td>
+<td>Uses MiniBatch k-means clustering to cluster matrix into groups.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="autodocs/metaseq.plotutils.calculate_limits.html#metaseq.plotutils.calculate_limits" title="metaseq.plotutils.calculate_limits"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.plotutils.calculate_limits</span></code></a></td>
+<td>Calculate limits for a group of arrays in a flexible manner.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="autodocs/metaseq.plotutils.ci_plot.html#metaseq.plotutils.ci_plot" title="metaseq.plotutils.ci_plot"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.plotutils.ci_plot</span></code></a></td>
+<td>Plots the mean and 95% ci for the given array on the given axes</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="autodocs/metaseq.plotutils.ci.html#metaseq.plotutils.ci" title="metaseq.plotutils.ci"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.plotutils.ci</span></code></a></td>
+<td>Column-wise confidence interval.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="autodocs/metaseq.plotutils.tip_zscores.html#metaseq.plotutils.tip_zscores" title="metaseq.plotutils.tip_zscores"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.plotutils.tip_zscores</span></code></a></td>
+<td>Calculates the &#8220;target identification from profiles&#8221; (TIP) zscores from Cheng et al.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="autodocs/metaseq.plotutils.tip_fdr.html#metaseq.plotutils.tip_fdr" title="metaseq.plotutils.tip_fdr"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.plotutils.tip_fdr</span></code></a></td>
+<td>Returns adjusted TIP p-values for a particular <cite>alpha</cite>.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="autodocs/metaseq.plotutils.nice_log.html#metaseq.plotutils.nice_log" title="metaseq.plotutils.nice_log"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.plotutils.nice_log</span></code></a></td>
+<td>Uses a log scale but with negative numbers.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="autodocs/metaseq.plotutils.prepare_logged.html#metaseq.plotutils.prepare_logged" title="metaseq.plotutils.prepare_logged"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.plotutils.prepare_logged</span></code></a></td>
+<td>Transform <cite>x</cite> and <cite>y</cite> to a log scale while dealing with zeros.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="autodocs/metaseq.plotutils.matrix_and_line_shell.html#metaseq.plotutils.matrix_and_line_shell" title="metaseq.plotutils.matrix_and_line_shell"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.plotutils.matrix_and_line_shell</span></code></a></td>
+<td>Helper function to construct an empty figure that has space for a matrix, a summary line plot directly below it, a colorbar axis, and an optional &#8220;strip&#8221; axis that parallels the matrix (and shares its y-axis) where data can be added to create callbacks.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="autodocs/metaseq.plotutils.input_ip_plots.html#metaseq.plotutils.input_ip_plots" title="metaseq.plotutils.input_ip_plots"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.plotutils.input_ip_plots</span></code></a></td>
+<td>All-in-one plotting function to make a 5-panel figure.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Classes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="autodocs/metaseq.plotutils.MarginalHistScatter.html#metaseq.plotutils.MarginalHistScatter" title="metaseq.plotutils.MarginalHistScatter"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.plotutils.MarginalHistScatter</span></code></a></td>
+<td>Class to enable incremental appending of scatterplots, each of which generate additional marginal histograms.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr class="docutils" />
+<div class="section" id="module-metaseq.colormap_adjust">
+<span id="metaseq-colormap-adjust"></span><h2><a class="toc-backref" href="#id6"><a class="reference internal" href="#module-metaseq.colormap_adjust" title="metaseq.colormap_adjust"><code class="xref py py-mod docutils literal"><span class="pre">metaseq.colormap_adjust</span></code></a></a><a class="headerlink" href="#module-metaseq.colormap_adjust" title="Permalink to this headline">¶</a></h2>
+<p>Module to handle custom colormaps.</p>
+<p><cite>cmap_powerlaw_adjust</cite>, <cite>cmap_center_adjust</cite>, and
+<cite>cmap_center_adjust</cite> are from
+<a class="reference external" href="https://sites.google.com/site/theodoregoetz/notes/matplotlib_colormapadjust">https://sites.google.com/site/theodoregoetz/notes/matplotlib_colormapadjust</a></p>
+<p class="rubric">Functions</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="autodocs/metaseq.colormap_adjust.color_test.html#metaseq.colormap_adjust.color_test" title="metaseq.colormap_adjust.color_test"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.colormap_adjust.color_test</span></code></a></td>
+<td>Figure filled in with <cite>color</cite>; useful for troubleshooting or experimenting</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="autodocs/metaseq.colormap_adjust.smart_colormap.html#metaseq.colormap_adjust.smart_colormap" title="metaseq.colormap_adjust.smart_colormap"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.colormap_adjust.smart_colormap</span></code></a></td>
+<td>Creates a &#8220;smart&#8221; colormap that is centered on zero, and accounts for asymmetrical vmin and vmax by matching saturation/value of high and low colors.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">metaseq.colormap_adjust.cmap_discretize</span></code></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="autodocs/metaseq.colormap_adjust.cmap_powerlaw_adjust.html#metaseq.colormap_adjust.cmap_powerlaw_adjust" title="metaseq.colormap_adjust.cmap_powerlaw_adjust"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.colormap_adjust.cmap_powerlaw_adjust</span></code></a></td>
+<td>Returns a new colormap based on the one given but adjusted via power-law, <cite>newcmap = oldcmap**a</cite>.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="autodocs/metaseq.colormap_adjust.cmap_center_adjust.html#metaseq.colormap_adjust.cmap_center_adjust" title="metaseq.colormap_adjust.cmap_center_adjust"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.colormap_adjust.cmap_center_adjust</span></code></a></td>
+<td>Returns a new colormap based on the one given</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="autodocs/metaseq.colormap_adjust.cmap_center_point_adjust.html#metaseq.colormap_adjust.cmap_center_point_adjust" title="metaseq.colormap_adjust.cmap_center_point_adjust"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.colormap_adjust.cmap_center_point_adjust</span></code></a></td>
+<td>Converts center to a ratio between 0 and 1 of the range given and calls cmap_center_adjust().</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr class="docutils" />
+<div class="section" id="module-metaseq.minibrowser">
+<span id="metaseq-minibrowser"></span><h2><a class="toc-backref" href="#id7"><a class="reference internal" href="#module-metaseq.minibrowser" title="metaseq.minibrowser"><code class="xref py py-mod docutils literal"><span class="pre">metaseq.minibrowser</span></code></a></a><a class="headerlink" href="#module-metaseq.minibrowser" title="Permalink to this headline">¶</a></h2>
+<p>Module for spawning mini genome browsers using a plugin structure, making it
+possible to build rather complex mini-browsers.  The goal is to point the
+mini-browser to some data, and call its plot() method with a feature.  This
+will spawn a new figure showing the data for that interval.</p>
+<p>MiniBrowser classes are just a general way of mapping data-manipulation or
+data-visualization methods to an Axes on which the data should be displayed.</p>
+<p>To make a new subclass:</p>
+<ol class="arabic">
+<li><p class="first">Create one or more methods that accept an Axes object and a pybedtools
+Interval object and return a feature.  The simplest do-nothing method would
+be:</p>
+<div class="highlight-python"><div class="highlight"><pre>def my_panel(self, ax, feature)
+    return feature
+</pre></div>
+</div>
+<p>A more useful method might be one that plots genomic signal over the
+region:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">my_panel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">feature</span><span class="p">):</span>
+    <span class="c"># for simplicity, assume just use the first genomic_signal</span>
+    <span class="n">gs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">genomic_signal_objs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">gs</span><span class="o">.</span><span class="n">local_coverage</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s">&#39;tight&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">feature</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Then, override the <cite>panels()</cite> method.  This method:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Creates Axes as needed; assumes that self.make_fig() has already been
+called so that self.fig is available.</li>
+<li>Returns a list of (ax, method) tuples.  This list maps created Axes to
+methods that should operate on them (like <cite>my_panel</cite> method above).</li>
+</ul>
+<p>For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">panels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[(</span><span class="n">ax</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">my_panel</span><span class="p">)]</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ol>
+<p>A figure is spawned by calling the <cite>plot</cite> method on a pybedtools genomic
+interval, e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre>s = SignalMiniBrowser(ip, control])
+s.plot(feature)
+</pre></div>
+</div>
+<p class="rubric">Classes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="autodocs/metaseq.minibrowser.BaseMiniBrowser.html#metaseq.minibrowser.BaseMiniBrowser" title="metaseq.minibrowser.BaseMiniBrowser"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.minibrowser.BaseMiniBrowser</span></code></a></td>
+<td>Base class for plotting a genomic region.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="autodocs/metaseq.minibrowser.SignalMiniBrowser.html#metaseq.minibrowser.SignalMiniBrowser" title="metaseq.minibrowser.SignalMiniBrowser"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.minibrowser.SignalMiniBrowser</span></code></a></td>
+<td>Base class for plotting genomic signal.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="autodocs/metaseq.minibrowser.GeneModelMiniBrowser.html#metaseq.minibrowser.GeneModelMiniBrowser" title="metaseq.minibrowser.GeneModelMiniBrowser"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.minibrowser.GeneModelMiniBrowser</span></code></a></td>
+<td>Mini-browser to show a signal panel on top and gene models on the bottom.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-metaseq.filetype_adapters">
+<span id="metaseq-filetype-adapters"></span><h2><a class="toc-backref" href="#id8"><a class="reference internal" href="#module-metaseq.filetype_adapters" title="metaseq.filetype_adapters"><code class="xref py py-mod docutils literal"><span class="pre">metaseq.filetype_adapters</span></code></a></a><a class="headerlink" href="#module-metaseq.filetype_adapters" title="Permalink to this headline">¶</a></h2>
+<p>This module provides classes that make a file format conform to a uniform API.
+These are not generally needed by end-users, rather, they are used internally
+by higher-level code like <code class="xref py py-mod docutils literal"><span class="pre">metaseq.genomic_signal</span></code>.</p>
+<p>File-type adapters accept a filename of the appropriate format (which is not
+checked) as the only argument to their constructor.</p>
+<p>Subclasses must define __getitem__ to accept a pybedtools.Interval and return
+an iterator of pybedtools.Intervals</p>
+<p>Subclasses must define make_fileobj(), which returns an object to be iterated
+over in __getitem__</p>
+<p class="rubric">Classes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="autodocs/metaseq.filetype_adapters.BaseAdapter.html#metaseq.filetype_adapters.BaseAdapter" title="metaseq.filetype_adapters.BaseAdapter"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.filetype_adapters.BaseAdapter</span></code></a></td>
+<td>Base class for filetype adapters</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="autodocs/metaseq.filetype_adapters.BamAdapter.html#metaseq.filetype_adapters.BamAdapter" title="metaseq.filetype_adapters.BamAdapter"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.filetype_adapters.BamAdapter</span></code></a></td>
+<td>Adapter that provides random access to BAM objects using Pysam</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="autodocs/metaseq.filetype_adapters.BedAdapter.html#metaseq.filetype_adapters.BedAdapter" title="metaseq.filetype_adapters.BedAdapter"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.filetype_adapters.BedAdapter</span></code></a></td>
+<td>Adapter that provides random access to BED files via Tabix</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="autodocs/metaseq.filetype_adapters.BigBedAdapter.html#metaseq.filetype_adapters.BigBedAdapter" title="metaseq.filetype_adapters.BigBedAdapter"><code class="xref py py-obj docutils literal"><span class="pre">metaseq.filetype_adapters.BigBedAdapter</span></code></a></td>
+<td>Adapter that provides random access to bigBed files via bx-python</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">API docs</a><ul>
+<li><a class="reference internal" href="#module-metaseq._genomic_signal"><code class="docutils literal"><span class="pre">genomic_signal</span></code></a><ul>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-metaseq.results_table"><code class="docutils literal"><span class="pre">metaseq.results_table</span></code></a></li>
+<li><a class="reference internal" href="#module-metaseq.integration"><code class="docutils literal"><span class="pre">metaseq.integration</span></code></a><ul>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-metaseq.plotutils"><code class="docutils literal"><span class="pre">metaseq.plotutils</span></code></a><ul>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-metaseq.colormap_adjust"><code class="docutils literal"><span class="pre">metaseq.colormap_adjust</span></code></a></li>
+<li><a class="reference internal" href="#module-metaseq.minibrowser"><code class="docutils literal"><span class="pre">metaseq.minibrowser</span></code></a></li>
+<li><a class="reference internal" href="#module-metaseq.filetype_adapters"><code class="docutils literal"><span class="pre">metaseq.filetype_adapters</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="example_session_2.html"
+                        title="previous chapter">Example 2: Differential expression scatterplots</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="autodocs/metaseq._genomic_signal.genomic_signal.html"
+                        title="next chapter">metaseq._genomic_signal.genomic_signal</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/autodocs.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="autodocs/metaseq._genomic_signal.genomic_signal.html" title="metaseq._genomic_signal.genomic_signal"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="example_session_2.html" title="Example 2: Differential expression scatterplots"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">metaseq 0.5.6 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2015, Ryan Dale.
+  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+  <br />Theme based on <a href="http://readthedocs.org/">Read The Docs</a>
+
+</div>
+
+
+
+
+
+  </body>
+</html>

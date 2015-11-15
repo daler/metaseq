@@ -1,0 +1,21 @@
+metaseq._genomic_signal.BedSignal
+=================================
+
+.. currentmodule:: metaseq._genomic_signal
+
+.. autoclass:: BedSignal
+    :inherited-members:
+    :show-inheritance:
+    :members:
+
+    
+    .. rubric:: Methods
+    
+    .. autosummary::
+    
+        ~BedSignal.__init__
+        ~BedSignal.array
+        ~BedSignal.local_count
+        ~BedSignal.local_coverage
+    
+    .. automethod:: __init__ 

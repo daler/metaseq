@@ -1,0 +1,23 @@
+metaseq.minibrowser.BaseMiniBrowser
+===================================
+
+.. currentmodule:: metaseq.minibrowser
+
+.. autoclass:: BaseMiniBrowser
+    :inherited-members:
+    :show-inheritance:
+    :members:
+
+    
+    .. rubric:: Methods
+    
+    .. autosummary::
+    
+        ~BaseMiniBrowser.__init__
+        ~BaseMiniBrowser.close_all
+        ~BaseMiniBrowser.example_panel
+        ~BaseMiniBrowser.make_fig
+        ~BaseMiniBrowser.panels
+        ~BaseMiniBrowser.plot
+    
+    .. automethod:: __init__ 

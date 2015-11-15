@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>metaseq.plotutils.input_ip_plots &mdash; metaseq 0.5.6 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.6',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/searchtools.js"></script>
+    <link rel="top" title="metaseq 0.5.6 documentation" href="../index.html" />
+    <link rel="up" title="API docs" href="../autodocs.html" />
+    <link rel="next" title="metaseq.plotutils.MarginalHistScatter" href="metaseq.plotutils.MarginalHistScatter.html" />
+    <link rel="prev" title="metaseq.plotutils.matrix_and_line_shell" href="metaseq.plotutils.matrix_and_line_shell.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="metaseq.plotutils.MarginalHistScatter.html" title="metaseq.plotutils.MarginalHistScatter"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="metaseq.plotutils.matrix_and_line_shell.html" title="metaseq.plotutils.matrix_and_line_shell"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../autodocs.html" accesskey="U">API docs</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="metaseq-plotutils-input-ip-plots">
+<h1>metaseq.plotutils.input_ip_plots<a class="headerlink" href="#metaseq-plotutils-input-ip-plots" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="metaseq.plotutils.input_ip_plots">
+<code class="descclassname">metaseq.plotutils.</code><code class="descname">input_ip_plots</code><span class="sig-paren">(</span><em>iparr</em>, <em>inputarr</em>, <em>diffed</em>, <em>x</em>, <em>sort_ind</em>, <em>prefix=None</em>, <em>limits1=(None</em>, <em>None)</em>, <em>limits2=(None</em>, <em>None)</em>, <em>hlines=None</em>, <em>vlines=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/plotutils.html#input_ip_plots"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.plotutils.input_ip_plots" title="Permalink to this definition">¶</a></dt>
+<dd><p>All-in-one plotting function to make a 5-panel figure.</p>
+<p>Panels are IP, input, and diffed; plus 2 line plots showing averages.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>inputarr</strong> (<em>iparr,</em>) &#8211; NumPy arrays constructed by a genomic_signal object</li>
+<li><strong>diffed</strong> &#8211; Difference of <cite>iparr</cite> and <cite>inputarr</cite>, but can be some other
+transformation.</li>
+<li><strong>x</strong> &#8211; Extent to use &#8211; for TSSs, maybe something like
+np.linspace(-1000, 1000, bins), or for just bin IDs, something like
+<cite>np.arange(bins)</cite>.</li>
+<li><strong>sort_ind</strong> &#8211; row order for each of the 3 panels &#8211; usually interesting
+to use <cite>clustered_sortind</cite> or <cite>tip_zscores</cite></li>
+<li><strong>prefix</strong> &#8211; Used to prefix plot titles with &#8216;%(prefix)s IP&#8221;, etc</li>
+<li><strong>limits1</strong> &#8211; Tuple passed to the Normalize function for IP and input.</li>
+<li><strong>limits2</strong> &#8211; Tuple passed tot he Normalize function for the diffed array</li>
+<li><strong>hlines</strong> &#8211; List of (position, kwarg) tuples for plotting horizontal
+lines.  Kwargs are passed directly to axhline. Useful for delimiting
+clusters, if you used <cite>clustered_sortind</cite> and have both <cite>row_order</cite> and
+<cite>breaks</cite>.</li>
+<li><strong>vlines</strong> &#8211; List of (position, kwargs) tuples.  A vertical line will be
+plotted at each position using kwargs.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="metaseq.plotutils.matrix_and_line_shell.html"
+                        title="previous chapter">metaseq.plotutils.matrix_and_line_shell</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="metaseq.plotutils.MarginalHistScatter.html"
+                        title="next chapter">metaseq.plotutils.MarginalHistScatter</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/autodocs/metaseq.plotutils.input_ip_plots.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="metaseq.plotutils.MarginalHistScatter.html" title="metaseq.plotutils.MarginalHistScatter"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="metaseq.plotutils.matrix_and_line_shell.html" title="metaseq.plotutils.matrix_and_line_shell"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../autodocs.html" >API docs</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2015, Ryan Dale.
+  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+  <br />Theme based on <a href="http://readthedocs.org/">Read The Docs</a>
+
+</div>
+
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,6 @@
+metaseq.plotutils.matrix_and_line_shell
+=======================================
+
+.. currentmodule:: metaseq.plotutils
+
+.. autofunction:: matrix_and_line_shell

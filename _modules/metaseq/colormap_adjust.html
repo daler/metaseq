@@ -1,0 +1,269 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>metaseq.colormap_adjust &mdash; metaseq 0.5.6 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.6',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
+    <link rel="top" title="metaseq 0.5.6 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for metaseq.colormap_adjust</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module to handle custom colormaps.</span>
+
+<span class="sd">`cmap_powerlaw_adjust`, `cmap_center_adjust`, and</span>
+<span class="sd">`cmap_center_adjust` are from</span>
+<span class="sd">https://sites.google.com/site/theodoregoetz/notes/matplotlib_colormapadjust</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span><span class="p">,</span> <span class="n">colors</span><span class="p">,</span> <span class="n">cm</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">import</span> <span class="nn">colorsys</span>
+
+
+<div class="viewcode-block" id="color_test"><a class="viewcode-back" href="../../autodocs/metaseq.colormap_adjust.color_test.html#metaseq.colormap_adjust.color_test">[docs]</a><span class="k">def</span> <span class="nf">color_test</span><span class="p">(</span><span class="n">color</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Figure filled in with `color`; useful for troubleshooting or experimenting</span>
+<span class="sd">    with colors</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="n">color</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">pyplot</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">facecolor</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="smart_colormap"><a class="viewcode-back" href="../../autodocs/metaseq.colormap_adjust.smart_colormap.html#metaseq.colormap_adjust.smart_colormap">[docs]</a><span class="k">def</span> <span class="nf">smart_colormap</span><span class="p">(</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">,</span> <span class="n">color_high</span><span class="o">=</span><span class="s">&#39;#b11902&#39;</span><span class="p">,</span> <span class="n">hue_low</span><span class="o">=</span><span class="mf">0.6</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a &quot;smart&quot; colormap that is centered on zero, and accounts for</span>
+<span class="sd">    asymmetrical vmin and vmax by matching saturation/value of high and low</span>
+<span class="sd">    colors.</span>
+
+<span class="sd">    It works by first creating a colormap from white to `color_high`.  Setting</span>
+<span class="sd">    this color to the max(abs([vmin, vmax])), it then determines what the color</span>
+<span class="sd">    of min(abs([vmin, vmax])) should be on that scale.  Then it shifts the</span>
+<span class="sd">    color to the new hue `hue_low`, and finally creates a new colormap with the</span>
+<span class="sd">    new hue-shifted as the low, `color_high` as the max, and centered on zero.</span>
+
+<span class="sd">    :param color_high: a matplotlib color -- try &quot;#b11902&quot; for a nice red</span>
+<span class="sd">    :param hue_low: float in [0, 1] -- try 0.6 for a nice blue</span>
+<span class="sd">    :param vmin: lowest value in data you&#39;ll be plotting</span>
+<span class="sd">    :param vmax: highest value in data you&#39;ll be plotting</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># first go from white to color_high</span>
+    <span class="n">orig_cmap</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">LinearSegmentedColormap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span>
+        <span class="s">&#39;test&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;#FFFFFF&#39;</span><span class="p">,</span> <span class="n">color_high</span><span class="p">],</span> <span class="n">N</span><span class="o">=</span><span class="mi">2048</span><span class="p">)</span>
+
+    <span class="c"># For example, say vmin=-3 and vmax=9.  If vmin were positive, what would</span>
+    <span class="c"># its color be?</span>
+    <span class="n">vmin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">vmin</span><span class="p">)</span>
+    <span class="n">vmax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">vmax</span><span class="p">)</span>
+    <span class="n">mx</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">])</span>
+    <span class="n">mn</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">])</span>
+    <span class="n">frac</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">mn</span> <span class="o">/</span> <span class="n">mx</span><span class="p">)</span>
+    <span class="n">rgb</span> <span class="o">=</span> <span class="n">orig_cmap</span><span class="p">(</span><span class="n">frac</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c"># Convert to HSV and shift the hue</span>
+    <span class="n">hsv</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">colorsys</span><span class="o">.</span><span class="n">rgb_to_hsv</span><span class="p">(</span><span class="o">*</span><span class="n">rgb</span><span class="p">))</span>
+    <span class="n">hsv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">hue_low</span>
+    <span class="n">new_rgb</span> <span class="o">=</span> <span class="n">colorsys</span><span class="o">.</span><span class="n">hsv_to_rgb</span><span class="p">(</span><span class="o">*</span><span class="n">hsv</span><span class="p">)</span>
+    <span class="n">new_hex</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">rgb2hex</span><span class="p">(</span><span class="n">new_rgb</span><span class="p">)</span>
+
+    <span class="n">zeropoint</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="o">-</span><span class="n">vmin</span> <span class="o">/</span> <span class="p">(</span><span class="n">vmax</span> <span class="o">-</span> <span class="n">vmin</span><span class="p">))</span>
+
+    <span class="c"># Create a new colormap using the new hue-shifted color as the low end</span>
+    <span class="n">new_cmap</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">LinearSegmentedColormap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span>
+        <span class="s">&#39;test&#39;</span><span class="p">,</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="n">new_rgb</span><span class="p">),</span> <span class="p">(</span><span class="n">zeropoint</span><span class="p">,</span> <span class="s">&#39;#FFFFFF&#39;</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">color_high</span><span class="p">)],</span>
+        <span class="n">N</span><span class="o">=</span><span class="mi">2048</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">new_cmap</span>
+
+</div>
+<div class="viewcode-block" id="cmap_powerlaw_adjust"><a class="viewcode-back" href="../../autodocs/metaseq.colormap_adjust.cmap_powerlaw_adjust.html#metaseq.colormap_adjust.cmap_powerlaw_adjust">[docs]</a><span class="k">def</span> <span class="nf">cmap_powerlaw_adjust</span><span class="p">(</span><span class="n">cmap</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a new colormap based on the one given</span>
+<span class="sd">    but adjusted via power-law, `newcmap = oldcmap**a`.</span>
+
+<span class="sd">    :param cmap: colormap instance (e.g., cm.jet)</span>
+<span class="sd">    :param a: power</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">a</span> <span class="o">&lt;</span> <span class="mf">0.</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">cmap</span>
+    <span class="n">cdict</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">cmap</span><span class="o">.</span><span class="n">_segmentdata</span><span class="p">)</span>
+    <span class="n">fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="n">a</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;red&#39;</span><span class="p">,</span> <span class="s">&#39;green&#39;</span><span class="p">,</span> <span class="s">&#39;blue&#39;</span><span class="p">):</span>
+        <span class="n">cdict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">cdict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="n">cdict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="n">cdict</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">cdict</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">),</span> \
+            <span class="s">&quot;Resulting indices extend out of the [0, 1] segment.&quot;</span>
+    <span class="k">return</span> <span class="n">colors</span><span class="o">.</span><span class="n">LinearSegmentedColormap</span><span class="p">(</span><span class="s">&#39;colormap&#39;</span><span class="p">,</span> <span class="n">cdict</span><span class="p">,</span> <span class="mi">1024</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="cmap_center_adjust"><a class="viewcode-back" href="../../autodocs/metaseq.colormap_adjust.cmap_center_adjust.html#metaseq.colormap_adjust.cmap_center_adjust">[docs]</a><span class="k">def</span> <span class="nf">cmap_center_adjust</span><span class="p">(</span><span class="n">cmap</span><span class="p">,</span> <span class="n">center_ratio</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a new colormap based on the one given</span>
+<span class="sd">    but adjusted so that the old center point higher</span>
+<span class="sd">    (&gt;0.5) or lower (&lt;0.5)</span>
+
+<span class="sd">    :param cmap: colormap instance (e.g., cm.jet)</span>
+<span class="sd">    :param center_ratio:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mf">0.</span> <span class="o">&lt;</span> <span class="n">center_ratio</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">center_ratio</span> <span class="o">&lt;</span> <span class="mf">1.</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">cmap</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">center_ratio</span><span class="p">)</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cmap_powerlaw_adjust</span><span class="p">(</span><span class="n">cmap</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="cmap_center_point_adjust"><a class="viewcode-back" href="../../autodocs/metaseq.colormap_adjust.cmap_center_point_adjust.html#metaseq.colormap_adjust.cmap_center_point_adjust">[docs]</a><span class="k">def</span> <span class="nf">cmap_center_point_adjust</span><span class="p">(</span><span class="n">cmap</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">center</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts center to a ratio between 0 and 1 of the</span>
+<span class="sd">    range given and calls cmap_center_adjust(). returns</span>
+<span class="sd">    a new adjusted colormap accordingly</span>
+
+<span class="sd">    :param cmap: colormap instance</span>
+<span class="sd">    :param range: Tuple of (min, max)</span>
+<span class="sd">    :param center: New cmap center</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">((</span><span class="nb">range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">center</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">center</span> <span class="o">&lt;</span> <span class="nb">range</span><span class="p">[</span><span class="mi">1</span><span class="p">])):</span>
+        <span class="k">return</span> <span class="n">cmap</span>
+    <span class="k">return</span> <span class="n">cmap_center_adjust</span><span class="p">(</span>
+        <span class="n">cmap</span><span class="p">,</span>
+        <span class="nb">abs</span><span class="p">(</span><span class="n">center</span> <span class="o">-</span> <span class="nb">range</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="nb">range</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">func3</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">5</span> <span class="o">+</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="n">func3</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+    <span class="n">extent</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+
+    <span class="n">plotkwargs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;extent&#39;</span><span class="p">:</span> <span class="n">extent</span><span class="p">,</span>
+        <span class="s">&#39;origin&#39;</span><span class="p">:</span> <span class="s">&#39;lower&#39;</span><span class="p">,</span>
+        <span class="s">&#39;interpolation&#39;</span><span class="p">:</span> <span class="s">&#39;nearest&#39;</span><span class="p">,</span>
+        <span class="s">&#39;aspect&#39;</span><span class="p">:</span> <span class="s">&#39;auto&#39;</span><span class="p">}</span>
+
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">pyplot</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">left</span><span class="o">=.</span><span class="mo">05</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=.</span><span class="mi">11</span><span class="p">,</span> <span class="n">right</span><span class="o">=.</span><span class="mi">94</span><span class="p">,</span> <span class="n">top</span><span class="o">=.</span><span class="mi">83</span><span class="p">,</span> <span class="n">wspace</span><span class="o">=.</span><span class="mi">35</span><span class="p">)</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="p">[</span><span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+
+    <span class="n">cmap</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">seismic</span>
+
+    <span class="n">plt</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="o">**</span><span class="n">plotkwargs</span><span class="p">)</span>
+    <span class="n">cb</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">plt</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s">&#39;cmap: seismic&#39;</span><span class="p">)</span>
+
+    <span class="n">plt</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap_center_adjust</span><span class="p">(</span><span class="n">cmap</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">),</span> <span class="o">**</span><span class="n">plotkwargs</span><span class="p">)</span>
+    <span class="n">cb</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">plt</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s">&#39;center raised by 25%&#39;</span><span class="p">)</span>
+
+    <span class="n">plt</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+        <span class="n">Z</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="n">cmap_center_point_adjust</span><span class="p">(</span>
+            <span class="n">cmap</span><span class="p">,</span> <span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">Z</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">Z</span><span class="p">)],</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="o">**</span><span class="n">plotkwargs</span><span class="p">)</span>
+    <span class="n">cb</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">plt</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s">&#39;center set to 0&#39;</span><span class="p">)</span>
+
+    <span class="n">pyplot</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2015, Ryan Dale.
+  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+  <br />Theme based on <a href="http://readthedocs.org/">Read The Docs</a>
+
+</div>
+
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,20 @@
+metaseq._genomic_signal.BigWigSignal
+====================================
+
+.. currentmodule:: metaseq._genomic_signal
+
+.. autoclass:: BigWigSignal
+    :inherited-members:
+    :show-inheritance:
+    :members:
+
+    
+    .. rubric:: Methods
+    
+    .. autosummary::
+    
+        ~BigWigSignal.__init__
+        ~BigWigSignal.array
+        ~BigWigSignal.local_coverage
+    
+    .. automethod:: __init__ 

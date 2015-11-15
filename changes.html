@@ -1,0 +1,174 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>Changelog &mdash; metaseq 0.5.6 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.5.6',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/searchtools.js"></script>
+    <link rel="top" title="metaseq 0.5.6 documentation" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">metaseq 0.5.6 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="changelog">
+<h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="changes-in-v0-5-6">
+<h2>Changes in v0.5.6<a class="headerlink" href="#changes-in-v0-5-6" title="Permalink to this headline">¶</a></h2>
+<p>(versions 0.5.5.2-4 were minor versions with different testing frameworks)</p>
+<ul class="simple">
+<li>fix typo in plotutils.clustered_sortind</li>
+<li>support for versions of pysam expecting string (rather than unicode) for
+chromosome</li>
+<li>support for cells in 2x2 tables with 0 items</li>
+<li>lots of improvements to testing framework &#8211; now using docker on travis</li>
+<li>added fisher as an explicit requirement</li>
+<li>handle bx-python 0.7.3 which does not work correctly on bigbed files.
+A NotImplementedError is raised in this case. The workaround is to convert
+bigBed to BED (<cite>bigBedToBed</cite> program from UCSC; <cite>conda install -c bioconda
+ucsc-bigbedtobed</cite> to install) and then either use a tabix-indexed BED file or
+convert BED to BAM (<cite>bedtools bedtobam</cite> program).</li>
+</ul>
+</div>
+<div class="section" id="changes-in-v0-5-5-1">
+<h2>Changes in v0.5.5.1<a class="headerlink" href="#changes-in-v0-5-5-1" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>change DifferentialExpressionResults.scatter default plotting style to have
+linewidths &gt; 0.  Previously, using linewidths=0 cause plots to show up blank
+in IPython Notebook on Mac</li>
+</ul>
+</div>
+<div class="section" id="changes-in-v0-5-5">
+<h2>Changes in v0.5.5<a class="headerlink" href="#changes-in-v0-5-5" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>add <cite>metaseq.tableprinter</cite> module</li>
+</ul>
+</div>
+<div class="section" id="changes-in-v0-5-4">
+<h2>Changes in v0.5.4<a class="headerlink" href="#changes-in-v0-5-4" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><cite>metaseq.results_table.DESeq2Results</cite> class</li>
+<li>handle cases where callbacks could be called multiple times</li>
+<li>support marginal histograms of length-1 arrays</li>
+<li><cite>metaseq.persistence</cite> functions use absolute path for features to make
+symlinking more robust</li>
+<li>differential expression classes cleaned up and refactored</li>
+<li>new kwargs for <cite>metaseq.plotutils.imshow</cite>: <cite>figure_kwargs</cite>, <cite>subset_by</cite>,
+<cite>subset_order</cite></li>
+<li>new <cite>metaseq.plotutils.add_labels_to_subsets</cite> helper function</li>
+</ul>
+</div>
+<div class="section" id="changes-in-v0-5">
+<h2>Changes in v0.5<a class="headerlink" href="#changes-in-v0-5" title="Permalink to this headline">¶</a></h2>
+<p>v0.5 marks a major improvement and maturation of <cite>metaseq</cite> but at the expense
+of backward-compatibility.  The changes are too numerous to list, but include
+massive plotting improvements, speedups, more flexible API, and much more.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Changelog</a><ul>
+<li><a class="reference internal" href="#changes-in-v0-5-6">Changes in v0.5.6</a></li>
+<li><a class="reference internal" href="#changes-in-v0-5-5-1">Changes in v0.5.5.1</a></li>
+<li><a class="reference internal" href="#changes-in-v0-5-5">Changes in v0.5.5</a></li>
+<li><a class="reference internal" href="#changes-in-v0-5-4">Changes in v0.5.4</a></li>
+<li><a class="reference internal" href="#changes-in-v0-5">Changes in v0.5</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/changes.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">metaseq 0.5.6 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2015, Ryan Dale.
+  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+  <br />Theme based on <a href="http://readthedocs.org/">Read The Docs</a>
+
+</div>
+
+
+
+
+
+  </body>
+</html>

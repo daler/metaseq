@@ -1,0 +1,236 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>metaseq.minibrowser.BaseMiniBrowser &mdash; metaseq 0.5.6 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.6',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/searchtools.js"></script>
+    <link rel="top" title="metaseq 0.5.6 documentation" href="../index.html" />
+    <link rel="up" title="API docs" href="../autodocs.html" />
+    <link rel="prev" title="metaseq.colormap_adjust.cmap_center_point_adjust" href="metaseq.colormap_adjust.cmap_center_point_adjust.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="metaseq.colormap_adjust.cmap_center_point_adjust.html" title="metaseq.colormap_adjust.cmap_center_point_adjust"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../autodocs.html" accesskey="U">API docs</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="metaseq-minibrowser-baseminibrowser">
+<h1>metaseq.minibrowser.BaseMiniBrowser<a class="headerlink" href="#metaseq-minibrowser-baseminibrowser" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="metaseq.minibrowser.BaseMiniBrowser">
+<em class="property">class </em><code class="descclassname">metaseq.minibrowser.</code><code class="descname">BaseMiniBrowser</code><span class="sig-paren">(</span><em>genomic_signal_objs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/minibrowser.html#BaseMiniBrowser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.minibrowser.BaseMiniBrowser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Base class for plotting a genomic region.</p>
+<p>This class is designed to be sub-classed, so it really just a shell with
+some example methods filled in.</p>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.minibrowser.BaseMiniBrowser.close_all" title="metaseq.minibrowser.BaseMiniBrowser.close_all"><code class="xref py py-obj docutils literal"><span class="pre">close_all</span></code></a>()</td>
+<td>Close all figures spawned by this class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.minibrowser.BaseMiniBrowser.example_panel" title="metaseq.minibrowser.BaseMiniBrowser.example_panel"><code class="xref py py-obj docutils literal"><span class="pre">example_panel</span></code></a>(ax,&nbsp;feature)</td>
+<td>A example panel that just prints the text of the feature.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.minibrowser.BaseMiniBrowser.make_fig" title="metaseq.minibrowser.BaseMiniBrowser.make_fig"><code class="xref py py-obj docutils literal"><span class="pre">make_fig</span></code></a>()</td>
+<td>Figure constructor, called before <cite>self.plot()</cite></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.minibrowser.BaseMiniBrowser.panels" title="metaseq.minibrowser.BaseMiniBrowser.panels"><code class="xref py py-obj docutils literal"><span class="pre">panels</span></code></a>()</td>
+<td>Method to be overriden by subclasses.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.minibrowser.BaseMiniBrowser.plot" title="metaseq.minibrowser.BaseMiniBrowser.plot"><code class="xref py py-obj docutils literal"><span class="pre">plot</span></code></a>(feature)</td>
+<td>Spawns a new figure showing data for <cite>feature</cite>.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.minibrowser.BaseMiniBrowser.__init__" title="metaseq.minibrowser.BaseMiniBrowser.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>(genomic_signal_objs)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.minibrowser.BaseMiniBrowser.close_all" title="metaseq.minibrowser.BaseMiniBrowser.close_all"><code class="xref py py-obj docutils literal"><span class="pre">close_all</span></code></a>()</td>
+<td>Close all figures spawned by this class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.minibrowser.BaseMiniBrowser.example_panel" title="metaseq.minibrowser.BaseMiniBrowser.example_panel"><code class="xref py py-obj docutils literal"><span class="pre">example_panel</span></code></a>(ax,&nbsp;feature)</td>
+<td>A example panel that just prints the text of the feature.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.minibrowser.BaseMiniBrowser.make_fig" title="metaseq.minibrowser.BaseMiniBrowser.make_fig"><code class="xref py py-obj docutils literal"><span class="pre">make_fig</span></code></a>()</td>
+<td>Figure constructor, called before <cite>self.plot()</cite></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.minibrowser.BaseMiniBrowser.panels" title="metaseq.minibrowser.BaseMiniBrowser.panels"><code class="xref py py-obj docutils literal"><span class="pre">panels</span></code></a>()</td>
+<td>Method to be overriden by subclasses.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.minibrowser.BaseMiniBrowser.plot" title="metaseq.minibrowser.BaseMiniBrowser.plot"><code class="xref py py-obj docutils literal"><span class="pre">plot</span></code></a>(feature)</td>
+<td>Spawns a new figure showing data for <cite>feature</cite>.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="metaseq.minibrowser.BaseMiniBrowser.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>genomic_signal_objs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/minibrowser.html#BaseMiniBrowser.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.minibrowser.BaseMiniBrowser.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="metaseq.minibrowser.BaseMiniBrowser.close_all">
+<code class="descname">close_all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/minibrowser.html#BaseMiniBrowser.close_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.minibrowser.BaseMiniBrowser.close_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close all figures spawned by this class.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.minibrowser.BaseMiniBrowser.example_panel">
+<code class="descname">example_panel</code><span class="sig-paren">(</span><em>ax</em>, <em>feature</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/minibrowser.html#BaseMiniBrowser.example_panel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.minibrowser.BaseMiniBrowser.example_panel" title="Permalink to this definition">¶</a></dt>
+<dd><p>A example panel that just prints the text of the feature.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.minibrowser.BaseMiniBrowser.make_fig">
+<code class="descname">make_fig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/minibrowser.html#BaseMiniBrowser.make_fig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.minibrowser.BaseMiniBrowser.make_fig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Figure constructor, called before <cite>self.plot()</cite></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.minibrowser.BaseMiniBrowser.panels">
+<code class="descname">panels</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/minibrowser.html#BaseMiniBrowser.panels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.minibrowser.BaseMiniBrowser.panels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to be overriden by subclasses.</p>
+<p>This method should create Axes objects on self.fig and register which
+methods operate on which axes.</p>
+<p>Each method&#8217;s signature should be func(self, ax, feature), and it will
+take a pybedtools.Interval <cite>feature</cite> and plot it or something derived
+from it onto <cite>ax</cite>. It should return a pybedtools.Interval object,
+usually just the same one that was passed in.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.minibrowser.BaseMiniBrowser.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>feature</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/minibrowser.html#BaseMiniBrowser.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.minibrowser.BaseMiniBrowser.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Spawns a new figure showing data for <cite>feature</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>feature</strong> &#8211; A <cite>pybedtools.Interval</cite> object</td>
+</tr>
+</tbody>
+</table>
+<p>Using the pybedtools.Interval <cite>feature</cite>, creates figure specified in
+<a class="reference internal" href="#metaseq.minibrowser.BaseMiniBrowser.make_fig" title="metaseq.minibrowser.BaseMiniBrowser.make_fig"><code class="xref py py-meth docutils literal"><span class="pre">BaseMiniBrowser.make_fig()</span></code></a> and plots data on panels according to
+<cite>self.panels()</cite>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="metaseq.colormap_adjust.cmap_center_point_adjust.html"
+                        title="previous chapter">metaseq.colormap_adjust.cmap_center_point_adjust</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/autodocs/metaseq.minibrowser.BaseMiniBrowser.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="metaseq.colormap_adjust.cmap_center_point_adjust.html" title="metaseq.colormap_adjust.cmap_center_point_adjust"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../autodocs.html" >API docs</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2015, Ryan Dale.
+  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+  <br />Theme based on <a href="http://readthedocs.org/">Read The Docs</a>
+
+</div>
+
+
+
+
+
+  </body>
+</html>

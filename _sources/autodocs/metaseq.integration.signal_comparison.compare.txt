@@ -1,0 +1,6 @@
+metaseq.integration.signal_comparison.compare
+=============================================
+
+.. currentmodule:: metaseq.integration.signal_comparison
+
+.. autofunction:: compare

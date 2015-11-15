@@ -1,0 +1,357 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>metaseq.filetype_adapters &mdash; metaseq 0.5.6 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.6',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
+    <link rel="top" title="metaseq 0.5.6 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for metaseq.filetype_adapters</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module provides classes that make a file format conform to a uniform API.</span>
+<span class="sd">These are not generally needed by end-users, rather, they are used internally</span>
+<span class="sd">by higher-level code like :mod:`metaseq.genomic_signal`.</span>
+
+<span class="sd">File-type adapters accept a filename of the appropriate format (which is not</span>
+<span class="sd">checked) as the only argument to their constructor.</span>
+
+<span class="sd">Subclasses must define __getitem__ to accept a pybedtools.Interval and return</span>
+<span class="sd">an iterator of pybedtools.Intervals</span>
+
+<span class="sd">Subclasses must define make_fileobj(), which returns an object to be iterated</span>
+<span class="sd">over in __getitem__</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">bx.bbi.bigbed_file</span> <span class="kn">import</span> <span class="n">BigBedFile</span>
+<span class="kn">from</span> <span class="nn">bx.bbi.bigwig_file</span> <span class="kn">import</span> <span class="n">BigWigFile</span>
+<span class="kn">from</span> <span class="nn">bx.intervals.io</span> <span class="kn">import</span> <span class="n">StrandFormatError</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">pysam</span>
+<span class="kn">import</span> <span class="nn">pybedtools</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">textwrap</span> <span class="kn">import</span> <span class="n">dedent</span>
+
+<span class="n">strand_lookup</span> <span class="o">=</span> <span class="p">{</span><span class="mi">16</span><span class="p">:</span> <span class="s">&#39;-&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span> <span class="s">&#39;+&#39;</span><span class="p">}</span>
+
+
+<div class="viewcode-block" id="BaseAdapter"><a class="viewcode-back" href="../../autodocs/metaseq.filetype_adapters.BaseAdapter.html#metaseq.filetype_adapters.BaseAdapter">[docs]</a><span class="k">class</span> <span class="nc">BaseAdapter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for filetype adapters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="BaseAdapter.__init__"><a class="viewcode-back" href="../../autodocs/metaseq.filetype_adapters.BaseAdapter.html#metaseq.filetype_adapters.BaseAdapter.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn</span> <span class="o">=</span> <span class="n">fn</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileobj</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileobj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_fileobj</span><span class="p">()</span>
+</div>
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Subclasses must define __getitem__&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">make_fileobj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Subclasses must define make_fileobj&#39;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="BamAdapter"><a class="viewcode-back" href="../../autodocs/metaseq.filetype_adapters.BamAdapter.html#metaseq.filetype_adapters.BamAdapter">[docs]</a><span class="k">class</span> <span class="nc">BamAdapter</span><span class="p">(</span><span class="n">BaseAdapter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adapter that provides random access to BAM objects using Pysam</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="BamAdapter.__init__"><a class="viewcode-back" href="../../autodocs/metaseq.filetype_adapters.BamAdapter.html#metaseq.filetype_adapters.BamAdapter.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BamAdapter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">make_fileobj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">pysam</span><span class="o">.</span><span class="n">Samfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="n">iterator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileobj</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">chrom</span><span class="p">),</span>
+            <span class="n">key</span><span class="o">.</span><span class="n">start</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">.</span><span class="n">stop</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">:</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">pos</span>
+            <span class="n">curr_end</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">pos</span>
+            <span class="k">for</span> <span class="n">op</span><span class="p">,</span> <span class="n">bp</span> <span class="ow">in</span> <span class="n">r</span><span class="o">.</span><span class="n">cigar</span><span class="p">:</span>
+                <span class="n">start</span> <span class="o">=</span> <span class="n">curr_end</span>
+                <span class="n">curr_end</span> <span class="o">+=</span> <span class="n">bp</span>
+                <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">interval</span> <span class="o">=</span> <span class="n">pybedtools</span><span class="o">.</span><span class="n">Interval</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">fileobj</span><span class="o">.</span><span class="n">references</span><span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">rname</span><span class="p">],</span>
+                        <span class="n">start</span><span class="p">,</span>
+                        <span class="n">curr_end</span><span class="p">,</span>
+                        <span class="n">strand</span><span class="o">=</span><span class="n">strand_lookup</span><span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">flag</span> <span class="o">&amp;</span> <span class="mh">0x0010</span><span class="p">])</span>
+                    <span class="n">interval</span><span class="o">.</span><span class="n">file_type</span> <span class="o">=</span> <span class="s">&#39;bed&#39;</span>
+                    <span class="k">yield</span> <span class="n">interval</span>
+
+</div>
+<div class="viewcode-block" id="BedAdapter"><a class="viewcode-back" href="../../autodocs/metaseq.filetype_adapters.BedAdapter.html#metaseq.filetype_adapters.BedAdapter">[docs]</a><span class="k">class</span> <span class="nc">BedAdapter</span><span class="p">(</span><span class="n">BaseAdapter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adapter that provides random access to BED files via Tabix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="BedAdapter.__init__"><a class="viewcode-back" href="../../autodocs/metaseq.filetype_adapters.BedAdapter.html#metaseq.filetype_adapters.BedAdapter.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BedAdapter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">make_fileobj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">pybedtools</span><span class="o">.</span><span class="n">BedTool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span><span class="o">.</span><span class="n">_tabixed</span><span class="p">():</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span><span class="o">.</span><span class="n">tabix</span><span class="p">(</span><span class="n">in_place</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">is_sorted</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fn</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">fn</span>
+        <span class="k">return</span> <span class="n">obj</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="n">bt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileobj</span><span class="o">.</span><span class="n">tabix_intervals</span><span class="p">(</span>
+            <span class="s">&#39;</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">-</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">key</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">key</span><span class="o">.</span><span class="n">stop</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">bt</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">i</span>
+        <span class="k">del</span> <span class="n">bt</span>
+
+</div>
+<div class="viewcode-block" id="BigBedAdapter"><a class="viewcode-back" href="../../autodocs/metaseq.filetype_adapters.BigBedAdapter.html#metaseq.filetype_adapters.BigBedAdapter">[docs]</a><span class="k">class</span> <span class="nc">BigBedAdapter</span><span class="p">(</span><span class="n">BaseAdapter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adapter that provides random access to bigBed files via bx-python</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="BigBedAdapter.__init__"><a class="viewcode-back" href="../../autodocs/metaseq.filetype_adapters.BigBedAdapter.html#metaseq.filetype_adapters.BigBedAdapter.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BigBedAdapter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">make_fileobj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">BigBedFile</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="n">chrom</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">chrom</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">start</span>
+        <span class="n">stop</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">end</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">bx_intervals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileobj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">chrom</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">StrandFormatError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">dedent</span><span class="p">(</span>
+                <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                It appears you have a version of bx-python where bigBed files</span>
+<span class="sd">                are temporarily unsupported due to recent changes in the</span>
+<span class="sd">                bx-python dependency. In the meantime, please convert bigBed to</span>
+<span class="sd">                BAM like this:</span>
+
+<span class="sd">                    bigBedToBed {0} tmp.bed</span>
+<span class="sd">                    bedtools bedtobam -i tmp.bed &gt; {0}.bam</span>
+
+<span class="sd">                and create a genomic signal object using this {0}.bam file.</span>
+<span class="sd">                &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">bx_intervals</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">StopIteration</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">bx_intervals</span><span class="p">:</span>
+            <span class="n">interval</span> <span class="o">=</span> <span class="n">pybedtools</span><span class="o">.</span><span class="n">create_interval_from_list</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">fields</span><span class="p">)</span>
+            <span class="n">interval</span><span class="o">.</span><span class="n">file_type</span> <span class="o">=</span> <span class="s">&#39;bed&#39;</span>
+            <span class="k">yield</span> <span class="n">interval</span>
+
+</div>
+<span class="k">class</span> <span class="nc">BigWigAdapter</span><span class="p">(</span><span class="n">BaseAdapter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adapter that provides random access to bigWig files bia bx-python</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BigWigAdapter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">make_fileobj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s">&quot;__getitem__ not implemented for </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">summarize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s">&#39;summarize&#39;</span><span class="p">,</span>
+                  <span class="n">function</span><span class="o">=</span><span class="s">&#39;mean&#39;</span><span class="p">):</span>
+
+        <span class="c"># We may be dividing by zero in some cases, which raises a warning in</span>
+        <span class="c"># NumPy based on the IEEE 754 standard (see</span>
+        <span class="c"># http://docs.scipy.org/doc/numpy/reference/generated/</span>
+        <span class="c">#       numpy.seterr.html)</span>
+        <span class="c">#</span>
+        <span class="c"># That&#39;s OK -- we&#39;re expecting that to happen sometimes. So temporarily</span>
+        <span class="c"># disable this error reporting for the duration of this method.</span>
+        <span class="n">orig</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">geterr</span><span class="p">()[</span><span class="s">&#39;invalid&#39;</span><span class="p">]</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">seterr</span><span class="p">(</span><span class="n">invalid</span><span class="o">=</span><span class="s">&#39;ignore&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">bins</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">method</span> <span class="o">==</span> <span class="s">&#39;get_as_array&#39;</span><span class="p">):</span>
+            <span class="n">bw</span> <span class="o">=</span> <span class="n">BigWigFile</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">))</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">bw</span><span class="o">.</span><span class="n">get_as_array</span><span class="p">(</span>
+                <span class="n">interval</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span>
+                <span class="n">interval</span><span class="o">.</span><span class="n">start</span><span class="p">,</span>
+                <span class="n">interval</span><span class="o">.</span><span class="n">stop</span><span class="p">,)</span>
+            <span class="k">if</span> <span class="n">s</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">interval</span><span class="o">.</span><span class="n">stop</span> <span class="o">-</span> <span class="n">interval</span><span class="o">.</span><span class="n">start</span><span class="p">,))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">s</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">s</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s">&#39;ucsc_summarize&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">function</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;mean&#39;</span><span class="p">,</span> <span class="s">&#39;min&#39;</span><span class="p">,</span> <span class="s">&#39;max&#39;</span><span class="p">,</span> <span class="s">&#39;std&#39;</span><span class="p">,</span> <span class="s">&#39;coverage&#39;</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ucsc_summarize</span><span class="p">(</span><span class="n">interval</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">function</span><span class="o">=</span><span class="n">function</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;function &quot;</span><span class="si">%s</span><span class="s">&quot; not supported by UCSC</span><span class="se">\&#39;</span><span class="s">s&#39;</span>
+                                 <span class="s">&#39;bigWigSummary&#39;</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bw</span> <span class="o">=</span> <span class="n">BigWigFile</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">))</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">bw</span><span class="o">.</span><span class="n">summarize</span><span class="p">(</span>
+                <span class="n">interval</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span>
+                <span class="n">interval</span><span class="o">.</span><span class="n">start</span><span class="p">,</span>
+                <span class="n">interval</span><span class="o">.</span><span class="n">stop</span><span class="p">,</span> <span class="n">bins</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">s</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">bins</span><span class="p">,))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">function</span> <span class="o">==</span> <span class="s">&#39;sum&#39;</span><span class="p">:</span>
+                    <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">sum_data</span>
+                <span class="k">if</span> <span class="n">function</span> <span class="o">==</span> <span class="s">&#39;mean&#39;</span><span class="p">:</span>
+                    <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">sum_data</span> <span class="o">/</span> <span class="n">s</span><span class="o">.</span><span class="n">valid_count</span>
+                    <span class="n">s</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">s</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">if</span> <span class="n">function</span> <span class="o">==</span> <span class="s">&#39;min&#39;</span><span class="p">:</span>
+                    <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">min_val</span>
+                    <span class="n">s</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">s</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">if</span> <span class="n">function</span> <span class="o">==</span> <span class="s">&#39;max&#39;</span><span class="p">:</span>
+                    <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">max_val</span>
+                    <span class="n">s</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">s</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">if</span> <span class="n">function</span> <span class="o">==</span> <span class="s">&#39;std&#39;</span><span class="p">:</span>
+                    <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">sum_squares</span> <span class="o">/</span> <span class="n">s</span><span class="o">.</span><span class="n">valid_count</span><span class="p">)</span>
+                    <span class="n">s</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">s</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c"># Reset NumPy error reporting</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">seterr</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="n">orig</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="k">def</span> <span class="nf">ucsc_summarize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">function</span><span class="o">=</span><span class="s">&#39;mean&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">bins</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">bins</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">interval</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span>
+
+        <span class="n">cmds</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s">&#39;bigWigSummary&#39;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">,</span>
+            <span class="n">interval</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">interval</span><span class="o">.</span><span class="n">start</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">interval</span><span class="o">.</span><span class="n">stop</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">bins</span><span class="p">),</span>
+            <span class="s">&#39;-type=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">function</span><span class="p">]</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+            <span class="n">cmds</span><span class="p">,</span>
+            <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+            <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">gen</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">stdout</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="n">line</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">return</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+                    <span class="n">err</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">returncode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">err</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;no data&#39;</span><span class="p">):</span>
+                            <span class="k">return</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                            <span class="s">&quot;cmds: </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span>
+                            <span class="p">(</span><span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cmds</span><span class="p">),</span> <span class="n">p</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">read</span><span class="p">()))</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">err</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">gen</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2015, Ryan Dale.
+  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+  <br />Theme based on <a href="http://readthedocs.org/">Read The Docs</a>
+
+</div>
+
+
+
+
+
+  </body>
+</html>

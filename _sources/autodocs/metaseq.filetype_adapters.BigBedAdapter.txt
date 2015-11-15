@@ -1,0 +1,19 @@
+metaseq.filetype_adapters.BigBedAdapter
+=======================================
+
+.. currentmodule:: metaseq.filetype_adapters
+
+.. autoclass:: BigBedAdapter
+    :inherited-members:
+    :show-inheritance:
+    :members:
+
+    
+    .. rubric:: Methods
+    
+    .. autosummary::
+    
+        ~BigBedAdapter.__init__
+        ~BigBedAdapter.make_fileobj
+    
+    .. automethod:: __init__ 

@@ -1,0 +1,6 @@
+metaseq.colormap_adjust.smart_colormap
+======================================
+
+.. currentmodule:: metaseq.colormap_adjust
+
+.. autofunction:: smart_colormap

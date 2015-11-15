@@ -1,0 +1,21 @@
+metaseq._genomic_signal.IntervalSignal
+======================================
+
+.. currentmodule:: metaseq._genomic_signal
+
+.. autoclass:: IntervalSignal
+    :inherited-members:
+    :show-inheritance:
+    :members:
+
+    
+    .. rubric:: Methods
+    
+    .. autosummary::
+    
+        ~IntervalSignal.__init__
+        ~IntervalSignal.array
+        ~IntervalSignal.local_count
+        ~IntervalSignal.local_coverage
+    
+    .. automethod:: __init__ 

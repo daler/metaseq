@@ -1,0 +1,164 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>metaseq.plotutils.clustered_sortind &mdash; metaseq 0.5.6 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.6',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/searchtools.js"></script>
+    <link rel="top" title="metaseq 0.5.6 documentation" href="../index.html" />
+    <link rel="up" title="API docs" href="../autodocs.html" />
+    <link rel="next" title="metaseq.plotutils.calculate_limits" href="metaseq.plotutils.calculate_limits.html" />
+    <link rel="prev" title="metaseq.plotutils.add_labels_to_subsets" href="metaseq.plotutils.add_labels_to_subsets.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="metaseq.plotutils.calculate_limits.html" title="metaseq.plotutils.calculate_limits"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="metaseq.plotutils.add_labels_to_subsets.html" title="metaseq.plotutils.add_labels_to_subsets"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../autodocs.html" accesskey="U">API docs</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="metaseq-plotutils-clustered-sortind">
+<h1>metaseq.plotutils.clustered_sortind<a class="headerlink" href="#metaseq-plotutils-clustered-sortind" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="metaseq.plotutils.clustered_sortind">
+<code class="descclassname">metaseq.plotutils.</code><code class="descname">clustered_sortind</code><span class="sig-paren">(</span><em>x</em>, <em>k=10</em>, <em>scorefunc=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/plotutils.html#clustered_sortind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.plotutils.clustered_sortind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses MiniBatch k-means clustering to cluster matrix into groups.</p>
+<p>Each cluster of rows is then sorted by <cite>scorefunc</cite> &#8211; by default, the max
+peak height when all rows in a cluster are averaged, or
+cluster.mean(axis=0).max().</p>
+<p>Returns the index that will sort the rows of <cite>x</cite> and a list of &#8220;breaks&#8221;.
+<cite>breaks</cite> is essentially a cumulative row count for each cluster boundary.
+In other words, after plotting the array you can use axhline on each
+&#8220;break&#8221; to plot the cluster boundary.</p>
+<p>If <cite>k</cite> is a list or tuple, iteratively try each one and select the best
+with the lowest mean distance from cluster centers.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> &#8211; Matrix whose rows are to be clustered</li>
+<li><strong>k</strong> &#8211; Number of clusters to create or a list of potential clusters; the
+optimum will be chosen from the list</li>
+<li><strong>scorefunc</strong> &#8211; Optional function for sorting rows within clusters.  Must
+accept a single argument of a NumPy array.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="metaseq.plotutils.add_labels_to_subsets.html"
+                        title="previous chapter">metaseq.plotutils.add_labels_to_subsets</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="metaseq.plotutils.calculate_limits.html"
+                        title="next chapter">metaseq.plotutils.calculate_limits</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/autodocs/metaseq.plotutils.clustered_sortind.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="metaseq.plotutils.calculate_limits.html" title="metaseq.plotutils.calculate_limits"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="metaseq.plotutils.add_labels_to_subsets.html" title="metaseq.plotutils.add_labels_to_subsets"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../autodocs.html" >API docs</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2015, Ryan Dale.
+  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+  <br />Theme based on <a href="http://readthedocs.org/">Read The Docs</a>
+
+</div>
+
+
+
+
+
+  </body>
+</html>

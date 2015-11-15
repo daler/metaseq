@@ -1,0 +1,1296 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>Example 1: Average ChIP-seq signal over promoters &mdash; metaseq 0.5.6 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.5.6',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/searchtools.js"></script>
+    <link rel="top" title="metaseq 0.5.6 documentation" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">metaseq 0.5.6 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="example-1-average-chip-seq-signal-over-promoters">
+<h1>Example 1: Average ChIP-seq signal over promoters<a class="headerlink" href="#example-1-average-chip-seq-signal-over-promoters" title="Permalink to this headline">¶</a></h1>
+<p>This example demonstrates the use of :mod:<code class="docutils literal"><span class="pre">metaseq</span></code> for performing a
+common task when analyzing ChIP-seq data: what does transcription factor
+binding signal look like near transcription start sites (TSS)?</p>
+<p>The IPython Notebook of this example can be found in the source
+directory (<code class="docutils literal"><span class="pre">doc/source/example_session.ipynb</span></code>) or at
+<a class="reference external" href="http://nbviewer.ipython.org/github/daler/metaseq/blob/master/doc/source/example_session.ipynb">http://nbviewer.ipython.org/github/daler/metaseq/blob/master/doc/source/example_session.ipynb</a></p>
+<div class="code python highlight-python"><div class="highlight"><pre># Enable in-line plots for this example
+%matplotlib inline
+</pre></div>
+</div>
+<div class="section" id="example-data">
+<h2>Example data<a class="headerlink" href="#example-data" title="Permalink to this headline">¶</a></h2>
+<p>This example uses data that can be downloaded from
+<a class="reference external" href="https://github.com/daler/metaseq-example-data">https://github.com/daler/metaseq-example-data</a>. See that repository for
+details on how the data were prepared; here&#8217;s how to download the
+prepared data:</p>
+<div class="code python highlight-python"><div class="highlight"><pre>%%bash
+example_dir=&quot;metaseq-example&quot;
+if [ -e $example_dir ]; then echo &quot;already exists&quot;;
+else
+    mkdir -p $example_dir
+    (cd $example_dir \
+    &amp;&amp; wget --progress=dot:giga https://raw.githubusercontent.com/daler/metaseq-example-data/master/metaseq-example-data.tar.gz \
+    &amp;&amp; tar -xzf metaseq-example-data.tar.gz \
+    &amp;&amp; rm metaseq-example-data.tar.gz)
+fi
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre>--2015-04-03 12:51:44--  https://raw.githubusercontent.com/daler/metaseq-example-data/master/metaseq-example-data.tar.gz
+Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 199.27.75.133
+Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|199.27.75.133|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 96655384 (92M) [application/octet-stream]
+Saving to: ‘metaseq-example-data.tar.gz’
+
+     0K ........ ........ ........ ........ 34% 34.7M 2s
+ 32768K ........ ........ ........ ........ 69% 83.3M 1s
+ 65536K ........ ........ ........ ....    100% 83.8M=1.6s
+
+2015-04-03 12:51:47 (56.1 MB/s) - ‘metaseq-example-data.tar.gz’ saved [96655384/96655384]
+</pre></div>
+</div>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># From now on, we can just use `data_dir`</span>
+<span class="n">data_dir</span> <span class="o">=</span> <span class="s">&#39;metaseq-example/data&#39;</span>
+</pre></div>
+</div>
+<div class="code python highlight-python"><div class="highlight"><pre># What did we get?
+!ls $data_dir
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre>GSM847565_SL2585.gtf.gz
+GSM847565_SL2585.table
+GSM847566_SL2592.gtf.gz
+GSM847566_SL2592.table
+Homo_sapiens.GRCh37.66_chr17.gtf
+Homo_sapiens.GRCh37.66_chr17.gtf.db
+Homo_sapiens.GRCh37.66.gtf.gz
+wgEncodeHaibTfbsK562Atf3V0416101AlnRep1_chr17.bam
+wgEncodeHaibTfbsK562Atf3V0416101AlnRep1_chr17.bam.bai
+wgEncodeHaibTfbsK562Atf3V0416101RawRep1_chr17.bigWig
+wgEncodeHaibTfbsK562RxlchV0416101AlnRep1_chr17.bam
+wgEncodeHaibTfbsK562RxlchV0416101AlnRep1_chr17.bam.bai
+wgEncodeHaibTfbsK562RxlchV0416101RawRep1_chr17.bigWig
+</pre></div>
+</div>
+<ul class="simple">
+<li>The <code class="docutils literal"><span class="pre">.bam</span></code> and <code class="docutils literal"><span class="pre">.bam.bai</span></code> files are from an ENCODE project
+ChIP-Seq experiment in the human erythroid K562 cell line for the
+ATF3 transcription factor and its associated input control. See the
+<a class="reference external" href="https://www.encodeproject.org/experiments/ENCSR000DOG/">ENCODE
+page</a> for
+details.</li>
+<li>The <code class="docutils literal"><span class="pre">.bigWig</span></code> files are from the same experiment, downloaded from
+ENCODE</li>
+<li>The GTF annotation files are downloaded from Ensembl (release 66) for
+hg19.</li>
+<li>The <code class="docutils literal"><span class="pre">Homo_sapiens.GRCh37.66_chr17.gtf.db</span></code> file is a <code class="docutils literal"><span class="pre">gffutils</span></code>
+database that was prepared from the GTF file.</li>
+<li>The <code class="docutils literal"><span class="pre">GSM*.gtf.gz</span></code> data are Cufflinks output from GEO accession
+GSM847565 and GSM847566. These were then parsed and reformatted into
+the corresponding <code class="docutils literal"><span class="pre">GSM*.table</span></code> files.</li>
+</ul>
+</div>
+<div class="section" id="getting-tsses">
+<h2>Getting TSSes<a class="headerlink" href="#getting-tsses" title="Permalink to this headline">¶</a></h2>
+<p>Our goal is to look at the ChIP-seq signal over transcription start
+sites (TSSes) of genes. Typically in this sort of analysis we start with
+annotations; here we&#8217;re using the annotations from Ensembl. If we&#8217;re
+lucky, TSSes will already be annotated. Failing that, perhaps 5&#8217;UTRs are
+annotated, so we could take the 5&#8217; end of the 5&#8217;UTR as the TSS. Let&#8217;s
+see what the Ensembl data gives us.</p>
+<div class="code python highlight-python"><div class="highlight"><pre>!head -n 3 $data_dir/Homo_sapiens.GRCh37.66_chr17.gtf
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre>chr17       protein_coding  exon    30898   31270   .       -       .        gene_id &quot;ENSG00000187939&quot;; transcript_id &quot;ENST00000343572&quot;; exon_number &quot;1&quot;; gene_name &quot;DOC2B&quot;; gene_biotype &quot;protein_coding&quot;; transcript_name &quot;DOC2B-201&quot;;
+chr17       protein_coding  CDS     30898   31270   .       -       0        gene_id &quot;ENSG00000187939&quot;; transcript_id &quot;ENST00000343572&quot;; exon_number &quot;1&quot;; gene_name &quot;DOC2B&quot;; gene_biotype &quot;protein_coding&quot;; transcript_name &quot;DOC2B-201&quot;; protein_id &quot;ENSP00000343665&quot;;
+chr17       protein_coding  start_codon     31268   31270   .       -       0        gene_id &quot;ENSG00000187939&quot;; transcript_id &quot;ENST00000343572&quot;; exon_number &quot;1&quot;; gene_name &quot;DOC2B&quot;; gene_biotype &quot;protein_coding&quot;; transcript_name &quot;DOC2B-201&quot;;
+</pre></div>
+</div>
+<p>GTF files have the feature type in the 3rd field. So what kind of
+featuretypes do we have here?</p>
+<div class="code python highlight-python"><div class="highlight"><pre>!cut -f 3  $data_dir/Homo_sapiens.GRCh37.66_chr17.gtf | sort | uniq -c
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre>34137 CDS
+45801 exon
+ 3355 start_codon
+ 3265 stop_codon
+</pre></div>
+</div>
+<p>With only these featuretypes to work with, we would need to do the
+following to identify the TSS of each transcript: * find all exons for
+the transcript * sort the exons by start position * if the transcript
+is on the &#8220;+&#8221; strand, TSS is the start position of the first exon * if
+the transcript is on the &#8220;-&#8221; strand, TSS is the end position of the last
+exon</p>
+<p>Luckily, <code class="docutils literal"><span class="pre">`gffutils</span></code> &lt;<a class="reference external" href="https://github.com/daler/gffutils">https://github.com/daler/gffutils</a>&gt;`__ is able to
+infer transcripts and genes from a GTF file. The inferred transcripts
+and genes are already in the prepared <code class="docutils literal"><span class="pre">gffutils</span></code> database, at
+<code class="docutils literal"><span class="pre">$data_dir/Homo_sapiens.GRCh37.66_chr17.gtf.db</span></code>. First we connect to
+it:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">gffutils</span>
+<span class="n">db</span> <span class="o">=</span> <span class="n">gffutils</span><span class="o">.</span><span class="n">FeatureDB</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s">&#39;Homo_sapiens.GRCh37.66_chr17.gtf.db&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>We&#8217;ll use <code class="docutils literal"><span class="pre">`pybedtools</span></code> &lt;<a class="reference external" href="https://github.com/daler/pybedtools">https://github.com/daler/pybedtools</a>&gt;`__ for
+interval manipulation.</p>
+<p>Here we create a generator function that iterates through all annotated
+transcripts in the database. For each transcript, we convert it to a
+<code class="docutils literal"><span class="pre">pybedtools.Interval</span></code> and use the <code class="docutils literal"><span class="pre">TSS</span></code> function to give us the 1-bp
+position of the TSS, and save it as a new file.</p>
+<p>Here is a general usage pattern for <code class="docutils literal"><span class="pre">gffutils</span></code> and <code class="docutils literal"><span class="pre">pybedtools</span></code>: do
+the work in a generator function, and pass the generator to
+<code class="docutils literal"><span class="pre">pybedtools.BedTool</span></code>. This uses very little memory, and scales well to
+hundreds of thousands of features.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">pybedtools</span>
+<span class="kn">from</span> <span class="nn">pybedtools.featurefuncs</span> <span class="kn">import</span> <span class="n">TSS</span>
+<span class="kn">from</span> <span class="nn">gffutils.helpers</span> <span class="kn">import</span> <span class="n">asinterval</span>
+
+
+<span class="k">def</span> <span class="nf">tss_generator</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generator function to yield TSS of each annotated transcript</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">transcript</span> <span class="ow">in</span> <span class="n">db</span><span class="o">.</span><span class="n">features_of_type</span><span class="p">(</span><span class="s">&#39;transcript&#39;</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="n">TSS</span><span class="p">(</span><span class="n">asinterval</span><span class="p">(</span><span class="n">transcript</span><span class="p">),</span> <span class="n">upstream</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">downstream</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+
+<span class="c"># A BedTool made out of a generator, and saved to file.</span>
+<span class="n">tsses</span> <span class="o">=</span> <span class="n">pybedtools</span><span class="o">.</span><span class="n">BedTool</span><span class="p">(</span><span class="n">tss_generator</span><span class="p">())</span><span class="o">.</span><span class="n">saveas</span><span class="p">(</span><span class="s">&#39;tsses.gtf&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now that we have a TSS file, we can modify it in different ways. Maybe
+we want to look at TSS +/- 1kb. Or 5kb. Or just 3kb upstream.</p>
+<p>For this example, let&#8217;s use <code class="docutils literal"><span class="pre">pybedtools</span></code> to add 1kb to either side of
+the TSS. This uses the BEDTools <code class="docutils literal"><span class="pre">slop</span></code> routine; see the docs for that
+program for how to make changes to up/downstream distances.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">tsses_1kb</span> <span class="o">=</span> <span class="n">tsses</span><span class="o">.</span><span class="n">slop</span><span class="p">(</span><span class="n">b</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">genome</span><span class="o">=</span><span class="s">&#39;hg19&#39;</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s">&#39;tsses-1kb.gtf&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="creating-the-arrays">
+<h2>Creating the arrays<a class="headerlink" href="#creating-the-arrays" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal"><span class="pre">metaseq</span></code> works with the concepts of signal and windows. In this
+example, the signal is ChIP data, and the windows are TSS +/- 1kb.</p>
+<p>The first step is to create “genomic signal” objects out of the data.
+Since our example files are BAM files, we specify the kind=’bam’, but if
+you have your own data in a different format (bigWig, bigBed, BED, GFF,
+GTF, VCF) then specify that format instead (see
+:func:<code class="docutils literal"><span class="pre">metaseq.genomic_signal()</span></code>).</p>
+<p>We need to pass the filenames of the BAM files:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">metaseq</span>
+
+<span class="n">ip_signal</span> <span class="o">=</span> <span class="n">metaseq</span><span class="o">.</span><span class="n">genomic_signal</span><span class="p">(</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s">&#39;wgEncodeHaibTfbsK562Atf3V0416101AlnRep1_chr17.bam&#39;</span><span class="p">),</span>
+    <span class="s">&#39;bam&#39;</span><span class="p">)</span>
+
+<span class="n">input_signal</span> <span class="o">=</span> <span class="n">metaseq</span><span class="o">.</span><span class="n">genomic_signal</span><span class="p">(</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s">&#39;wgEncodeHaibTfbsK562RxlchV0416101AlnRep1_chr17.bam&#39;</span><span class="p">),</span>
+    <span class="s">&#39;bam&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now we can create the arrays of signal over each window. Since this can
+be a time-consuming step, the first time this code is run it will cache
+the arrays on disk. The next time this code is run, it will be quickly
+loaded. Trigger a re-run by deleting the <code class="docutils literal"><span class="pre">.npz</span></code> file.</p>
+<p>Here, with the <code class="docutils literal"><span class="pre">BamSignal.array</span></code> method, we bin each promoter region
+into 100 bins, and calculate the signal in parallel across as many CPUs
+as are available. We do this for the IP signal and input signals
+separately. Then, since these are BAM files of mapped reads, we scale
+the arrays to the library size. The scaled arrays are then saved to
+disk, along with the windows that were used to create them.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="n">processes</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s">&#39;example.npz&#39;</span><span class="p">):</span>
+
+    <span class="c"># The signal is the IP ChIP-seq BAM file.</span>
+    <span class="n">ip_array</span> <span class="o">=</span> <span class="n">ip_signal</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+
+        <span class="c"># Look at signal over these windows</span>
+        <span class="n">tsses_1kb</span><span class="p">,</span>
+
+        <span class="c"># Bin signal into this many bins per window</span>
+        <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+
+        <span class="c"># Use multiple CPUs. Dramatically speeds up run time.</span>
+        <span class="n">processes</span><span class="o">=</span><span class="n">processes</span><span class="p">)</span>
+
+    <span class="c"># Do the same thing for input.</span>
+    <span class="n">input_array</span> <span class="o">=</span> <span class="n">input_signal</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="n">tsses_1kb</span><span class="p">,</span>
+        <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">processes</span><span class="o">=</span><span class="n">processes</span><span class="p">)</span>
+
+    <span class="c"># Normalize to library size. The values in the array</span>
+    <span class="c"># will be in units of &quot;reads per million mapped reads&quot;</span>
+    <span class="n">ip_array</span> <span class="o">/=</span> <span class="n">ip_signal</span><span class="o">.</span><span class="n">mapped_read_count</span><span class="p">()</span> <span class="o">/</span> <span class="mf">1e6</span>
+    <span class="n">input_array</span> <span class="o">/=</span> <span class="n">input_signal</span><span class="o">.</span><span class="n">mapped_read_count</span><span class="p">()</span> <span class="o">/</span> <span class="mf">1e6</span>
+
+    <span class="c"># Cache to disk. The data will be saved as &quot;example.npz&quot; and &quot;example.features&quot;.</span>
+    <span class="n">metaseq</span><span class="o">.</span><span class="n">persistence</span><span class="o">.</span><span class="n">save_features_and_arrays</span><span class="p">(</span>
+        <span class="n">features</span><span class="o">=</span><span class="n">tsses</span><span class="p">,</span>
+        <span class="n">arrays</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;ip&#39;</span><span class="p">:</span> <span class="n">ip_array</span><span class="p">,</span> <span class="s">&#39;input&#39;</span><span class="p">:</span> <span class="n">input_array</span><span class="p">},</span>
+        <span class="n">prefix</span><span class="o">=</span><span class="s">&#39;example&#39;</span><span class="p">,</span>
+        <span class="n">link_features</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">overwrite</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="loading-the-arrays">
+<h2>Loading the arrays<a class="headerlink" href="#loading-the-arrays" title="Permalink to this headline">¶</a></h2>
+<p>Now that we’ve saved to disk, at any time in the future we can load the
+data without having to regenerate them:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">features</span><span class="p">,</span> <span class="n">arrays</span> <span class="o">=</span> <span class="n">metaseq</span><span class="o">.</span><span class="n">persistence</span><span class="o">.</span><span class="n">load_features_and_arrays</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s">&#39;example&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Let’s do some double-checks.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># How many features?</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">)</span> <span class="o">==</span> <span class="mi">5708</span>
+
+<span class="c"># This ought to be exactly the same as the number of features in `tsses_1kb.gtf`</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">tsses_1kb</span><span class="p">)</span> <span class="o">==</span> <span class="mi">5708</span>
+
+<span class="c"># This shows that `arrays` acts like a dictionary</span>
+<span class="k">assert</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">arrays</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">==</span> <span class="p">[</span><span class="s">&#39;input&#39;</span><span class="p">,</span> <span class="s">&#39;ip&#39;</span><span class="p">]</span>
+
+<span class="c"># This shows that the IP and input arrays have one row per feature, and one column per bin</span>
+<span class="k">assert</span> <span class="n">arrays</span><span class="p">[</span><span class="s">&#39;ip&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">5708</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span> <span class="o">==</span> <span class="n">arrays</span><span class="p">[</span><span class="s">&#39;input&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="line-plot-of-average-signal">
+<h2>Line plot of average signal<a class="headerlink" href="#line-plot-of-average-signal" title="Permalink to this headline">¶</a></h2>
+<p>Now that we have NumPy arrays of signal over windows, there’s a lot we
+can do. One easy thing is to simply plot the mean signal of IP and of
+input. Let’s construct meaningful values for the x-axis, from -1000 to
++1000 over 100 bins. We&#8217;ll do this with a NumPy array.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then plot, using standard <code class="docutils literal"><span class="pre">`matplotlib</span></code> &lt;<a class="reference external" href="http://matplotlib.org/">http://matplotlib.org/</a>&gt;`__
+commands:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Import plotting tools</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+
+<span class="c"># Create a figure and axes</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+
+
+<span class="c"># Plot the IP:</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="c"># use the x-axis values we created</span>
+    <span class="n">x</span><span class="p">,</span>
+
+    <span class="c"># axis=0 takes the column-wise mean, so with</span>
+    <span class="c"># 100 columns we&#39;ll have 100 means to plot</span>
+    <span class="n">arrays</span><span class="p">[</span><span class="s">&#39;ip&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+
+    <span class="c"># Make it red</span>
+    <span class="n">color</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">,</span>
+
+    <span class="c"># Label to show up in legend</span>
+    <span class="n">label</span><span class="o">=</span><span class="s">&#39;IP&#39;</span><span class="p">)</span>
+
+
+<span class="c"># Do the same thing with the input</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">,</span>
+    <span class="n">arrays</span><span class="p">[</span><span class="s">&#39;input&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+    <span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s">&#39;input&#39;</span><span class="p">)</span>
+
+
+<span class="c"># Add a vertical line at the TSS, at position 0</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s">&#39;:&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">)</span>
+
+
+<span class="c"># Add labels and legend</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s">&#39;Distance from TSS (bp)&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&#39;Average read coverage (per million mapped reads)&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s">&#39;best&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+<img alt="example_session_run_files/example_session_run_30_0.png" src="example_session_run_files/example_session_run_30_0.png" />
+</div>
+<div class="section" id="adding-a-heatmap">
+<h2>Adding a heatmap<a class="headerlink" href="#adding-a-heatmap" title="Permalink to this headline">¶</a></h2>
+<p>Let&#8217;s work on improving this plot, one step at a time.</p>
+<p>We don&#8217;t really know if this average signal is due to a handful of
+really strong peaks, or if it&#8217;s moderate signal over many peaks. So one
+improvement would be to include a heatmap of the signal over all the
+TSSs.</p>
+<p>First, let&#8217;s create a single normalized array by subtracting input from
+IP:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">normalized_subtracted</span> <span class="o">=</span> <span class="n">arrays</span><span class="p">[</span><span class="s">&#39;ip&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">arrays</span><span class="p">[</span><span class="s">&#39;input&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p><code class="docutils literal"><span class="pre">metaseq</span></code> comes with some helper functions to simplify this kind of
+plotting. The <code class="docutils literal"><span class="pre">metaseq.plotutils.imshow</span></code> function is one of these;
+here the arguments are described:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Tweak some font settings so the results look nicer</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s">&#39;font.family&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;Arial&#39;</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s">&#39;font.size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10</span>
+
+<span class="c"># the metaseq.plotutils.imshow function does a lot of work,</span>
+<span class="c"># we just have to give it the right arguments:</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">metaseq</span><span class="o">.</span><span class="n">plotutils</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+
+    <span class="c"># The array to plot; here, we&#39;ve subtracted input from IP.</span>
+    <span class="n">normalized_subtracted</span><span class="p">,</span>
+
+    <span class="c"># X-axis to use</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+
+    <span class="c"># Change the default figure size to something smaller for this example</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
+
+    <span class="c"># Make the colorbar limits go from 5th to 99th percentile.</span>
+    <span class="c"># `percentile=True` means treat vmin/vmax as percentiles rather than</span>
+    <span class="c"># actual values.</span>
+    <span class="n">percentile</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="mi">99</span><span class="p">,</span>
+
+    <span class="c"># Style for the average line plot (black line)</span>
+    <span class="n">line_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;All&#39;</span><span class="p">),</span>
+
+    <span class="c"># Style for the +/- 95% CI band surrounding the</span>
+    <span class="c"># average line (transparent black)</span>
+    <span class="n">fill_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<img alt="example_session_run_files/example_session_run_35_0.png" src="example_session_run_files/example_session_run_35_0.png" />
+<div class="code python highlight-python"><div class="highlight"><pre><span class="k">print</span> <span class="s">&quot;asdf&quot;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">asdf</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="sorting-the-array">
+<h2>Sorting the array<a class="headerlink" href="#sorting-the-array" title="Permalink to this headline">¶</a></h2>
+<p>The array is not very meaningful as currently sorted. We can adjust the
+sorting this either by re-ordering the array before plotting, or using
+the <code class="docutils literal"><span class="pre">sort_by</span></code> kwarg when calling <code class="docutils literal"><span class="pre">metaseq.plotutils.imshow</span></code>. Let&#8217;s
+sort the rows by their mean value:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">fig</span> <span class="o">=</span> <span class="n">metaseq</span><span class="o">.</span><span class="n">plotutils</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+
+    <span class="c"># These are the same arguments as above.</span>
+    <span class="n">normalized_subtracted</span><span class="p">,</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">99</span><span class="p">,</span>  <span class="n">percentile</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">line_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;All&#39;</span><span class="p">),</span>
+    <span class="n">fill_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">),</span>
+
+    <span class="c"># This is new: sort by mean signal</span>
+    <span class="n">sort_by</span><span class="o">=</span><span class="n">normalized_subtracted</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<img alt="example_session_run_files/example_session_run_38_0.png" src="example_session_run_files/example_session_run_38_0.png" />
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">ax1</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
+<span class="n">ax2</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">)</span>
+<span class="n">sort_by</span> <span class="o">=</span> <span class="n">arrays</span><span class="p">[</span><span class="s">&#39;ip&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">metaseq</span><span class="o">.</span><span class="n">plotutils</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+    <span class="c"># These are the same arguments as above.</span>
+    <span class="n">arrays</span><span class="p">[</span><span class="s">&#39;input&#39;</span><span class="p">],</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">99</span><span class="p">,</span>  <span class="n">percentile</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">sort_by</span><span class="o">=</span><span class="n">sort_by</span>
+
+<span class="p">)</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">metaseq</span><span class="o">.</span><span class="n">plotutils</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+    <span class="c"># These are the same arguments as above.</span>
+    <span class="n">arrays</span><span class="p">[</span><span class="s">&#39;ip&#39;</span><span class="p">],</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax2</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">99</span><span class="p">,</span>  <span class="n">percentile</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">sort_by</span><span class="o">=</span><span class="n">sort_by</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<img alt="example_session_run_files/example_session_run_39_0.png" src="example_session_run_files/example_session_run_39_0.png" />
+<p>We can use any number of arbitrary sorting methods. For example, this
+sorts the rows by the position of the highest signal in the row. Note
+that the line plot, which is the column-wise average, remains unchanged
+since we&#8217;re still using the same data. The rows are just sorted
+differently.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">fig</span> <span class="o">=</span> <span class="n">metaseq</span><span class="o">.</span><span class="n">plotutils</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+
+    <span class="c"># These are the same arguments as above.</span>
+    <span class="n">normalized_subtracted</span><span class="p">,</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">99</span><span class="p">,</span>  <span class="n">percentile</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">line_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;All&#39;</span><span class="p">),</span>
+    <span class="n">fill_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">),</span>
+
+    <span class="c"># This is new: sort by mean signal</span>
+    <span class="n">sort_by</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">normalized_subtracted</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<img alt="example_session_run_files/example_session_run_41_0.png" src="example_session_run_files/example_session_run_41_0.png" />
+</div>
+<div class="section" id="customizing-the-axes-styles">
+<h2>Customizing the axes styles<a class="headerlink" href="#customizing-the-axes-styles" title="Permalink to this headline">¶</a></h2>
+<p>Let&#8217;s go back to the sorted-by-mean version.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">fig</span> <span class="o">=</span> <span class="n">metaseq</span><span class="o">.</span><span class="n">plotutils</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+    <span class="n">normalized_subtracted</span><span class="p">,</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">99</span><span class="p">,</span>  <span class="n">percentile</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">line_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;All&#39;</span><span class="p">),</span>
+    <span class="n">fill_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">),</span>
+    <span class="n">sort_by</span><span class="o">=</span><span class="n">normalized_subtracted</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<img alt="example_session_run_files/example_session_run_43_0.png" src="example_session_run_files/example_session_run_43_0.png" />
+<p>Now we&#8217;ll make some tweaks to the plot. The figure returned by
+<code class="docutils literal"><span class="pre">metaseq.plotutils.imshow</span></code> has attributes <code class="docutils literal"><span class="pre">array_axes</span></code>,
+<code class="docutils literal"><span class="pre">line_axes</span></code>, and <code class="docutils literal"><span class="pre">cax</span></code>, which can be used as an easy way to get
+handles to the axes for further configuration. Let&#8217;s make some
+additional tweaks:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># &quot;line_axes&quot; is our handle for working on the lower axes.</span>
+<span class="c"># Add some nicer labels.</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">line_axes</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&#39;Average enrichment&#39;</span><span class="p">);</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">line_axes</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s">&#39;Distance from TSS (bp)&#39;</span><span class="p">);</span>
+
+<span class="c"># &quot;array_axes&quot; is our handle for working on the upper array axes.</span>
+<span class="c"># Add a nicer axis label</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">array_axes</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&#39;Transcripts on chr17&#39;</span><span class="p">)</span>
+
+<span class="c"># Remove the x tick labels, since they&#39;re redundant</span>
+<span class="c"># with the line axes</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">array_axes</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([])</span>
+
+<span class="c"># Add a vertical line to indicate zero in both the array axes</span>
+<span class="c"># and the line axes</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">array_axes</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s">&#39;:&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">line_axes</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s">&#39;:&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">cax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&quot;Enrichment&quot;</span><span class="p">)</span>
+<span class="n">fig</span>
+</pre></div>
+</div>
+<img alt="example_session_run_files/example_session_run_45_0.png" src="example_session_run_files/example_session_run_45_0.png" />
+</div>
+</div>
+<div class="section" id="integrating-with-rna-seq-expression-data">
+<h1>Integrating with RNA-seq expression data<a class="headerlink" href="#integrating-with-rna-seq-expression-data" title="Permalink to this headline">¶</a></h1>
+<p>Often we want to compare ChIP-seq data with RNA-seq data. But RNA-seq
+data typically is presented as gene ID, while ChIP-seq data is presented
+as genomic coords. These can be tricky to reconcile.</p>
+<p>We will use example data from ATF3 knockdown experiments them to subset
+the ChIP signal by those TSSs that were affected by knockdown and those
+that were not.</p>
+<p>This example uses pre-processed data downloaded from GEO. We&#8217;ll use a
+simple (and naive) 2-fold cutoff to identify transcripts that went up,
+down, or were unchanged upon ATF3 knockdown. In real-world analysis,
+you&#8217;d probaby have a table from DESeq2 or edgeR analysis that you would
+use instead.</p>
+<div class="section" id="rna-seq-data-wrangling-loading-data">
+<h2>RNA-seq data wrangling: loading data<a class="headerlink" href="#rna-seq-data-wrangling-loading-data" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal"><span class="pre">metaseq.results_table</span></code> module has tools for working with this
+kind of data (for example, the <code class="docutils literal"><span class="pre">metaseq.results_table.DESeq2Results</span></code>
+class). Here, we will make a generic <code class="docutils literal"><span class="pre">ResultsTable</span></code> which handles any
+kind of tab-delimited data. It&#8217;s important to specify the index column.
+This is the column that contains the transcript IDs in these files.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">metaseq.results_table</span> <span class="kn">import</span> <span class="n">ResultsTable</span>
+
+<span class="n">control</span> <span class="o">=</span> <span class="n">ResultsTable</span><span class="p">(</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s">&#39;GSM847565_SL2585.table&#39;</span><span class="p">),</span>
+    <span class="n">import_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+<span class="n">knockdown</span> <span class="o">=</span> <span class="n">ResultsTable</span><span class="p">(</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s">&#39;GSM847566_SL2592.table&#39;</span><span class="p">),</span>
+    <span class="n">import_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+</pre></div>
+</div>
+<p><code class="docutils literal"><span class="pre">metaseq.results_table.ResultsTable</span></code> objects are wrappers around
+<code class="docutils literal"><span class="pre">pandas.DataFrame</span></code> objects, so if you already know <code class="docutils literal"><span class="pre">pandas</span></code> you know
+how to manipulate these objects. The <code class="docutils literal"><span class="pre">pandas.DataFrame</span></code> is always
+available as the <code class="docutils literal"><span class="pre">data</span></code> attribute.</p>
+<p>Here are the first 5 rows of the <code class="docutils literal"><span class="pre">control</span></code> object, which show that the
+index is <code class="docutils literal"><span class="pre">id</span></code>, which are Ensembl transcript IDs, and there are two
+columns, <code class="docutils literal"><span class="pre">score</span></code> and <code class="docutils literal"><span class="pre">fpkm</span></code>:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># ---------------------------------------------------------</span>
+<span class="c"># Inspect results to see what we&#39;re working with</span>
+
+<span class="k">print</span> <span class="nb">len</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+<span class="n">control</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="mi">85699</span>
+</pre></div>
+</div>
+<div style="max-height:1000px;max-width:1500px;overflow:auto;">
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>score</th>
+      <th>fpkm</th>
+    </tr>
+    <tr>
+      <th>id</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>ENST00000456328</th>
+      <td> 108.293111</td>
+      <td> 1.118336</td>
+    </tr>
+    <tr>
+      <th>ENST00000515242</th>
+      <td>  87.233019</td>
+      <td> 0.830617</td>
+    </tr>
+    <tr>
+      <th>ENST00000518655</th>
+      <td> 175.175609</td>
+      <td> 2.367682</td>
+    </tr>
+    <tr>
+      <th>ENST00000473358</th>
+      <td> 343.232679</td>
+      <td> 9.795265</td>
+    </tr>
+    <tr>
+      <th>ENST00000408384</th>
+      <td>   0.000000</td>
+      <td> 0.000000</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+<div class="section" id="rna-seq-data-wrangling-aligning-rna-seq-data-with-chip-seq-data">
+<h2>RNA-seq data wrangling: aligning RNA-seq data with ChIP-seq data<a class="headerlink" href="#rna-seq-data-wrangling-aligning-rna-seq-data-with-chip-seq-data" title="Permalink to this headline">¶</a></h2>
+<p>We should ensure that <code class="docutils literal"><span class="pre">control</span></code> and <code class="docutils literal"><span class="pre">knockdown</span></code> have their
+transcript IDs in the same order as the rows in the heatmap array, and
+that they only contain transcript IDs from chr17.</p>
+<p>The <code class="docutils literal"><span class="pre">ResultsTable.reindex_to</span></code> method is very useful for this &#8211; it
+takes a <code class="docutils literal"><span class="pre">pybedtools.BedTool</span></code> object and re-indexes the underlying
+dataframe so that the order of the dataframe matches the order of the
+features in the file. In this way we can re-align RNA-seq data to
+ChIP-seq data for more direct comparison.</p>
+<p>Remember the <code class="docutils literal"><span class="pre">tsses_1kb</span></code> object that we used to create the array? That
+defined the order of the rows in the array. We can use that to re-index
+the dataframes. Let&#8217;s look at the first line from that file to see how
+the transcript ID information is stored:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># ---------------------------------------------------------</span>
+<span class="c"># Inspect the GTF file originally used to create the array</span>
+
+<span class="k">print</span> <span class="n">tsses_1kb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre>chr17       gffutils_derived        transcript      37025255        37027255        .       +       .       transcript_id &quot;ENST00000318008&quot;; gene_id &quot;ENSG00000002834&quot;;
+</pre></div>
+</div>
+<p>The Ensembl transcript ID is stored in the <code class="docutils literal"><span class="pre">transcript_id</span></code> field of
+the GTF attributes:</p>
+<div class="highlight-python"><div class="highlight"><pre>transcript_id &quot;ENST00000318008&quot;; gene_id &quot;ENSG00000002834&quot;;
+</pre></div>
+</div>
+<p>The <code class="docutils literal"><span class="pre">ResultsTable</span></code> is indexed by transcript ID. Note that DESeq2 and
+edgeR results are typically indexed by gene, rather than trancscript,
+ID. So when working with your own data, be sure to select the GTF
+attribute whose values will be found in the <code class="docutils literal"><span class="pre">ResultsTable</span></code> index.</p>
+<p>Here, we tell the <code class="docutils literal"><span class="pre">ResultsTable.reindex_to</span></code> method which attribute it
+should pay attention to when realigning the data:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># ---------------------------------------------------------</span>
+<span class="c"># Re-align the ResultsTables to match the GTF file</span>
+<span class="n">control</span> <span class="o">=</span> <span class="n">control</span><span class="o">.</span><span class="n">reindex_to</span><span class="p">(</span><span class="n">tsses</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="s">&#39;transcript_id&#39;</span><span class="p">)</span>
+<span class="n">knockdown</span> <span class="o">=</span> <span class="n">knockdown</span><span class="o">.</span><span class="n">reindex_to</span><span class="p">(</span><span class="n">tsses</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="s">&#39;transcript_id&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that we now have a different order &#8211; the first 5 rows are now
+different compared to when we checked before.</p>
+<p>Also, the number of rows in the table has decreased dramatically. Recall
+that <code class="docutils literal"><span class="pre">tsses_1kb</span></code> only contained features from chr17. The original data
+table had all transcripts. By reindexing the table to match the
+<code class="docutils literal"><span class="pre">tsses_1kb</span></code>, we lose all of the non-chr17 transcripts.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="k">print</span> <span class="nb">len</span><span class="p">(</span><span class="n">control</span><span class="p">)</span>
+<span class="n">control</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="mi">5708</span>
+</pre></div>
+</div>
+<div style="max-height:1000px;max-width:1500px;overflow:auto;">
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>score</th>
+      <th>fpkm</th>
+    </tr>
+    <tr>
+      <th>id</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>ENST00000318008</th>
+      <td> 433.958279</td>
+      <td> 19.246250</td>
+    </tr>
+    <tr>
+      <th>ENST00000419929</th>
+      <td>        NaN</td>
+      <td>       NaN</td>
+    </tr>
+    <tr>
+      <th>ENST00000433206</th>
+      <td>  40.938322</td>
+      <td>  0.328118</td>
+    </tr>
+    <tr>
+      <th>ENST00000435347</th>
+      <td> 450.179142</td>
+      <td> 21.655531</td>
+    </tr>
+    <tr>
+      <th>ENST00000443937</th>
+      <td> 451.761068</td>
+      <td> 21.905318</td>
+    </tr>
+  </tbody>
+</table>
+</div><p>Also note that second transcript, with NaN values. It turns out that
+transcript was not in the original RNA-seq results data table:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">original_control</span> <span class="o">=</span> <span class="n">ResultsTable</span><span class="p">(</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s">&#39;GSM847565_SL2585.table&#39;</span><span class="p">),</span>
+    <span class="n">import_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+<span class="s">&#39;ENST00000419929&#39;</span> <span class="ow">in</span> <span class="n">original_control</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">False</span>
+</pre></div>
+</div>
+<p>This may be because the experiment from GEO used something other than
+Ensembl annotations when running the analysis. It&#8217;s actually not clear
+from the GEO entry what they used. Anyway, in order to make sure the
+rows in the table match the rows in the array, NaNs are added as values.</p>
+<p>Let&#8217;s do some double-checks to make sure things are set up correctly:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Everything should be the same length</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">knockdown</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">tsses_1kb</span><span class="p">)</span> <span class="o">==</span> <span class="mi">5708</span>
+
+<span class="c"># Spot-check some values to make sure the GTF file and the DataFrame match up.</span>
+<span class="k">assert</span> <span class="n">tsses</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;transcript_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">control</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="k">assert</span> <span class="n">tsses</span><span class="p">[</span><span class="mi">100</span><span class="p">][</span><span class="s">&#39;transcript_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">control</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">100</span><span class="p">]</span>
+<span class="k">assert</span> <span class="n">tsses</span><span class="p">[</span><span class="mi">5000</span><span class="p">][</span><span class="s">&#39;transcript_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">control</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">5000</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="rna-seq-data-wrangling-join-control-and-knockdown-data">
+<h2>RNA-seq data wrangling: join control and knockdown data<a class="headerlink" href="#rna-seq-data-wrangling-join-control-and-knockdown-data" title="Permalink to this headline">¶</a></h2>
+<p>Now for some more data-wrangling. We&#8217;ll use basic
+<code class="docutils literal"><span class="pre">`pandas</span></code> &lt;<a class="reference external" href="http://pandas.pydata.org/">http://pandas.pydata.org/</a>&gt;`__ operations to merge the
+control and knockdown data together into a single table. We&#8217;ll also
+create a new log2foldchange column.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Join the dataframes and create a new pandas.DataFrame.</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">control</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">knockdown</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">lsuffix</span><span class="o">=</span><span class="s">&#39;_control&#39;</span><span class="p">,</span> <span class="n">rsuffix</span><span class="o">=</span><span class="s">&#39;_knockdown&#39;</span><span class="p">)</span>
+
+<span class="c"># Add a log2 fold change variable</span>
+<span class="n">data</span><span class="p">[</span><span class="s">&#39;log2foldchange&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">fpkm_knockdown</span> <span class="o">/</span> <span class="n">data</span><span class="o">.</span><span class="n">fpkm_control</span><span class="p">)</span>
+<span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+<div style="max-height:1000px;max-width:1500px;overflow:auto;">
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>score_control</th>
+      <th>fpkm_control</th>
+      <th>score_knockdown</th>
+      <th>fpkm_knockdown</th>
+      <th>log2foldchange</th>
+    </tr>
+    <tr>
+      <th>id</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>ENST00000318008</th>
+      <td> 433.958279</td>
+      <td> 19.246250</td>
+      <td> 386.088132</td>
+      <td> 13.529179</td>
+      <td>-0.508503</td>
+    </tr>
+    <tr>
+      <th>ENST00000419929</th>
+      <td>        NaN</td>
+      <td>       NaN</td>
+      <td>        NaN</td>
+      <td>       NaN</td>
+      <td>      NaN</td>
+    </tr>
+    <tr>
+      <th>ENST00000433206</th>
+      <td>  40.938322</td>
+      <td>  0.328118</td>
+      <td> 181.442415</td>
+      <td>  2.517192</td>
+      <td> 2.939529</td>
+    </tr>
+    <tr>
+      <th>ENST00000435347</th>
+      <td> 450.179142</td>
+      <td> 21.655531</td>
+      <td> 436.579186</td>
+      <td> 19.617419</td>
+      <td>-0.142600</td>
+    </tr>
+    <tr>
+      <th>ENST00000443937</th>
+      <td> 451.761068</td>
+      <td> 21.905318</td>
+      <td> 431.172759</td>
+      <td> 18.859090</td>
+      <td>-0.216021</td>
+    </tr>
+  </tbody>
+</table>
+</div><p>We can investigate some basic stats:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># ---------------------------------------------------------</span>
+<span class="c"># How many transcripts on chr17 changed expression?</span>
+
+<span class="k">print</span> <span class="s">&quot;up:&quot;</span><span class="p">,</span> <span class="nb">sum</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">log2foldchange</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&quot;down:&quot;</span><span class="p">,</span> <span class="nb">sum</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">log2foldchange</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre>up: 735
+down: 514
+</pre></div>
+</div>
+</div>
+<div class="section" id="integrating-rna-seq-data-with-the-heatmap">
+<h2>Integrating RNA-seq data with the heatmap<a class="headerlink" href="#integrating-rna-seq-data-with-the-heatmap" title="Permalink to this headline">¶</a></h2>
+<p>Let&#8217;s return to the heatmap. In addition to the average coverage line we
+already have, we&#8217;d like to add additional lines in another panel. The
+<code class="docutils literal"><span class="pre">metaseq.plotutils.imshow</span></code> function is very flexible, and uses
+<code class="docutils literal"><span class="pre">matplotlib.gridspec</span></code> for organizing the axes. This means we can ask
+for an additional axes by overriding the default <code class="docutils literal"><span class="pre">height_ratios</span></code>
+tuple, using <code class="docutils literal"><span class="pre">(3,</span> <span class="pre">1,</span> <span class="pre">1)</span></code>. This says to make 3 axes, where the first
+one is 3x the height of the other two.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">fig</span> <span class="o">=</span> <span class="n">metaseq</span><span class="o">.</span><span class="n">plotutils</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+    <span class="c"># Same as before...</span>
+    <span class="n">normalized_subtracted</span><span class="p">,</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">99</span><span class="p">,</span>  <span class="n">percentile</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">line_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;All&#39;</span><span class="p">),</span>
+    <span class="n">fill_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">),</span>
+    <span class="n">sort_by</span><span class="o">=</span><span class="n">normalized_subtracted</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+
+
+    <span class="c"># Default was (3,1); here we add another number</span>
+    <span class="n">height_ratios</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c"># `fig.gs` contains the `matplotlib.gridspec.GridSpec` object,</span>
+<span class="c"># so we can now create the new axes.</span>
+<span class="n">bottom_axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">fig</span><span class="o">.</span><span class="n">gs</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+<img alt="example_session_run_files/example_session_run_67_0.png" src="example_session_run_files/example_session_run_67_0.png" />
+<p>The <code class="docutils literal"><span class="pre">metaseq.plotutils.ci_plot</span></code> function takes an array and plots the
+mean signal +/- 95% CI bands. This was actually called automatically
+before for our line plot of average signal across all TSSes.</p>
+<p>Now, let&#8217;s create a custom plot that separates TSSes into up, down, and
+unchanged in the ATF3 knockdown.</p>
+<p>Importantly, since we&#8217;ve aligned the RNA-seq data table and the array,
+we can calculate subsets in the RNA-seq data (as boolean indexes) and
+use those same indexes into the array itself.</p>
+<p>For clarity, let&#8217;s split up each step separately for the upregulated
+genes.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># This is a pandas.Series, True where the log2foldchange was &gt;1</span>
+<span class="n">upregulated</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">log2foldchange</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">upregulated</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre>id
+ENST00000318008    False
+ENST00000419929    False
+ENST00000433206     True
+ENST00000435347    False
+ENST00000443937    False
+ENST00000359238    False
+ENST00000393405     True
+ENST00000439357    False
+ENST00000452859     True
+ENST00000003834     True
+ENST00000379061    False
+ENST00000457710    False
+ENST00000003607    False
+ENST00000540200     True
+ENST00000158166     True
+...
+ENST00000562182    False
+ENST00000564549    False
+ENST00000566140    False
+ENST00000566930    False
+ENST00000567452    False
+ENST00000569893    False
+ENST00000569279    False
+ENST00000565271    False
+ENST00000567351    False
+ENST00000569284    False
+ENST00000569543    False
+ENST00000565120    False
+ENST00000562555    False
+ENST00000570002    False
+ENST00000565472    False
+Name: log2foldchange, Length: 5708, dtype: bool
+</pre></div>
+</div>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># This gets us the underlying boolean NumPy array which we</span>
+<span class="c"># can use to subset the array</span>
+<span class="n">index</span> <span class="o">=</span> <span class="n">upregulated</span><span class="o">.</span><span class="n">values</span>
+<span class="n">index</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">array</span><span class="p">([</span><span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span>  <span class="bp">True</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># This is the subset of the array where the TSS of the transcript</span>
+<span class="c"># went up in the ATF3 knockdown</span>
+<span class="n">upregulated_chipseq_signal</span> <span class="o">=</span> <span class="n">normalized_subtracted</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="p">:]</span>
+<span class="n">upregulated_chipseq_signal</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">array</span><span class="p">([[</span> <span class="mf">1.03915645</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.84141782</span><span class="p">,</span>  <span class="mf">0.03746102</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.84141782</span><span class="p">,</span>
+         <span class="mf">3.11746936</span><span class="p">,</span>  <span class="mf">3.11746936</span><span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">1.84141782</span><span class="p">,</span>  <span class="mf">2.07831291</span><span class="p">,</span>  <span class="mf">0.</span>        <span class="p">,</span> <span class="o">...</span><span class="p">,</span>  <span class="mf">1.03915645</span><span class="p">,</span>
+         <span class="mf">1.03915645</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.88057427</span><span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">2.88057427</span><span class="p">,</span>  <span class="mf">2.07831291</span><span class="p">,</span>  <span class="mf">2.07831291</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span>  <span class="mf">0.</span>        <span class="p">,</span>
+         <span class="mf">1.03915645</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.84141782</span><span class="p">],</span>
+       <span class="o">...</span><span class="p">,</span>
+       <span class="p">[</span> <span class="mf">1.03915645</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.84141782</span><span class="p">,</span>  <span class="mf">1.27605155</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span>  <span class="mf">0.</span>        <span class="p">,</span>
+         <span class="mf">0.</span>        <span class="p">,</span> <span class="o">-</span><span class="mf">2.88057427</span><span class="p">],</span>
+       <span class="p">[</span> <span class="mf">0.</span>        <span class="p">,</span> <span class="o">-</span><span class="mf">2.88057427</span><span class="p">,</span>  <span class="mf">0.</span>        <span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.80226136</span><span class="p">,</span>
+         <span class="mf">1.86838231</span><span class="p">,</span>  <span class="mf">4.15662582</span><span class="p">],</span>
+       <span class="p">[</span> <span class="mf">0.</span>        <span class="p">,</span>  <span class="mf">0.</span>        <span class="p">,</span>  <span class="mf">0.</span>        <span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.84141782</span><span class="p">,</span>
+        <span class="o">-</span><span class="mf">1.84141782</span><span class="p">,</span> <span class="o">-</span><span class="mf">8.64172281</span><span class="p">]])</span>
+</pre></div>
+</div>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># We can combine the above steps into the following:</span>
+<span class="n">subset</span> <span class="o">=</span> <span class="n">normalized_subtracted</span><span class="p">[(</span><span class="n">data</span><span class="o">.</span><span class="n">log2foldchange</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="p">:]</span>
+</pre></div>
+</div>
+<p>Now we just use the same technique for the up, down, and unchanged
+transcripts. Each one of them gets passed to the <code class="docutils literal"><span class="pre">ci_plot</span></code> method,
+which plots the line in the color we specify (<code class="docutils literal"><span class="pre">line_kwargs</span></code>,
+<code class="docutils literal"><span class="pre">fill_kwargs</span></code>) on the axes we specify (<code class="docutils literal"><span class="pre">bottom_axes</span></code>).</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Signal over TSSs of transcripts that were activated upon knockdown.</span>
+<span class="n">metaseq</span><span class="o">.</span><span class="n">plotutils</span><span class="o">.</span><span class="n">ci_plot</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">,</span>
+    <span class="n">normalized_subtracted</span><span class="p">[(</span><span class="n">data</span><span class="o">.</span><span class="n">log2foldchange</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="p">:],</span>
+    <span class="n">line_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;#fe9829&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;up&#39;</span><span class="p">),</span>
+    <span class="n">fill_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;#fe9829&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">),</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">bottom_axes</span><span class="p">)</span>
+
+<span class="c"># Signal over TSSs of transcripts that were repressed upon knockdown</span>
+<span class="n">metaseq</span><span class="o">.</span><span class="n">plotutils</span><span class="o">.</span><span class="n">ci_plot</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">,</span>
+    <span class="n">normalized_subtracted</span><span class="p">[(</span><span class="n">data</span><span class="o">.</span><span class="n">log2foldchange</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="p">:],</span>
+    <span class="n">line_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;#8e3104&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;down&#39;</span><span class="p">),</span>
+    <span class="n">fill_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;#8e3104&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">),</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">bottom_axes</span><span class="p">)</span>
+
+<span class="c"># Signal over TSSs tof transcripts that did not change upon knockdown</span>
+<span class="n">metaseq</span><span class="o">.</span><span class="n">plotutils</span><span class="o">.</span><span class="n">ci_plot</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">,</span>
+    <span class="n">normalized_subtracted</span><span class="p">[((</span><span class="n">data</span><span class="o">.</span><span class="n">log2foldchange</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">log2foldchange</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="p">:],</span>
+    <span class="n">line_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;.5&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;unchanged&#39;</span><span class="p">),</span>
+    <span class="n">fill_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;.5&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">),</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">bottom_axes</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Finally, we do some cleaning up to make the figure look nicer (axes
+labels, legend, vertical lines at zero):</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Clean up redundant x tick labels, and add axes labels</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">line_axes</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([])</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">array_axes</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([])</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">line_axes</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&#39;Average</span><span class="se">\n</span><span class="s">enrichement&#39;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">array_axes</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&#39;Transcripts on chr17&#39;</span><span class="p">)</span>
+<span class="n">bottom_axes</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&#39;Average</span><span class="se">\n</span><span class="s">enrichment&#39;</span><span class="p">)</span>
+<span class="n">bottom_axes</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s">&#39;Distance from TSS (bp)&#39;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">cax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&#39;Enrichment&#39;</span><span class="p">)</span>
+
+<span class="c"># Add the vertical lines for TSS position to all axes</span>
+<span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="p">[</span><span class="n">fig</span><span class="o">.</span><span class="n">line_axes</span><span class="p">,</span> <span class="n">fig</span><span class="o">.</span><span class="n">array_axes</span><span class="p">,</span> <span class="n">bottom_axes</span><span class="p">]:</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s">&#39;:&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">)</span>
+
+<span class="c"># Nice legend</span>
+<span class="n">bottom_axes</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s">&#39;best&#39;</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">labelspacing</span><span class="o">=.</span><span class="mi">3</span><span class="p">,</span> <span class="n">handletextpad</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+<span class="n">fig</span>
+</pre></div>
+</div>
+<img alt="example_session_run_files/example_session_run_76_0.png" src="example_session_run_files/example_session_run_76_0.png" />
+<p>We can save the figure to disk in different formats for manuscript
+preparation:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s">&#39;demo.png&#39;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s">&#39;demo.svg&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>It appears that transcripts unchanged by ATF3 knockdown have the
+strongest ChIP signal. Transcripts that went up upon knockdown (that is,
+ATF3 normally represses them) had a slightly higher signal than those
+transcripts that went down (normally activated by ATF3).</p>
+<p>Interestingly, even though we used a crude cutoff of 2-fold for a single
+replicate, and we only looked at chr17, the direction of the
+relationship we see here &#8211; where ATF3-repressed genes have a higher
+signal than ATF3-activated &#8211; is consistent with ATF3&#8217;s known repressive
+role.</p>
+</div>
+</div>
+<div class="section" id="extras">
+<h1>Extras<a class="headerlink" href="#extras" title="Permalink to this headline">¶</a></h1>
+<p>This section shows some examples of more advanced <code class="docutils literal"><span class="pre">metaseq</span></code> usage
+without as much explanatory text as above. More knowledge about
+<code class="docutils literal"><span class="pre">pandas</span></code>, <code class="docutils literal"><span class="pre">numpy</span></code>, and <code class="docutils literal"><span class="pre">matplotlib</span></code> are expected here. For further
+details, see the <code class="docutils literal"><span class="pre">metaseq</span></code> docs and source code for the functions used
+below.</p>
+<div class="section" id="k-means-clustering-of-chip-seq-signal">
+<h2>K-means clustering of ChIP-seq signal<a class="headerlink" href="#k-means-clustering-of-chip-seq-signal" title="Permalink to this headline">¶</a></h2>
+<p>Note that K-means clustering is non-deterministic &#8211; running it multiple
+times will give different clusters since the initial state is set
+randomly.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># K-means input data should be normalized (mean=0, stddev=1)</span>
+<span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">preprocessing</span>
+<span class="n">X_scaled</span> <span class="o">=</span> <span class="n">preprocessing</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">normalized_subtracted</span><span class="p">)</span>
+
+<span class="n">k</span> <span class="o">=</span> <span class="mi">4</span>
+
+<span class="n">ind</span><span class="p">,</span> <span class="n">breaks</span> <span class="o">=</span> <span class="n">metaseq</span><span class="o">.</span><span class="n">plotutils</span><span class="o">.</span><span class="n">new_clustered_sortind</span><span class="p">(</span>
+
+    <span class="c"># The array to cluster</span>
+    <span class="n">X_scaled</span><span class="p">,</span>
+
+    <span class="c"># Within each cluster, how the rows should be sorted</span>
+    <span class="n">row_key</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span>
+
+    <span class="c"># How each cluster should be sorted</span>
+    <span class="n">cluster_key</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">,</span>
+
+    <span class="c"># Number of clusters</span>
+    <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Plot the heatmap again</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">metaseq</span><span class="o">.</span><span class="n">plotutils</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+    <span class="n">normalized_subtracted</span><span class="p">,</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">99</span><span class="p">,</span>  <span class="n">percentile</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">line_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;All&#39;</span><span class="p">),</span>
+    <span class="n">fill_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">),</span>
+
+    <span class="c"># A little tricky: `sort_by` expects values to sort by</span>
+    <span class="c"># (say, expression values). But we&#39;ve pre-calculated</span>
+    <span class="c"># our actual sort index based on clusters, so we transform</span>
+    <span class="c"># it like this</span>
+    <span class="n">sort_by</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
+
+    <span class="c"># This adds a &quot;strip&quot; axes on the right side, useful</span>
+    <span class="c"># for adding extra information. We&#39;ll add cluster color</span>
+    <span class="c"># codes here.</span>
+    <span class="n">strip</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c"># De-clutter by hiding labels</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">strip_axes</span><span class="o">.</span><span class="n">get_yticklabels</span><span class="p">()</span>
+    <span class="o">+</span> <span class="n">fig</span><span class="o">.</span><span class="n">strip_axes</span><span class="o">.</span><span class="n">get_xticklabels</span><span class="p">()</span>
+    <span class="o">+</span> <span class="n">fig</span><span class="o">.</span><span class="n">array_axes</span><span class="o">.</span><span class="n">get_xticklabels</span><span class="p">(),</span>
+    <span class="n">visible</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+<span class="c">#</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">line_axes</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&#39;Average</span><span class="se">\n</span><span class="s">enrichement&#39;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">array_axes</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&#39;Transcripts on chr17&#39;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">strip_axes</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_label_position</span><span class="p">(</span><span class="s">&#39;right&#39;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">strip_axes</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&#39;Cluster&#39;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">cax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&#39;Enrichment&#39;</span><span class="p">)</span>
+
+<span class="c"># Make colors</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="n">cmap</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">Spectral</span>
+<span class="n">colors</span> <span class="o">=</span> <span class="n">cmap</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">k</span><span class="p">))</span>
+
+<span class="c"># This figure will contain average signal for each cluster</span>
+<span class="n">fig2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+
+
+<span class="n">last_break</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">cluster_number</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">n_panel_rows</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">n_panel_cols</span> <span class="o">=</span> <span class="n">k</span>
+<span class="k">for</span> <span class="n">color</span><span class="p">,</span> <span class="n">this_break</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">colors</span><span class="p">,</span> <span class="n">breaks</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">cluster_number</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">sharex</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">sharey</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sharex</span> <span class="o">=</span> <span class="n">fig2</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">sharey</span> <span class="o">=</span> <span class="n">fig2</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">fig2</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span>
+        <span class="n">n_panel_rows</span><span class="p">,</span>
+        <span class="n">n_panel_cols</span><span class="p">,</span>
+        <span class="n">cluster_number</span><span class="p">,</span>
+        <span class="n">sharex</span><span class="o">=</span><span class="n">sharex</span><span class="p">,</span>
+        <span class="n">sharey</span><span class="o">=</span><span class="n">sharey</span><span class="p">)</span>
+
+    <span class="c"># The y position is somewhat tricky: the array was</span>
+    <span class="c"># displayed using matplotlib.imshow with the argument</span>
+    <span class="c"># `origin=&quot;lower&quot;`, which means the row in the plot at y=0</span>
+    <span class="c"># corresponds to the last row in the array (index=-1).</span>
+    <span class="c"># But the  breaks are in array coordinates. So we convert</span>
+    <span class="c"># them by subtracting from the total array size.</span>
+    <span class="n">xpos</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">width</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">ypos</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">normalized_subtracted</span><span class="p">)</span> <span class="o">-</span> <span class="n">this_break</span>
+    <span class="n">height</span> <span class="o">=</span> <span class="n">this_break</span> <span class="o">-</span> <span class="n">last_break</span>
+    <span class="n">rect</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">patches</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">xpos</span><span class="p">,</span> <span class="n">ypos</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">strip_axes</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">rect</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">array_axes</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">ypos</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">chunk</span> <span class="o">=</span> <span class="n">normalized_subtracted</span><span class="p">[</span><span class="n">last_break</span><span class="p">:</span><span class="n">this_break</span><span class="p">]</span>
+
+    <span class="n">metaseq</span><span class="o">.</span><span class="n">plotutils</span><span class="o">.</span><span class="n">ci_plot</span><span class="p">(</span>
+        <span class="n">x</span><span class="p">,</span>
+        <span class="n">chunk</span><span class="p">,</span>
+        <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+        <span class="n">line_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">),</span>
+        <span class="n">fill_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">),</span>
+        <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s">&#39;:&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s">&#39;cluster </span><span class="si">%s</span><span class="se">\n</span><span class="s">(N=</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">cluster_number</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">)))</span>
+    <span class="n">cluster_number</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">last_break</span> <span class="o">=</span> <span class="n">this_break</span>
+</pre></div>
+</div>
+<img alt="example_session_run_files/example_session_run_83_0.png" src="example_session_run_files/example_session_run_83_0.png" />
+<img alt="example_session_run_files/example_session_run_83_1.png" src="example_session_run_files/example_session_run_83_1.png" />
+</div>
+<div class="section" id="scatterplots-of-rna-seq-and-chip-seq-signal">
+<h2>Scatterplots of RNA-seq and ChIP-seq signal<a class="headerlink" href="#scatterplots-of-rna-seq-and-chip-seq-signal" title="Permalink to this headline">¶</a></h2>
+<p>More examples of integrating ChIP-seq and RNA-seq. This uses the
+<code class="docutils literal"><span class="pre">data</span></code> dataframe created above, which contains RNA-seq data aligned
+with the ChIP-seq array.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Convert to ResultsTable so we can take advantage of its</span>
+<span class="c"># `scatter` method</span>
+<span class="n">rt</span> <span class="o">=</span> <span class="n">ResultsTable</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="c"># Get the up/down regulated</span>
+<span class="n">up</span> <span class="o">=</span> <span class="n">rt</span><span class="o">.</span><span class="n">log2foldchange</span> <span class="o">&gt;</span> <span class="mi">1</span>
+<span class="n">dn</span> <span class="o">=</span> <span class="n">rt</span><span class="o">.</span><span class="n">log2foldchange</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">1</span>
+
+<span class="c"># Go back to the ChIP-seq data and create a boolean array</span>
+<span class="c"># that is True only for the top TSSes with the strongest</span>
+<span class="c"># mean signal</span>
+<span class="n">tss_means</span> <span class="o">=</span> <span class="n">normalized_subtracted</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">strongest_signal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tss_means</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span>
+<span class="n">strongest_signal</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">tss_means</span><span class="p">)[</span><span class="o">-</span><span class="mi">25</span><span class="p">:]]</span> <span class="o">=</span> <span class="bp">True</span>
+
+<span class="n">rt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="s">&#39;fpkm_control&#39;</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="s">&#39;fpkm_knockdown&#39;</span><span class="p">,</span>
+    <span class="n">xfunc</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">log1p</span><span class="p">,</span>
+    <span class="n">yfunc</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">log1p</span><span class="p">,</span>
+    <span class="n">genes_to_highlight</span><span class="o">=</span><span class="p">[</span>
+        <span class="p">(</span><span class="n">up</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;#da3b3a&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)),</span>
+        <span class="p">(</span><span class="n">dn</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;#00748e&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)),</span>
+        <span class="p">(</span><span class="n">strongest_signal</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span>
+
+    <span class="p">],</span>
+    <span class="n">general_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;0.5&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
+    <span class="n">one_to_one</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s">&#39;:&#39;</span><span class="p">)</span>
+<span class="p">);</span>
+</pre></div>
+</div>
+<img alt="example_session_run_files/example_session_run_85_0.png" src="example_session_run_files/example_session_run_85_0.png" />
+<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Perhaps a better analysis would be to plot average</span>
+<span class="c"># ChIP-seq signal vs log2foldchange directly. In an imaginary</span>
+<span class="c"># world where biology is simple, we might expect TSSes with stronger</span>
+<span class="c"># log2foldchange upon knockdown to have stronger ChIP-seq signal</span>
+<span class="c"># in the control.</span>
+<span class="c">#</span>
+<span class="c"># To take advantage of the `scatter` method of ResultsTable objects,</span>
+<span class="c"># we simply add the TSS signal means as another variable in the</span>
+<span class="c"># dataframe. Then we can refer to it by name in `scatter`.</span>
+<span class="c">#</span>
+<span class="c"># We&#39;ll also use the same colors and genes to highlight from</span>
+<span class="c"># above.</span>
+
+<span class="n">rt</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;tss_means&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tss_means</span>
+<span class="n">rt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="s">&#39;log2foldchange&#39;</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="s">&#39;tss_means&#39;</span><span class="p">,</span>
+    <span class="n">genes_to_highlight</span><span class="o">=</span><span class="p">[</span>
+        <span class="p">(</span><span class="n">up</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;#da3b3a&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)),</span>
+        <span class="p">(</span><span class="n">dn</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;#00748e&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)),</span>
+        <span class="p">(</span><span class="n">strongest_signal</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span>
+    <span class="p">],</span>
+    <span class="n">general_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;0.5&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
+    <span class="n">yfunc</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">);</span>
+</pre></div>
+</div>
+<img alt="example_session_run_files/example_session_run_86_0.png" src="example_session_run_files/example_session_run_86_0.png" />
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Example 1: Average ChIP-seq signal over promoters</a><ul>
+<li><a class="reference internal" href="#example-data">Example data</a></li>
+<li><a class="reference internal" href="#getting-tsses">Getting TSSes</a></li>
+<li><a class="reference internal" href="#creating-the-arrays">Creating the arrays</a></li>
+<li><a class="reference internal" href="#loading-the-arrays">Loading the arrays</a></li>
+<li><a class="reference internal" href="#line-plot-of-average-signal">Line plot of average signal</a></li>
+<li><a class="reference internal" href="#adding-a-heatmap">Adding a heatmap</a></li>
+<li><a class="reference internal" href="#sorting-the-array">Sorting the array</a></li>
+<li><a class="reference internal" href="#customizing-the-axes-styles">Customizing the axes styles</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#integrating-with-rna-seq-expression-data">Integrating with RNA-seq expression data</a><ul>
+<li><a class="reference internal" href="#rna-seq-data-wrangling-loading-data">RNA-seq data wrangling: loading data</a></li>
+<li><a class="reference internal" href="#rna-seq-data-wrangling-aligning-rna-seq-data-with-chip-seq-data">RNA-seq data wrangling: aligning RNA-seq data with ChIP-seq data</a></li>
+<li><a class="reference internal" href="#rna-seq-data-wrangling-join-control-and-knockdown-data">RNA-seq data wrangling: join control and knockdown data</a></li>
+<li><a class="reference internal" href="#integrating-rna-seq-data-with-the-heatmap">Integrating RNA-seq data with the heatmap</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#extras">Extras</a><ul>
+<li><a class="reference internal" href="#k-means-clustering-of-chip-seq-signal">K-means clustering of ChIP-seq signal</a></li>
+<li><a class="reference internal" href="#scatterplots-of-rna-seq-and-chip-seq-signal">Scatterplots of RNA-seq and ChIP-seq signal</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/example_session_run.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">metaseq 0.5.6 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2015, Ryan Dale.
+  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+  <br />Theme based on <a href="http://readthedocs.org/">Read The Docs</a>
+
+</div>
+
+
+
+
+
+  </body>
+</html>

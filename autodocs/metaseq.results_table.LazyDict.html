@@ -1,0 +1,268 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>metaseq.results_table.LazyDict &mdash; metaseq 0.5.6 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.6',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/searchtools.js"></script>
+    <link rel="top" title="metaseq 0.5.6 documentation" href="../index.html" />
+    <link rel="up" title="API docs" href="../autodocs.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../autodocs.html" accesskey="U">API docs</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="metaseq-results-table-lazydict">
+<h1>metaseq.results_table.LazyDict<a class="headerlink" href="#metaseq-results-table-lazydict" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="metaseq.results_table.LazyDict">
+<em class="property">class </em><code class="descclassname">metaseq.results_table.</code><code class="descname">LazyDict</code><span class="sig-paren">(</span><em>fn_dict</em>, <em>dbfn</em>, <em>index_file</em>, <em>extra=None</em>, <em>cls=&lt;class 'metaseq.results_table.DESeqResults'&gt;</em>, <em>modifier=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/results_table.html#LazyDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.results_table.LazyDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Dictionary-like object that lazily-loads ResultsTable objects.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>fn_dict</strong> : dict</p>
+<blockquote>
+<div><p>Keys of <cite>fn_dict</cite> will be the keys of this LazyDict object.  Values
+should be filenames which will be loaded into ResultsTable object
+upon access for the first time.</p>
+</div></blockquote>
+<p><strong>index_file</strong> : str</p>
+<blockquote>
+<div><p>Path to a file that contains one ID per line.  This file is used to
+ensure all ResultsTable objects are aligned to the same index.</p>
+</div></blockquote>
+<p><strong>dbfn</strong> : str</p>
+<blockquote>
+<div><p>Filename to a gffutils database.  This enables gene info to be
+attached to the dataframe.</p>
+</div></blockquote>
+<p><strong>extra</strong> : pandas.dataframe</p>
+<blockquote>
+<div><p>This dataframe hat will be merged into the data in each file.  This
+is useful for attaching things like gene lengths, alt names, etc.
+In order for it to work, this dataframe must be indexed the same
+way the ResultsTable files are indexed.</p>
+</div></blockquote>
+<p><strong>cls</strong> : ResultsTable class or subclass</p>
+<blockquote>
+<div><p>Each filename in <cite>fn_dict</cite> will be converted using this class.</p>
+</div></blockquote>
+<p><strong>modifier</strong> : callable</p>
+<blockquote class="last">
+<div><p>Upon first access, each newly-constructed ResultsTable will first
+have the <cite>extra</cite> data attached, and then will be provided as this
+callable&#8217;s only argument.  The callable can make any modifications
+to the ResultsTable, and return a new version that will be used in
+the future when the same key is accessed.  For example, exonic bp
+data can be provided as part of the <cite>extra</cite> dataframe, and then the
+<cite>modifier</cite> can be a function that adds an RPKM column.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>When a key is provided for the first time, the workflow is
+ResultsTable(fn, <a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs) -&gt; attach <cite>extra</cite> -&gt; send to <cite>modifier</cite> -&gt;
+return extended and modified ResultsTable.  Subsequent access of the
+same key will immediately return the extended-and-modified
+ResultsTable.</p>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">items</span></code>()</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">keys</span></code>()</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">values</span></code>()</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.results_table.LazyDict.__init__" title="metaseq.results_table.LazyDict.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>(fn_dict,&nbsp;dbfn,&nbsp;index_file[,&nbsp;extra,&nbsp;...])</td>
+<td>Dictionary-like object that lazily-loads ResultsTable objects.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">items</span></code>()</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">keys</span></code>()</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">values</span></code>()</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="metaseq.results_table.LazyDict.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>fn_dict</em>, <em>dbfn</em>, <em>index_file</em>, <em>extra=None</em>, <em>cls=&lt;class 'metaseq.results_table.DESeqResults'&gt;</em>, <em>modifier=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/results_table.html#LazyDict.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.results_table.LazyDict.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dictionary-like object that lazily-loads ResultsTable objects.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>fn_dict</strong> : dict</p>
+<blockquote>
+<div><p>Keys of <cite>fn_dict</cite> will be the keys of this LazyDict object.  Values
+should be filenames which will be loaded into ResultsTable object
+upon access for the first time.</p>
+</div></blockquote>
+<p><strong>index_file</strong> : str</p>
+<blockquote>
+<div><p>Path to a file that contains one ID per line.  This file is used to
+ensure all ResultsTable objects are aligned to the same index.</p>
+</div></blockquote>
+<p><strong>dbfn</strong> : str</p>
+<blockquote>
+<div><p>Filename to a gffutils database.  This enables gene info to be
+attached to the dataframe.</p>
+</div></blockquote>
+<p><strong>extra</strong> : pandas.dataframe</p>
+<blockquote>
+<div><p>This dataframe hat will be merged into the data in each file.  This
+is useful for attaching things like gene lengths, alt names, etc.
+In order for it to work, this dataframe must be indexed the same
+way the ResultsTable files are indexed.</p>
+</div></blockquote>
+<p><strong>cls</strong> : ResultsTable class or subclass</p>
+<blockquote>
+<div><p>Each filename in <cite>fn_dict</cite> will be converted using this class.</p>
+</div></blockquote>
+<p><strong>modifier</strong> : callable</p>
+<blockquote class="last">
+<div><p>Upon first access, each newly-constructed ResultsTable will first
+have the <cite>extra</cite> data attached, and then will be provided as this
+callable&#8217;s only argument.  The callable can make any modifications
+to the ResultsTable, and return a new version that will be used in
+the future when the same key is accessed.  For example, exonic bp
+data can be provided as part of the <cite>extra</cite> dataframe, and then the
+<cite>modifier</cite> can be a function that adds an RPKM column.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>When a key is provided for the first time, the workflow is
+ResultsTable(fn, <a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs) -&gt; attach <cite>extra</cite> -&gt; send to <cite>modifier</cite> -&gt;
+return extended and modified ResultsTable.  Subsequent access of the
+same key will immediately return the extended-and-modified
+ResultsTable.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/autodocs/metaseq.results_table.LazyDict.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../autodocs.html" >API docs</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2015, Ryan Dale.
+  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+  <br />Theme based on <a href="http://readthedocs.org/">Read The Docs</a>
+
+</div>
+
+
+
+
+
+  </body>
+</html>

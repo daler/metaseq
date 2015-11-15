@@ -1,0 +1,6 @@
+metaseq._genomic_signal.supported_formats
+=========================================
+
+.. currentmodule:: metaseq._genomic_signal
+
+.. autofunction:: supported_formats

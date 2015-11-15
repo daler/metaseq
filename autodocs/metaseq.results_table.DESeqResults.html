@@ -1,0 +1,869 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>metaseq.results_table.DESeqResults &mdash; metaseq 0.5.6 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.6',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/searchtools.js"></script>
+    <link rel="top" title="metaseq 0.5.6 documentation" href="../index.html" />
+    <link rel="up" title="API docs" href="../autodocs.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../autodocs.html" accesskey="U">API docs</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="metaseq-results-table-deseqresults">
+<h1>metaseq.results_table.DESeqResults<a class="headerlink" href="#metaseq-results-table-deseqresults" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="metaseq.results_table.DESeqResults">
+<em class="property">class </em><code class="descclassname">metaseq.results_table.</code><code class="descname">DESeqResults</code><span class="sig-paren">(</span><em>data</em>, <em>db=None</em>, <em>header_check=True</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/results_table.html#DESeqResults"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.results_table.DESeqResults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">metaseq.results_table.DifferentialExpressionResults</span></code></p>
+<p>Class for working with results from DESeq.</p>
+<p>Just like a DifferentialExpressionResults object, but sets the
+pval_column, lfc_column, and mean_column to the names used in edgeR&#8217;s
+output.</p>
+<p>The underlying pandas.DataFrame is always available with the <cite>data</cite>
+attribute.</p>
+<p>Any attributes not explicitly in this class will be looked for in the
+underlying pandas.DataFrame.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>data</strong> : string or pandas.DataFrame</p>
+<blockquote>
+<div><p>If string, assumes it&#8217;s a filename and calls
+pandas.read_table(data, <a href="#id1"><span class="problematic" id="id2">**</span></a>import_kwargs).</p>
+</div></blockquote>
+<p><strong>db</strong> : string or gffutils.FeatureDB</p>
+<blockquote>
+<div><p>Optional database that can be used to generate features</p>
+</div></blockquote>
+<p><strong>import_kwargs</strong> : dict</p>
+<blockquote class="last">
+<div><p>These arguments will be passed to pandas.read_table() if <cite>data</cite> is
+a filename.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.TSS" title="metaseq.results_table.DESeqResults.TSS"><code class="xref py py-obj docutils literal"><span class="pre">TSS</span></code></a>([upstream,&nbsp;downstream])</td>
+<td>Creates a BED/GFF file of the 5&#8217; end of each feature represented in the table and returns the resulting pybedtools.BedTool object.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.TTS" title="metaseq.results_table.DESeqResults.TTS"><code class="xref py py-obj docutils literal"><span class="pre">TTS</span></code></a>([upstream,&nbsp;downstream])</td>
+<td>Creates a BED/GFF file of the 3&#8217; end of each feature represented in the table and returns the resulting pybedtools.BedTool object.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.align_with" title="metaseq.results_table.DESeqResults.align_with"><code class="xref py py-obj docutils literal"><span class="pre">align_with</span></code></a>(other)</td>
+<td>Align the dataframe&#8217;s index with another.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.attach_db" title="metaseq.results_table.DESeqResults.attach_db"><code class="xref py py-obj docutils literal"><span class="pre">attach_db</span></code></a>(db)</td>
+<td>Attach a gffutils.FeatureDB for access to features.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.autosql_file" title="metaseq.results_table.DESeqResults.autosql_file"><code class="xref py py-obj docutils literal"><span class="pre">autosql_file</span></code></a>()</td>
+<td>Generate the autosql for DESeq results (to create bigBed)</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.changed" title="metaseq.results_table.DESeqResults.changed"><code class="xref py py-obj docutils literal"><span class="pre">changed</span></code></a>([thresh,&nbsp;idx])</td>
+<td>Changed features.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.colormapped_bedfile" title="metaseq.results_table.DESeqResults.colormapped_bedfile"><code class="xref py py-obj docutils literal"><span class="pre">colormapped_bedfile</span></code></a>(genome[,&nbsp;cmap])</td>
+<td>Create a BED file with padj encoded as color</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">copy</span></code>()</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.disenriched" title="metaseq.results_table.DESeqResults.disenriched"><code class="xref py py-obj docutils literal"><span class="pre">disenriched</span></code></a>([thresh,&nbsp;idx])</td>
+<td>Disenriched features.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.downregulated" title="metaseq.results_table.DESeqResults.downregulated"><code class="xref py py-obj docutils literal"><span class="pre">downregulated</span></code></a>([thresh,&nbsp;idx])</td>
+<td>Downregulated features.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.enriched" title="metaseq.results_table.DESeqResults.enriched"><code class="xref py py-obj docutils literal"><span class="pre">enriched</span></code></a>([thresh,&nbsp;idx])</td>
+<td>Enriched features.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.features" title="metaseq.results_table.DESeqResults.features"><code class="xref py py-obj docutils literal"><span class="pre">features</span></code></a>([ignore_unknown])</td>
+<td>Generator of features.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.five_prime" title="metaseq.results_table.DESeqResults.five_prime"><code class="xref py py-obj docutils literal"><span class="pre">five_prime</span></code></a>([upstream,&nbsp;downstream])</td>
+<td>Creates a BED/GFF file of the 5&#8217; end of each feature represented in the table and returns the resulting pybedtools.BedTool object.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.genes_in_common" title="metaseq.results_table.DESeqResults.genes_in_common"><code class="xref py py-obj docutils literal"><span class="pre">genes_in_common</span></code></a>(other)</td>
+<td>Convenience method for getting the genes found in both dataframes.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.genes_with_peak" title="metaseq.results_table.DESeqResults.genes_with_peak"><code class="xref py py-obj docutils literal"><span class="pre">genes_with_peak</span></code></a>(peaks[,&nbsp;transform_func,&nbsp;...])</td>
+<td>Returns a boolean index of genes that have a peak nearby.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.ma_plot" title="metaseq.results_table.DESeqResults.ma_plot"><code class="xref py py-obj docutils literal"><span class="pre">ma_plot</span></code></a>(thresh[,&nbsp;up_kwargs,&nbsp;dn_kwargs,&nbsp;...])</td>
+<td>MA plot</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.radviz" title="metaseq.results_table.DESeqResults.radviz"><code class="xref py py-obj docutils literal"><span class="pre">radviz</span></code></a>(column_names[,&nbsp;transforms])</td>
+<td>Radviz plot.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.reindex_to" title="metaseq.results_table.DESeqResults.reindex_to"><code class="xref py py-obj docutils literal"><span class="pre">reindex_to</span></code></a>(x[,&nbsp;attribute])</td>
+<td>Returns a copy that only has rows corresponding to feature names in x.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.scatter" title="metaseq.results_table.DESeqResults.scatter"><code class="xref py py-obj docutils literal"><span class="pre">scatter</span></code></a>(x,&nbsp;y[,&nbsp;xfunc,&nbsp;yfunc,&nbsp;xscale,&nbsp;...])</td>
+<td>Do-it-all method for making annotated scatterplots.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.strip_unknown_features" title="metaseq.results_table.DESeqResults.strip_unknown_features"><code class="xref py py-obj docutils literal"><span class="pre">strip_unknown_features</span></code></a>()</td>
+<td>Remove features not found in the <cite>gffutils.FeatureDB</cite>.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.three_prime" title="metaseq.results_table.DESeqResults.three_prime"><code class="xref py py-obj docutils literal"><span class="pre">three_prime</span></code></a>([upstream,&nbsp;downstream])</td>
+<td>Creates a BED/GFF file of the 3&#8217; end of each feature represented in the table and returns the resulting pybedtools.BedTool object.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.unchanged" title="metaseq.results_table.DESeqResults.unchanged"><code class="xref py py-obj docutils literal"><span class="pre">unchanged</span></code></a>([thresh,&nbsp;idx])</td>
+<td>Changed features.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.update" title="metaseq.results_table.DESeqResults.update"><code class="xref py py-obj docutils literal"><span class="pre">update</span></code></a>(dataframe)</td>
+<td>Updates the current data with a new dataframe.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.upregulated" title="metaseq.results_table.DESeqResults.upregulated"><code class="xref py py-obj docutils literal"><span class="pre">upregulated</span></code></a>([thresh,&nbsp;idx])</td>
+<td>Upregulated features.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.TSS" title="metaseq.results_table.DESeqResults.TSS"><code class="xref py py-obj docutils literal"><span class="pre">TSS</span></code></a>([upstream,&nbsp;downstream])</td>
+<td>Creates a BED/GFF file of the 5&#8217; end of each feature represented in the table and returns the resulting pybedtools.BedTool object.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.TTS" title="metaseq.results_table.DESeqResults.TTS"><code class="xref py py-obj docutils literal"><span class="pre">TTS</span></code></a>([upstream,&nbsp;downstream])</td>
+<td>Creates a BED/GFF file of the 3&#8217; end of each feature represented in the table and returns the resulting pybedtools.BedTool object.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.__init__" title="metaseq.results_table.DESeqResults.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>(data[,&nbsp;db,&nbsp;header_check])</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.align_with" title="metaseq.results_table.DESeqResults.align_with"><code class="xref py py-obj docutils literal"><span class="pre">align_with</span></code></a>(other)</td>
+<td>Align the dataframe&#8217;s index with another.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.attach_db" title="metaseq.results_table.DESeqResults.attach_db"><code class="xref py py-obj docutils literal"><span class="pre">attach_db</span></code></a>(db)</td>
+<td>Attach a gffutils.FeatureDB for access to features.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.autosql_file" title="metaseq.results_table.DESeqResults.autosql_file"><code class="xref py py-obj docutils literal"><span class="pre">autosql_file</span></code></a>()</td>
+<td>Generate the autosql for DESeq results (to create bigBed)</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.changed" title="metaseq.results_table.DESeqResults.changed"><code class="xref py py-obj docutils literal"><span class="pre">changed</span></code></a>([thresh,&nbsp;idx])</td>
+<td>Changed features.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.colormapped_bedfile" title="metaseq.results_table.DESeqResults.colormapped_bedfile"><code class="xref py py-obj docutils literal"><span class="pre">colormapped_bedfile</span></code></a>(genome[,&nbsp;cmap])</td>
+<td>Create a BED file with padj encoded as color</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">copy</span></code>()</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.disenriched" title="metaseq.results_table.DESeqResults.disenriched"><code class="xref py py-obj docutils literal"><span class="pre">disenriched</span></code></a>([thresh,&nbsp;idx])</td>
+<td>Disenriched features.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.downregulated" title="metaseq.results_table.DESeqResults.downregulated"><code class="xref py py-obj docutils literal"><span class="pre">downregulated</span></code></a>([thresh,&nbsp;idx])</td>
+<td>Downregulated features.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.enriched" title="metaseq.results_table.DESeqResults.enriched"><code class="xref py py-obj docutils literal"><span class="pre">enriched</span></code></a>([thresh,&nbsp;idx])</td>
+<td>Enriched features.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.features" title="metaseq.results_table.DESeqResults.features"><code class="xref py py-obj docutils literal"><span class="pre">features</span></code></a>([ignore_unknown])</td>
+<td>Generator of features.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.five_prime" title="metaseq.results_table.DESeqResults.five_prime"><code class="xref py py-obj docutils literal"><span class="pre">five_prime</span></code></a>([upstream,&nbsp;downstream])</td>
+<td>Creates a BED/GFF file of the 5&#8217; end of each feature represented in the table and returns the resulting pybedtools.BedTool object.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.genes_in_common" title="metaseq.results_table.DESeqResults.genes_in_common"><code class="xref py py-obj docutils literal"><span class="pre">genes_in_common</span></code></a>(other)</td>
+<td>Convenience method for getting the genes found in both dataframes.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.genes_with_peak" title="metaseq.results_table.DESeqResults.genes_with_peak"><code class="xref py py-obj docutils literal"><span class="pre">genes_with_peak</span></code></a>(peaks[,&nbsp;transform_func,&nbsp;...])</td>
+<td>Returns a boolean index of genes that have a peak nearby.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.ma_plot" title="metaseq.results_table.DESeqResults.ma_plot"><code class="xref py py-obj docutils literal"><span class="pre">ma_plot</span></code></a>(thresh[,&nbsp;up_kwargs,&nbsp;dn_kwargs,&nbsp;...])</td>
+<td>MA plot</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.radviz" title="metaseq.results_table.DESeqResults.radviz"><code class="xref py py-obj docutils literal"><span class="pre">radviz</span></code></a>(column_names[,&nbsp;transforms])</td>
+<td>Radviz plot.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.reindex_to" title="metaseq.results_table.DESeqResults.reindex_to"><code class="xref py py-obj docutils literal"><span class="pre">reindex_to</span></code></a>(x[,&nbsp;attribute])</td>
+<td>Returns a copy that only has rows corresponding to feature names in x.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.scatter" title="metaseq.results_table.DESeqResults.scatter"><code class="xref py py-obj docutils literal"><span class="pre">scatter</span></code></a>(x,&nbsp;y[,&nbsp;xfunc,&nbsp;yfunc,&nbsp;xscale,&nbsp;...])</td>
+<td>Do-it-all method for making annotated scatterplots.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.strip_unknown_features" title="metaseq.results_table.DESeqResults.strip_unknown_features"><code class="xref py py-obj docutils literal"><span class="pre">strip_unknown_features</span></code></a>()</td>
+<td>Remove features not found in the <cite>gffutils.FeatureDB</cite>.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.three_prime" title="metaseq.results_table.DESeqResults.three_prime"><code class="xref py py-obj docutils literal"><span class="pre">three_prime</span></code></a>([upstream,&nbsp;downstream])</td>
+<td>Creates a BED/GFF file of the 3&#8217; end of each feature represented in the table and returns the resulting pybedtools.BedTool object.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.unchanged" title="metaseq.results_table.DESeqResults.unchanged"><code class="xref py py-obj docutils literal"><span class="pre">unchanged</span></code></a>([thresh,&nbsp;idx])</td>
+<td>Changed features.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.update" title="metaseq.results_table.DESeqResults.update"><code class="xref py py-obj docutils literal"><span class="pre">update</span></code></a>(dataframe)</td>
+<td>Updates the current data with a new dataframe.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.results_table.DESeqResults.upregulated" title="metaseq.results_table.DESeqResults.upregulated"><code class="xref py py-obj docutils literal"><span class="pre">upregulated</span></code></a>([thresh,&nbsp;idx])</td>
+<td>Upregulated features.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="metaseq.results_table.DESeqResults.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>data</em>, <em>db=None</em>, <em>header_check=True</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#metaseq.results_table.DESeqResults.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="metaseq.results_table.DESeqResults.TSS">
+<code class="descname">TSS</code><span class="sig-paren">(</span><em>upstream=1</em>, <em>downstream=0</em><span class="sig-paren">)</span><a class="headerlink" href="#metaseq.results_table.DESeqResults.TSS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a BED/GFF file of the 5&#8217; end of each feature represented in the
+table and returns the resulting pybedtools.BedTool object. Needs an
+attached database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>upstream, downstream</strong> : int</p>
+<blockquote class="last">
+<div><p>Number of basepairs up and downstream to include</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.results_table.DESeqResults.TTS">
+<code class="descname">TTS</code><span class="sig-paren">(</span><em>upstream=0</em>, <em>downstream=1</em><span class="sig-paren">)</span><a class="headerlink" href="#metaseq.results_table.DESeqResults.TTS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a BED/GFF file of the 3&#8217; end of each feature represented in the
+table and returns the resulting pybedtools.BedTool object. Needs an
+attached database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>upstream, downstream</strong> : int</p>
+<blockquote class="last">
+<div><p>Number of basepairs up and downstream to include</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.results_table.DESeqResults.align_with">
+<code class="descname">align_with</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#metaseq.results_table.DESeqResults.align_with" title="Permalink to this definition">¶</a></dt>
+<dd><p>Align the dataframe&#8217;s index with another.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.results_table.DESeqResults.attach_db">
+<code class="descname">attach_db</code><span class="sig-paren">(</span><em>db</em><span class="sig-paren">)</span><a class="headerlink" href="#metaseq.results_table.DESeqResults.attach_db" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attach a gffutils.FeatureDB for access to features.</p>
+<p>Useful if you want to attach a db after this instance has already been
+created.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>db</strong> : gffutils.FeatureDB</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.results_table.DESeqResults.autosql_file">
+<code class="descname">autosql_file</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/results_table.html#DESeqResults.autosql_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.results_table.DESeqResults.autosql_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate the autosql for DESeq results (to create bigBed)</p>
+<p>Returns a temp filename containing the autosql defining the extra
+fields.</p>
+<p>This for creating bigBed files from BED files created by
+colormapped_bed.  When a user clicks on a feature, the DESeq results
+will be reported.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.results_table.DESeqResults.changed">
+<code class="descname">changed</code><span class="sig-paren">(</span><em>thresh=0.05</em>, <em>idx=True</em><span class="sig-paren">)</span><a class="headerlink" href="#metaseq.results_table.DESeqResults.changed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changed features.</p>
+<p>{threshdoc}</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.results_table.DESeqResults.colormapped_bedfile">
+<code class="descname">colormapped_bedfile</code><span class="sig-paren">(</span><em>genome</em>, <em>cmap=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/results_table.html#DESeqResults.colormapped_bedfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.results_table.DESeqResults.colormapped_bedfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a BED file with padj encoded as color</p>
+<p>Features will be colored according to adjusted pval (phred
+transformed).  Downregulated features have the sign flipped.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>cmap</strong> : matplotlib colormap</p>
+<blockquote class="last">
+<div><p>Default is matplotlib.cm.RdBu_r</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Requires a FeatureDB to be attached.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.results_table.DESeqResults.disenriched">
+<code class="descname">disenriched</code><span class="sig-paren">(</span><em>thresh=0.05</em>, <em>idx=True</em><span class="sig-paren">)</span><a class="headerlink" href="#metaseq.results_table.DESeqResults.disenriched" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Disenriched features.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>thresh</strong> : float</p>
+<blockquote>
+<div><p>Only features with &lt;= <cite>thresh</cite> will be returned</p>
+</div></blockquote>
+<p><strong>idx</strong> : bool</p>
+<blockquote class="last">
+<div><p>If True, a boolean index will be returned.  If False, a new object will
+be returned that has been subsetted.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.results_table.DESeqResults.downregulated">
+<code class="descname">downregulated</code><span class="sig-paren">(</span><em>thresh=0.05</em>, <em>idx=True</em><span class="sig-paren">)</span><a class="headerlink" href="#metaseq.results_table.DESeqResults.downregulated" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Downregulated features.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>thresh</strong> : float</p>
+<blockquote>
+<div><p>Only features with &lt;= <cite>thresh</cite> will be returned</p>
+</div></blockquote>
+<p><strong>idx</strong> : bool</p>
+<blockquote class="last">
+<div><p>If True, a boolean index will be returned.  If False, a new object will
+be returned that has been subsetted.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.results_table.DESeqResults.enriched">
+<code class="descname">enriched</code><span class="sig-paren">(</span><em>thresh=0.05</em>, <em>idx=True</em><span class="sig-paren">)</span><a class="headerlink" href="#metaseq.results_table.DESeqResults.enriched" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Enriched features.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>thresh</strong> : float</p>
+<blockquote>
+<div><p>Only features with &lt;= <cite>thresh</cite> will be returned</p>
+</div></blockquote>
+<p><strong>idx</strong> : bool</p>
+<blockquote class="last">
+<div><p>If True, a boolean index will be returned.  If False, a new object will
+be returned that has been subsetted.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.results_table.DESeqResults.features">
+<code class="descname">features</code><span class="sig-paren">(</span><em>ignore_unknown=False</em><span class="sig-paren">)</span><a class="headerlink" href="#metaseq.results_table.DESeqResults.features" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generator of features.</p>
+<p>If a gffutils.FeatureDB is attached, returns a pybedtools.Interval for
+every feature in the dataframe&#8217;s index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ignore_unknown</strong> : bool</p>
+<blockquote class="last">
+<div><p>If True, silently ignores features that are not found in the db.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.results_table.DESeqResults.five_prime">
+<code class="descname">five_prime</code><span class="sig-paren">(</span><em>upstream=1</em>, <em>downstream=0</em><span class="sig-paren">)</span><a class="headerlink" href="#metaseq.results_table.DESeqResults.five_prime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a BED/GFF file of the 5&#8217; end of each feature represented in the
+table and returns the resulting pybedtools.BedTool object. Needs an
+attached database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>upstream, downstream</strong> : int</p>
+<blockquote class="last">
+<div><p>Number of basepairs up and downstream to include</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.results_table.DESeqResults.genes_in_common">
+<code class="descname">genes_in_common</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#metaseq.results_table.DESeqResults.genes_in_common" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience method for getting the genes found in both dataframes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.results_table.DESeqResults.genes_with_peak">
+<code class="descname">genes_with_peak</code><span class="sig-paren">(</span><em>peaks</em>, <em>transform_func=None</em>, <em>split=False</em>, <em>intersect_kwargs=None</em>, <em>id_attribute='ID'</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#metaseq.results_table.DESeqResults.genes_with_peak" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a boolean index of genes that have a peak nearby.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>peaks</strong> : string or pybedtools.BedTool</p>
+<blockquote>
+<div><p>If string, then assume it&#8217;s a filename to a BED/GFF/GTF file of
+intervals; otherwise use the pybedtools.BedTool object directly.</p>
+</div></blockquote>
+<p><strong>transform_func</strong> : callable</p>
+<blockquote>
+<div><p>This function will be applied to each gene object returned by
+self.features().  Additional args and kwargs are passed to
+<cite>transform_func</cite>. For example, if you&#8217;re looking for peaks within
+1kb upstream of TSSs, then pybedtools.featurefuncs.TSS would be
+a useful <cite>transform_func</cite>, and you could supply additional kwargs
+of <cite>upstream=1000</cite> and <cite>downstream=0</cite>.</p>
+<p>This function can return iterables of features, too. For example,
+you might want to look for peaks falling within the exons of
+a gene.  In this case, <cite>transform_func</cite> should return an iterable
+of pybedtools.Interval objects.  The only requirement is that the
+<cite>name</cite> field of any feature matches the index of the dataframe.</p>
+</div></blockquote>
+<p><strong>intersect_kwargs</strong> : dict</p>
+<blockquote>
+<div><p>kwargs passed to pybedtools.BedTool.intersect.</p>
+</div></blockquote>
+<p><strong>id_attribute</strong> : str</p>
+<blockquote class="last">
+<div><p>The attribute in the GTF or GFF file that contains the id of the
+gene. For meaningful results to be returned, a gene&#8217;s ID be also
+found in the index of the dataframe.</p>
+<p>For GFF files, typically you&#8217;d use <cite>id_attribute=&#8221;ID&#8221;</cite>.  For GTF
+files, you&#8217;d typically use <cite>id_attribute=&#8221;gene_id&#8221;</cite>.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.results_table.DESeqResults.ma_plot">
+<code class="descname">ma_plot</code><span class="sig-paren">(</span><em>thresh</em>, <em>up_kwargs=None</em>, <em>dn_kwargs=None</em>, <em>zero_line=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#metaseq.results_table.DESeqResults.ma_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>MA plot</p>
+<p>Plots the average read count across treatments (x-axis) vs the log2
+fold change (y-axis).</p>
+<p>Additional kwargs are passed to self.scatter (useful ones might include
+<cite>genes_to_highlight</cite>)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>thresh</strong> : float</p>
+<blockquote>
+<div><p>Features with values &lt;= <cite>thresh</cite> will be highlighted in the plot.</p>
+</div></blockquote>
+<p><strong>up_kwargs, dn_kwargs</strong> : None or dict</p>
+<blockquote>
+<div><p>Kwargs passed to matplotlib&#8217;s scatter(), used for styling up/down
+regulated features (defined by <cite>thresh</cite> and <cite>col</cite>)</p>
+</div></blockquote>
+<p><strong>zero_line</strong> : None or dict</p>
+<blockquote class="last">
+<div><p>Kwargs passed to matplotlib.axhline(0).</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.results_table.DESeqResults.radviz">
+<code class="descname">radviz</code><span class="sig-paren">(</span><em>column_names</em>, <em>transforms={}</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#metaseq.results_table.DESeqResults.radviz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Radviz plot.</p>
+<p>Useful for exploratory visualization, a radviz plot can show
+multivariate data in 2D.  Conceptually, the variables (here, specified
+in <cite>column_names</cite>) are distributed evenly around the unit circle.  Then
+each point (here, each row in the dataframe) is attached to each
+variable by a spring, where the stiffness of the spring is proportional
+to the value of corresponding variable.  The final position of a point
+represents the equilibrium position with all springs pulling on it.</p>
+<p>In practice, each variable is normalized to 0-1 (by subtracting the
+mean and dividing by the range).</p>
+<p>This is a very exploratory plot.  The order of <cite>column_names</cite> will
+affect the results, so it&#8217;s best to try a couple different orderings.
+For other caveats, see [1].</p>
+<p>Additional kwargs are passed to self.scatter, so subsetting, callbacks,
+and other configuration can be performed using options for that method
+(e.g., <cite>genes_to_highlight</cite> is particularly useful).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>column_names</strong> : list</p>
+<blockquote>
+<div><p>Which columns of the dataframe to consider.  The columns provided
+should only include numeric data, and they should not contain any
+NaN, inf, or -inf values.</p>
+</div></blockquote>
+<p><strong>transforms</strong> : dict</p>
+<blockquote>
+<div><p>Dictionary mapping column names to transformations that will be
+applied just for the radviz plot.  For example, np.log1p is
+a useful function. If a column name is not in this dictionary, it
+will be used as-is.</p>
+</div></blockquote>
+<p><strong>ax</strong> : matplotlib.Axes</p>
+<blockquote>
+<div><p>If not None, then plot the radviz on this axes.  If None, then
+a new figure will be created.</p>
+</div></blockquote>
+<p><strong>kwargs</strong> : dict</p>
+<blockquote class="last">
+<div><p>Additional arguments are passed to self.scatter.  Note that not all
+possible kwargs for self.scatter are necessarily useful for
+a radviz plot (for example, margninal histograms would not be
+meaningful).</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>This method adds two new variables to self.data: &#8220;radviz_x&#8221; and
+&#8220;radviz_y&#8221;.  It then calls the self.scatter method, using these new
+variables.</p>
+<p>The data transformation was adapted from the
+pandas.tools.plotting.radviz function.</p>
+<p class="rubric">References</p>
+<dl class="docutils">
+<dt>[1]  Hoffman,P.E. et al. (1997) DNA visual and analytic data mining. In</dt>
+<dd>the Proceedings of the IEEE Visualization. Phoenix, AZ, pp.
+437-441.</dd>
+</dl>
+<p>[2] <a class="reference external" href="http://www.agocg.ac.uk/reports/visual/casestud/brunsdon/radviz.htm">http://www.agocg.ac.uk/reports/visual/casestud/brunsdon/radviz.htm</a>
+[3] <a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/visualization.html">http://pandas.pydata.org/pandas-docs/stable/visualization.html</a>                #radviz</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.results_table.DESeqResults.reindex_to">
+<code class="descname">reindex_to</code><span class="sig-paren">(</span><em>x</em>, <em>attribute='Name'</em><span class="sig-paren">)</span><a class="headerlink" href="#metaseq.results_table.DESeqResults.reindex_to" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a copy that only has rows corresponding to feature names in x.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x</strong> : str or pybedtools.BedTool</p>
+<blockquote>
+<div><p>BED, GFF, GTF, or VCF where the &#8220;Name&#8221; field (that is, the value
+returned by feature[&#8216;Name&#8217;]) or any arbitrary attribute</p>
+</div></blockquote>
+<p><strong>attribute</strong> : str</p>
+<blockquote class="last">
+<div><p>Attribute containing the name of the feature to use as the index.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.results_table.DESeqResults.scatter">
+<code class="descname">scatter</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>xfunc=None</em>, <em>yfunc=None</em>, <em>xscale=None</em>, <em>yscale=None</em>, <em>xlab=None</em>, <em>ylab=None</em>, <em>genes_to_highlight=None</em>, <em>label_genes=False</em>, <em>marginal_histograms=False</em>, <em>general_kwargs={'picker': True</em>, <em>'alpha': 0.2</em>, <em>'color': 'k'}</em>, <em>general_hist_kwargs=None</em>, <em>offset_kwargs={}</em>, <em>label_kwargs=None</em>, <em>ax=None</em>, <em>one_to_one=None</em>, <em>callback=None</em>, <em>xlab_prefix=None</em>, <em>ylab_prefix=None</em>, <em>sizefunc=None</em>, <em>hist_size=0.3</em>, <em>hist_pad=0.0</em>, <em>nan_offset=0.015</em>, <em>pos_offset=0.99</em>, <em>linelength=0.01</em>, <em>neg_offset=0.005</em>, <em>figure_kwargs=None</em><span class="sig-paren">)</span><a class="headerlink" href="#metaseq.results_table.DESeqResults.scatter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do-it-all method for making annotated scatterplots.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x, y</strong> : array-like</p>
+<blockquote>
+<div><p>Variables to plot.  Must be names in self.data&#8217;s DataFrame.  For
+example, &#8220;baseMeanA&#8221; and &#8220;baseMeanB&#8221;</p>
+</div></blockquote>
+<p><strong>xfunc, yfunc</strong> : callable</p>
+<blockquote>
+<div><p>Functions to apply to <cite>xvar</cite> and <cite>yvar</cite> respectively. Default is
+log2; set to None to have no transformation.</p>
+</div></blockquote>
+<p><strong>xlab, ylab</strong> : string</p>
+<blockquote>
+<div><p>Labels for x and y axes; default is to use function names for
+<cite>xfunc</cite> and <cite>yfunc</cite> and variable names <cite>xvar</cite> and <cite>yvar</cite>, e.g.,
+&#8220;log2(baseMeanA)&#8221;</p>
+</div></blockquote>
+<p><strong>ax</strong> : None or Axes object</p>
+<blockquote>
+<div><p>If <cite>ax=None</cite>, then makes a new fig and returns the Axes object,
+otherwise, plots onto <cite>ax</cite></p>
+</div></blockquote>
+<p><strong>general_kwargs</strong> : dict</p>
+<blockquote>
+<div><p>Kwargs for matplotlib.scatter; specifies how all points look</p>
+</div></blockquote>
+<p><strong>genes_to_highlight</strong> : list of (index, dict) tuples</p>
+<blockquote>
+<div><p>Provides lots of control to colors.  It is a list of (<cite>ind</cite>,
+<cite>kwargs</cite>) tuples, where each <cite>ind</cite> specifies genes to plot with
+<cite>kwargs</cite>.  Each dictionary updates a copy of <cite>general_kwargs</cite>. If
+<cite>genes_to_highlight</cite> has a &#8220;name&#8221; kwarg, this must be a list that&#8217;t
+the same length as <cite>ind</cite>.  It will be used to label the genes in
+<cite>ind</cite> using <cite>label_kwargs</cite>.</p>
+</div></blockquote>
+<p><strong>callback</strong> : callable</p>
+<blockquote>
+<div><p>Function to call upon clicking a point. Must accept a single
+argument which is the gene ID. Default is to print the gene name,
+but an example of another useful callback would be a mini-browser
+connected to a genomic_signal object from which the expression data
+were calculated.</p>
+</div></blockquote>
+<p><strong>one_to_one</strong> : None or dict</p>
+<blockquote>
+<div><p>If not None, a dictionary of matplotlib.plot kwargs that will be
+used to plot a 1:1 line.</p>
+</div></blockquote>
+<p><strong>label_kwargs</strong> : dict</p>
+<blockquote>
+<div><p>Kwargs for labeled genes (e.g., dict=(style=&#8217;italic&#8217;)).  Will only
+be used if an entry in <cite>genes_to_highlight</cite> has a <cite>name</cite> key.</p>
+</div></blockquote>
+<p><strong>offset_kwargs</strong> : dict</p>
+<blockquote>
+<div><p>Kwargs to be passed to matplotlib.transforms.offset_copy, used for
+adjusting the positioning of gene labels in relation to the actual
+point.</p>
+</div></blockquote>
+<p><strong>xlab_prefix, ylab_prefix</strong> : str</p>
+<blockquote>
+<div><p>Optional label prefix that will be added to the beginning of <cite>xlab</cite>
+and/or <cite>ylab</cite>.</p>
+</div></blockquote>
+<p><strong>hist_size</strong> : float</p>
+<blockquote>
+<div><p>Size of marginal histograms</p>
+</div></blockquote>
+<p><strong>hist_pad</strong> : float</p>
+<blockquote>
+<div><p>Spacing between marginal histograms</p>
+</div></blockquote>
+<p><strong>nan_offset, pos_offset, neg_offset</strong> : float</p>
+<blockquote>
+<div><p>Offset, in units of &#8220;fraction of axes&#8221; for the NaN, +inf, and -inf
+&#8220;rug plots&#8221;</p>
+</div></blockquote>
+<p><strong>linelength</strong> : float</p>
+<blockquote class="last">
+<div><p>Line length for the rug plots</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.results_table.DESeqResults.strip_unknown_features">
+<code class="descname">strip_unknown_features</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metaseq.results_table.DESeqResults.strip_unknown_features" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove features not found in the <cite>gffutils.FeatureDB</cite>.  This will
+typically include &#8216;ambiguous&#8217;, &#8216;no_feature&#8217;, etc, but can also be
+useful if the database was created from a different one than was used
+to create the table.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.results_table.DESeqResults.three_prime">
+<code class="descname">three_prime</code><span class="sig-paren">(</span><em>upstream=0</em>, <em>downstream=1</em><span class="sig-paren">)</span><a class="headerlink" href="#metaseq.results_table.DESeqResults.three_prime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a BED/GFF file of the 3&#8217; end of each feature represented in the
+table and returns the resulting pybedtools.BedTool object. Needs an
+attached database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>upstream, downstream</strong> : int</p>
+<blockquote class="last">
+<div><p>Number of basepairs up and downstream to include</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.results_table.DESeqResults.unchanged">
+<code class="descname">unchanged</code><span class="sig-paren">(</span><em>thresh=0.05</em>, <em>idx=True</em><span class="sig-paren">)</span><a class="headerlink" href="#metaseq.results_table.DESeqResults.unchanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changed features.</p>
+<p>{threshdoc}</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.results_table.DESeqResults.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>dataframe</em><span class="sig-paren">)</span><a class="headerlink" href="#metaseq.results_table.DESeqResults.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the current data with a new dataframe.</p>
+<p>This extra step is required to get around the fancy pandas.DataFrame
+indexing (like .ix, .iloc, etc).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.results_table.DESeqResults.upregulated">
+<code class="descname">upregulated</code><span class="sig-paren">(</span><em>thresh=0.05</em>, <em>idx=True</em><span class="sig-paren">)</span><a class="headerlink" href="#metaseq.results_table.DESeqResults.upregulated" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Upregulated features.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>thresh</strong> : float</p>
+<blockquote>
+<div><p>Only features with &lt;= <cite>thresh</cite> will be returned</p>
+</div></blockquote>
+<p><strong>idx</strong> : bool</p>
+<blockquote class="last">
+<div><p>If True, a boolean index will be returned.  If False, a new object will
+be returned that has been subsetted.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/autodocs/metaseq.results_table.DESeqResults.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../autodocs.html" >API docs</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2015, Ryan Dale.
+  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+  <br />Theme based on <a href="http://readthedocs.org/">Read The Docs</a>
+
+</div>
+
+
+
+
+
+  </body>
+</html>

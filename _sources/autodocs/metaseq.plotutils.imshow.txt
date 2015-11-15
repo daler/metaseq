@@ -1,0 +1,6 @@
+metaseq.plotutils.imshow
+========================
+
+.. currentmodule:: metaseq.plotutils
+
+.. autofunction:: imshow

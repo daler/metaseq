@@ -1,0 +1,33 @@
+metaseq.results_table.ResultsTable
+==================================
+
+.. currentmodule:: metaseq.results_table
+
+.. autoclass:: ResultsTable
+    :inherited-members:
+    :show-inheritance:
+    :members:
+
+    
+    .. rubric:: Methods
+    
+    .. autosummary::
+    
+        ~ResultsTable.TSS
+        ~ResultsTable.TTS
+        ~ResultsTable.__init__
+        ~ResultsTable.align_with
+        ~ResultsTable.attach_db
+        ~ResultsTable.copy
+        ~ResultsTable.features
+        ~ResultsTable.five_prime
+        ~ResultsTable.genes_in_common
+        ~ResultsTable.genes_with_peak
+        ~ResultsTable.radviz
+        ~ResultsTable.reindex_to
+        ~ResultsTable.scatter
+        ~ResultsTable.strip_unknown_features
+        ~ResultsTable.three_prime
+        ~ResultsTable.update
+    
+    .. automethod:: __init__ 

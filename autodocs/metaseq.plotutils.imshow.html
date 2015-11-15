@@ -1,0 +1,226 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>metaseq.plotutils.imshow &mdash; metaseq 0.5.6 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.6',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/searchtools.js"></script>
+    <link rel="top" title="metaseq 0.5.6 documentation" href="../index.html" />
+    <link rel="up" title="API docs" href="../autodocs.html" />
+    <link rel="next" title="metaseq.plotutils.add_labels_to_subsets" href="metaseq.plotutils.add_labels_to_subsets.html" />
+    <link rel="prev" title="metaseq.integration.signal_comparison.compare" href="metaseq.integration.signal_comparison.compare.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="metaseq.plotutils.add_labels_to_subsets.html" title="metaseq.plotutils.add_labels_to_subsets"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="metaseq.integration.signal_comparison.compare.html" title="metaseq.integration.signal_comparison.compare"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../autodocs.html" accesskey="U">API docs</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="metaseq-plotutils-imshow">
+<h1>metaseq.plotutils.imshow<a class="headerlink" href="#metaseq-plotutils-imshow" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="metaseq.plotutils.imshow">
+<code class="descclassname">metaseq.plotutils.</code><code class="descname">imshow</code><span class="sig-paren">(</span><em>arr</em>, <em>x=None</em>, <em>ax=None</em>, <em>vmin=None</em>, <em>vmax=None</em>, <em>percentile=True</em>, <em>strip=False</em>, <em>features=None</em>, <em>conf=0.95</em>, <em>sort_by=None</em>, <em>line_kwargs=None</em>, <em>fill_kwargs=None</em>, <em>imshow_kwargs=None</em>, <em>figsize=(5</em>, <em>12)</em>, <em>width_ratios=(4</em>, <em>1)</em>, <em>height_ratios=(4</em>, <em>1)</em>, <em>subplot_params={'wspace': 0.1</em>, <em>'hspace': 0.1}</em>, <em>subset_by=None</em>, <em>subset_order=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/plotutils.html#imshow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.plotutils.imshow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do-it-all function to help with plotting heatmaps</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>arr</strong> : array-like</p>
+<p><strong>x</strong> : 1D array</p>
+<blockquote>
+<div><p>X values to use.  If None, use range(arr.shape[1])</p>
+</div></blockquote>
+<p><strong>ax</strong> : matplotlib.Axes</p>
+<blockquote>
+<div><p>If not None, then only plot the array on the provided axes.  This will
+ignore any additional arguments provided that apply to figure-level
+configuration or to the average line plot.  For example, <cite>figsize</cite>,
+<cite>width_ratios</cite>, <cite>height_ratios</cite>, <cite>subplot_params</cite>, <cite>line_kwargs</cite>, and
+<cite>fill_kwargs</cite> will all be ignored.</p>
+</div></blockquote>
+<p><strong>vmin, vmax</strong> : float</p>
+<p><strong>percentile</strong> : bool</p>
+<blockquote>
+<div><p>If True, then treat values for <cite>vmin</cite> and <cite>vmax</cite> as percentiles rather
+than absolute values.</p>
+</div></blockquote>
+<p><strong>strip</strong> : bool</p>
+<blockquote>
+<div><p>Include a strip plot alongside the array</p>
+</div></blockquote>
+<p><strong>features</strong> : pybedtools.BedTool or string filename</p>
+<blockquote>
+<div><p>Features used to construct the array</p>
+</div></blockquote>
+<p><strong>conf</strong> : float</p>
+<blockquote>
+<div><p>Confidence interval to use in line plot.</p>
+</div></blockquote>
+<p><strong>sort_by</strong> : array-like</p>
+<blockquote>
+<div><p>Use the provided array to sort the array (e.g., an array of expression
+values).  This array will be argsorted to get the proper order.</p>
+</div></blockquote>
+<p><strong>line_kwargs, fill_kwargs</strong> : dict</p>
+<blockquote>
+<div><p>Passed directly to <cite>ci_plot</cite>.</p>
+</div></blockquote>
+<p><strong>figsize</strong> : tuple</p>
+<blockquote>
+<div><p>(Width, height) of the figure to create.</p>
+</div></blockquote>
+<p><strong>imshow_kwargs</strong> : dict</p>
+<blockquote>
+<div><p>Passed directly to matplotlib.pyplot.imshow.  By default, arguments
+used are <cite>origin=&#8217;lower&#8217;</cite>, <cite>aspect=&#8221;auto&#8221;</cite> and a colormap from
+colormap_adjust.smart_colormap generated using the provided <cite>vmin</cite> and
+<cite>vmax</cite>.</p>
+</div></blockquote>
+<p><strong>width_ratios, height_ratios: tuple</strong></p>
+<blockquote>
+<div><p>These tuples are passed to the <cite>new_shell</cite> function.  The default
+values set up a 2x2 configuration of panels for heatmap, line plot,
+colorbar axes, and optional strip plot.  However modifying
+<cite>width_ratios</cite> or <cite>height_ratios</cite> can be used to create more or fewer panels.</p>
+</div></blockquote>
+<p><strong>subplot_params</strong> : dict</p>
+<blockquote>
+<div><p>Passed to Figure.subplots_adjust</p>
+</div></blockquote>
+<p><strong>subset_by</strong> : array</p>
+<blockquote>
+<div><p>An array of any type (but usually int or str) that contains a class
+label for each row in the heatmap array.  For example, to subset by
+expression, an array the values of &#8220;up&#8221;, &#8220;down&#8221;, or &#8220;unchanged&#8221; at each
+of the positions could be provided.</p>
+<p>Note that the heatmap array is first sorted by <cite>sort_by</cite> and then split
+into groups according to <cite>subset_by</cite>, so each subset remains sorted by
+<cite>sort_by</cite>.</p>
+</div></blockquote>
+<p><strong>subset_order</strong> : list-like</p>
+<blockquote class="last">
+<div><p>This provides the order in which the subsets are plotted.  Since the
+default imshow arguments contain <cite>origin=&#8221;lower&#8221;</cite>, these will be
+plotted in order starting at the bottom of the heatmap.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="metaseq.integration.signal_comparison.compare.html"
+                        title="previous chapter">metaseq.integration.signal_comparison.compare</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="metaseq.plotutils.add_labels_to_subsets.html"
+                        title="next chapter">metaseq.plotutils.add_labels_to_subsets</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/autodocs/metaseq.plotutils.imshow.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="metaseq.plotutils.add_labels_to_subsets.html" title="metaseq.plotutils.add_labels_to_subsets"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="metaseq.integration.signal_comparison.compare.html" title="metaseq.integration.signal_comparison.compare"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../autodocs.html" >API docs</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2015, Ryan Dale.
+  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+  <br />Theme based on <a href="http://readthedocs.org/">Read The Docs</a>
+
+</div>
+
+
+
+
+
+  </body>
+</html>

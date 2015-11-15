@@ -1,0 +1,158 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>metaseq.plotutils.matrix_and_line_shell &mdash; metaseq 0.5.6 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.6',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/searchtools.js"></script>
+    <link rel="top" title="metaseq 0.5.6 documentation" href="../index.html" />
+    <link rel="up" title="API docs" href="../autodocs.html" />
+    <link rel="next" title="metaseq.plotutils.input_ip_plots" href="metaseq.plotutils.input_ip_plots.html" />
+    <link rel="prev" title="metaseq.plotutils.prepare_logged" href="metaseq.plotutils.prepare_logged.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="metaseq.plotutils.input_ip_plots.html" title="metaseq.plotutils.input_ip_plots"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="metaseq.plotutils.prepare_logged.html" title="metaseq.plotutils.prepare_logged"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../autodocs.html" accesskey="U">API docs</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="metaseq-plotutils-matrix-and-line-shell">
+<h1>metaseq.plotutils.matrix_and_line_shell<a class="headerlink" href="#metaseq-plotutils-matrix-and-line-shell" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="metaseq.plotutils.matrix_and_line_shell">
+<code class="descclassname">metaseq.plotutils.</code><code class="descname">matrix_and_line_shell</code><span class="sig-paren">(</span><em>figsize=(5</em>, <em>12)</em>, <em>strip=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/plotutils.html#matrix_and_line_shell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.plotutils.matrix_and_line_shell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function to construct an empty figure that has space for a matrix,
+a summary line plot directly below it, a colorbar axis, and an optional
+&#8220;strip&#8221; axis that parallels the matrix (and shares its y-axis) where data
+can be added to create callbacks.</p>
+<p>Returns a tuple of (fig, matrix_ax, line_ax, strip_ax, colorbar_ax) that
+can then be used to plot upon.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>figsize</strong> &#8211; Tuple of (width, height), in inches, for the figure to be</li>
+<li><strong>strip</strong> &#8211; If <cite>strip</cite> is False, then the returned <cite>strip_ax</cite> will be
+None and no strip axes will be created.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="metaseq.plotutils.prepare_logged.html"
+                        title="previous chapter">metaseq.plotutils.prepare_logged</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="metaseq.plotutils.input_ip_plots.html"
+                        title="next chapter">metaseq.plotutils.input_ip_plots</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/autodocs/metaseq.plotutils.matrix_and_line_shell.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="metaseq.plotutils.input_ip_plots.html" title="metaseq.plotutils.input_ip_plots"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="metaseq.plotutils.prepare_logged.html" title="metaseq.plotutils.prepare_logged"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../autodocs.html" >API docs</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2015, Ryan Dale.
+  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+  <br />Theme based on <a href="http://readthedocs.org/">Read The Docs</a>
+
+</div>
+
+
+
+
+
+  </body>
+</html>

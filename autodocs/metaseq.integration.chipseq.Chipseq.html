@@ -1,0 +1,288 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>metaseq.integration.chipseq.Chipseq &mdash; metaseq 0.5.6 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.6',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/searchtools.js"></script>
+    <link rel="top" title="metaseq 0.5.6 documentation" href="../index.html" />
+    <link rel="up" title="API docs" href="../autodocs.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../autodocs.html" accesskey="U">API docs</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="metaseq-integration-chipseq-chipseq">
+<h1>metaseq.integration.chipseq.Chipseq<a class="headerlink" href="#metaseq-integration-chipseq-chipseq" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="metaseq.integration.chipseq.Chipseq">
+<em class="property">class </em><code class="descclassname">metaseq.integration.chipseq.</code><code class="descname">Chipseq</code><span class="sig-paren">(</span><em>ip_bam</em>, <em>control_bam</em>, <em>dbfn=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/integration/chipseq.html#Chipseq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.integration.chipseq.Chipseq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Class for visualizing and interactively exploring ChIP-seq data.</p>
+<p>Needs two BAM files (for IP and control) and a gffutils database
+filename in order to display gene models.</p>
+<p>Typical usage is to create a normalized array of signal over each
+feature with the <cite>diff_array</cite> method, and then plot with the <cite>plot</cite>
+method.</p>
+<p>The resulting figure has the matrix as a heatmap, the average signal
+over features, and a panel with points that can be zoomed and clicked,
+spawning a mini-browser window for the corresponding feature.</p>
+<p>Configuration can be done by adjusting the following attributes after
+creating a Chipseq instance:</p>
+<blockquote>
+<div><ul class="simple">
+<li><cite>_strip_kwargs</cite> (the style for the dots in the left panel)</li>
+<li><cite>browser_plotting_kwargs</cite> (style of signal lines in the mini-browser)</li>
+</ul>
+</div></blockquote>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.integration.chipseq.Chipseq.callback" title="metaseq.integration.chipseq.Chipseq.callback"><code class="xref py py-obj docutils literal"><span class="pre">callback</span></code></a>(event)</td>
+<td>Callback function to spawn a mini-browser when a feature is clicked.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.integration.chipseq.Chipseq.diff_array" title="metaseq.integration.chipseq.Chipseq.diff_array"><code class="xref py py-obj docutils literal"><span class="pre">diff_array</span></code></a>(features[,&nbsp;force,&nbsp;func,&nbsp;...])</td>
+<td>Scales the control and IP data to million mapped reads, then subtracts scaled control from scaled IP, applies <cite>func(diffed)</cite> to the diffed array, and finally sets <cite>self.diffed_array</cite> to be the result.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.integration.chipseq.Chipseq.plot" title="metaseq.integration.chipseq.Chipseq.plot"><code class="xref py py-obj docutils literal"><span class="pre">plot</span></code></a>(x[,&nbsp;row_order,&nbsp;imshow_kwargs,&nbsp;strip])</td>
+<td>Plot the scaled ChIP-seq data.</td>
+</tr>
+</tbody>
+</table>
+<p>Set up a <a class="reference internal" href="#metaseq.integration.chipseq.Chipseq" title="metaseq.integration.chipseq.Chipseq"><code class="xref py py-class docutils literal"><span class="pre">Chipseq</span></code></a> object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ip_bam</strong> &#8211; filename of BAM file for ChIP data</li>
+<li><strong>control_bam</strong> &#8211; filename of BAM file for control data</li>
+<li><strong>dbfn</strong> &#8211; filename of gffutils database</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.integration.chipseq.Chipseq.callback" title="metaseq.integration.chipseq.Chipseq.callback"><code class="xref py py-obj docutils literal"><span class="pre">callback</span></code></a>(event)</td>
+<td>Callback function to spawn a mini-browser when a feature is clicked.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.integration.chipseq.Chipseq.diff_array" title="metaseq.integration.chipseq.Chipseq.diff_array"><code class="xref py py-obj docutils literal"><span class="pre">diff_array</span></code></a>(features[,&nbsp;force,&nbsp;func,&nbsp;...])</td>
+<td>Scales the control and IP data to million mapped reads, then subtracts scaled control from scaled IP, applies <cite>func(diffed)</cite> to the diffed array, and finally sets <cite>self.diffed_array</cite> to be the result.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.integration.chipseq.Chipseq.plot" title="metaseq.integration.chipseq.Chipseq.plot"><code class="xref py py-obj docutils literal"><span class="pre">plot</span></code></a>(x[,&nbsp;row_order,&nbsp;imshow_kwargs,&nbsp;strip])</td>
+<td>Plot the scaled ChIP-seq data.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.integration.chipseq.Chipseq.__init__" title="metaseq.integration.chipseq.Chipseq.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>(ip_bam,&nbsp;control_bam[,&nbsp;dbfn])</td>
+<td>Set up a <a class="reference internal" href="#metaseq.integration.chipseq.Chipseq" title="metaseq.integration.chipseq.Chipseq"><code class="xref py py-class docutils literal"><span class="pre">Chipseq</span></code></a> object.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.integration.chipseq.Chipseq.callback" title="metaseq.integration.chipseq.Chipseq.callback"><code class="xref py py-obj docutils literal"><span class="pre">callback</span></code></a>(event)</td>
+<td>Callback function to spawn a mini-browser when a feature is clicked.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.integration.chipseq.Chipseq.diff_array" title="metaseq.integration.chipseq.Chipseq.diff_array"><code class="xref py py-obj docutils literal"><span class="pre">diff_array</span></code></a>(features[,&nbsp;force,&nbsp;func,&nbsp;...])</td>
+<td>Scales the control and IP data to million mapped reads, then subtracts scaled control from scaled IP, applies <cite>func(diffed)</cite> to the diffed array, and finally sets <cite>self.diffed_array</cite> to be the result.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.integration.chipseq.Chipseq.plot" title="metaseq.integration.chipseq.Chipseq.plot"><code class="xref py py-obj docutils literal"><span class="pre">plot</span></code></a>(x[,&nbsp;row_order,&nbsp;imshow_kwargs,&nbsp;strip])</td>
+<td>Plot the scaled ChIP-seq data.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="metaseq.integration.chipseq.Chipseq.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>ip_bam</em>, <em>control_bam</em>, <em>dbfn=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/integration/chipseq.html#Chipseq.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.integration.chipseq.Chipseq.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set up a <a class="reference internal" href="#metaseq.integration.chipseq.Chipseq" title="metaseq.integration.chipseq.Chipseq"><code class="xref py py-class docutils literal"><span class="pre">Chipseq</span></code></a> object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ip_bam</strong> &#8211; filename of BAM file for ChIP data</li>
+<li><strong>control_bam</strong> &#8211; filename of BAM file for control data</li>
+<li><strong>dbfn</strong> &#8211; filename of gffutils database</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.integration.chipseq.Chipseq.callback">
+<code class="descname">callback</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/integration/chipseq.html#Chipseq.callback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.integration.chipseq.Chipseq.callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Callback function to spawn a mini-browser when a feature is clicked.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.integration.chipseq.Chipseq.diff_array">
+<code class="descname">diff_array</code><span class="sig-paren">(</span><em>features</em>, <em>force=True</em>, <em>func=None</em>, <em>array_kwargs={}</em>, <em>cache=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/integration/chipseq.html#Chipseq.diff_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.integration.chipseq.Chipseq.diff_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scales the control and IP data to million mapped reads, then subtracts
+scaled control from scaled IP, applies <cite>func(diffed)</cite> to the diffed
+array, and finally sets <cite>self.diffed_array</cite> to be the result.</p>
+<p>Arrays <cite>self.ip</cite> and <cite>self.control</cite> are set as well, and if
+<cite>force=False</cite>, then previously-created arrays will be used instead of
+re-calculating new ones.  This is useful if you want to easily try
+multiple <cite>func</cite> functions without having to re-calculate the data.</p>
+<p>Another side-effect is that <cite>self.features</cite> is set so that it can be
+accesed by other methods.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>features</strong> &#8211; a list of pybedtools.Interval objects</li>
+<li><strong>array_kwargs</strong> &#8211; extra keyword args passed to genomic_signal.array;
+typically this will include <cite>bins</cite>, <cite>processes</cite>, and <cite>chunksize</cite>
+arguments.</li>
+<li><strong>func</strong> &#8211; a function to apply to the diffed arrays. By default
+this is <a class="reference internal" href="metaseq.plotutils.nice_log.html#metaseq.plotutils.nice_log" title="metaseq.plotutils.nice_log"><code class="xref py py-func docutils literal"><span class="pre">metaseq.plotutils.nice_log()</span></code></a>; another option might be
+<cite>lambda x: x</cite>, or <cite>lambda x: 1e6*x</cite></li>
+<li><strong>force</strong> &#8211; Force a re-calculation of the arrays; otherwise uses
+cached values</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.integration.chipseq.Chipseq.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>x</em>, <em>row_order=None</em>, <em>imshow_kwargs=None</em>, <em>strip=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/integration/chipseq.html#Chipseq.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.integration.chipseq.Chipseq.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the scaled ChIP-seq data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> &#8211; X-axis to use (e.g, for TSS +/- 1kb with 100 bins, this would
+be <cite>np.linspace(-1000, 1000, 100)</cite>)</li>
+<li><strong>row_order</strong> &#8211; Array-like object containing row order &#8211; typically
+the result of an <cite>np.argsort</cite> call.</li>
+<li><strong>strip</strong> &#8211; Include axes along the left side with points that can be
+clicked to spawn a minibrowser for that feature.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/autodocs/metaseq.integration.chipseq.Chipseq.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../autodocs.html" >API docs</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2015, Ryan Dale.
+  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+  <br />Theme based on <a href="http://readthedocs.org/">Read The Docs</a>
+
+</div>
+
+
+
+
+
+  </body>
+</html>

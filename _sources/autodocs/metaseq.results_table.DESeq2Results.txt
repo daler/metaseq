@@ -1,0 +1,42 @@
+metaseq.results_table.DESeq2Results
+===================================
+
+.. currentmodule:: metaseq.results_table
+
+.. autoclass:: DESeq2Results
+    :inherited-members:
+    :show-inheritance:
+    :members:
+
+    
+    .. rubric:: Methods
+    
+    .. autosummary::
+    
+        ~DESeq2Results.TSS
+        ~DESeq2Results.TTS
+        ~DESeq2Results.__init__
+        ~DESeq2Results.align_with
+        ~DESeq2Results.attach_db
+        ~DESeq2Results.autosql_file
+        ~DESeq2Results.changed
+        ~DESeq2Results.colormapped_bedfile
+        ~DESeq2Results.copy
+        ~DESeq2Results.disenriched
+        ~DESeq2Results.downregulated
+        ~DESeq2Results.enriched
+        ~DESeq2Results.features
+        ~DESeq2Results.five_prime
+        ~DESeq2Results.genes_in_common
+        ~DESeq2Results.genes_with_peak
+        ~DESeq2Results.ma_plot
+        ~DESeq2Results.radviz
+        ~DESeq2Results.reindex_to
+        ~DESeq2Results.scatter
+        ~DESeq2Results.strip_unknown_features
+        ~DESeq2Results.three_prime
+        ~DESeq2Results.unchanged
+        ~DESeq2Results.update
+        ~DESeq2Results.upregulated
+    
+    .. automethod:: __init__ 

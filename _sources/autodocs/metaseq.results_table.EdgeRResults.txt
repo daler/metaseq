@@ -1,0 +1,40 @@
+metaseq.results_table.EdgeRResults
+==================================
+
+.. currentmodule:: metaseq.results_table
+
+.. autoclass:: EdgeRResults
+    :inherited-members:
+    :show-inheritance:
+    :members:
+
+    
+    .. rubric:: Methods
+    
+    .. autosummary::
+    
+        ~EdgeRResults.TSS
+        ~EdgeRResults.TTS
+        ~EdgeRResults.__init__
+        ~EdgeRResults.align_with
+        ~EdgeRResults.attach_db
+        ~EdgeRResults.changed
+        ~EdgeRResults.copy
+        ~EdgeRResults.disenriched
+        ~EdgeRResults.downregulated
+        ~EdgeRResults.enriched
+        ~EdgeRResults.features
+        ~EdgeRResults.five_prime
+        ~EdgeRResults.genes_in_common
+        ~EdgeRResults.genes_with_peak
+        ~EdgeRResults.ma_plot
+        ~EdgeRResults.radviz
+        ~EdgeRResults.reindex_to
+        ~EdgeRResults.scatter
+        ~EdgeRResults.strip_unknown_features
+        ~EdgeRResults.three_prime
+        ~EdgeRResults.unchanged
+        ~EdgeRResults.update
+        ~EdgeRResults.upregulated
+    
+    .. automethod:: __init__ 

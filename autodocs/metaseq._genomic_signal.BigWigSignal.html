@@ -1,0 +1,338 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>metaseq._genomic_signal.BigWigSignal &mdash; metaseq 0.5.6 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.6',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/searchtools.js"></script>
+    <link rel="top" title="metaseq 0.5.6 documentation" href="../index.html" />
+    <link rel="up" title="API docs" href="../autodocs.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../autodocs.html" accesskey="U">API docs</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="metaseq-genomic-signal-bigwigsignal">
+<h1>metaseq._genomic_signal.BigWigSignal<a class="headerlink" href="#metaseq-genomic-signal-bigwigsignal" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="metaseq._genomic_signal.BigWigSignal">
+<em class="property">class </em><code class="descclassname">metaseq._genomic_signal.</code><code class="descname">BigWigSignal</code><span class="sig-paren">(</span><em>fn</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/_genomic_signal.html#BigWigSignal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq._genomic_signal.BigWigSignal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="metaseq._genomic_signal.BaseSignal.html#metaseq._genomic_signal.BaseSignal" title="metaseq._genomic_signal.BaseSignal"><code class="xref py py-class docutils literal"><span class="pre">metaseq._genomic_signal.BaseSignal</span></code></a></p>
+<p>Class for operating on bigWig files</p>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq._genomic_signal.BigWigSignal.array" title="metaseq._genomic_signal.BigWigSignal.array"><code class="xref py py-obj docutils literal"><span class="pre">array</span></code></a>(features[,&nbsp;processes,&nbsp;chunksize,&nbsp;ragged])</td>
+<td>Creates an MxN NumPy array of genomic signal for the region defined by</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq._genomic_signal.BigWigSignal.local_coverage" title="metaseq._genomic_signal.BigWigSignal.local_coverage"><code class="xref py py-obj docutils literal"><span class="pre">local_coverage</span></code></a>(features,&nbsp;*args,&nbsp;**kwargs)</td>
+<td>Returns a binned vector of coverage.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq._genomic_signal.BigWigSignal.__init__" title="metaseq._genomic_signal.BigWigSignal.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>(fn)</td>
+<td>Class for operating on bigWig files</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq._genomic_signal.BigWigSignal.array" title="metaseq._genomic_signal.BigWigSignal.array"><code class="xref py py-obj docutils literal"><span class="pre">array</span></code></a>(features[,&nbsp;processes,&nbsp;chunksize,&nbsp;ragged])</td>
+<td>Creates an MxN NumPy array of genomic signal for the region defined by</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq._genomic_signal.BigWigSignal.local_coverage" title="metaseq._genomic_signal.BigWigSignal.local_coverage"><code class="xref py py-obj docutils literal"><span class="pre">local_coverage</span></code></a>(features,&nbsp;*args,&nbsp;**kwargs)</td>
+<td>Returns a binned vector of coverage.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="metaseq._genomic_signal.BigWigSignal.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>fn</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/_genomic_signal.html#BigWigSignal.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq._genomic_signal.BigWigSignal.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for operating on bigWig files</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq._genomic_signal.BigWigSignal.array">
+<code class="descname">array</code><span class="sig-paren">(</span><em>features</em>, <em>processes=None</em>, <em>chunksize=1</em>, <em>ragged=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#metaseq._genomic_signal.BigWigSignal.array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an MxN NumPy array of genomic signal for the region defined by
+each feature in <cite>features</cite>, where M=len(features) and N=(bins or
+feature length)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>features</strong> : iterable of interval-like objects</p>
+<blockquote>
+<div><p>An iterable of interval-like objects; see docstring for
+<cite>local_coverage</cite> method for more details.</p>
+</div></blockquote>
+<p><strong>processes</strong> : int or None</p>
+<blockquote>
+<div><p>If not None, then create the array in parallel, giving each process
+chunks of length <cite>chunksize</cite> to work on.</p>
+</div></blockquote>
+<p><strong>chunksize</strong> : int</p>
+<blockquote>
+<div><p><cite>features</cite> will be split into <cite>chunksize</cite> pieces, and each piece
+will be given to a different process. The optimum value is
+dependent on the size of the features and the underlying data set,
+but <cite>chunksize=100</cite> is a good place to start.</p>
+</div></blockquote>
+<p><strong>ragged</strong> : bool</p>
+<blockquote class="last">
+<div><p>If False (default), then return a 2-D NumPy array.  This requires
+all rows to have the same number of columns, which you get when
+supplying <cite>bins</cite> or if all features are of uniform length.  If
+True, then return a list of 1-D NumPy arrays</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Additional keyword args are passed to local_coverage() which performs
+the work for each feature; see that method for more details.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq._genomic_signal.BigWigSignal.local_coverage">
+<code class="descname">local_coverage</code><span class="sig-paren">(</span><em>features</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#metaseq._genomic_signal.BigWigSignal.local_coverage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a binned vector of coverage.</p>
+<p>Computes a 1D vector of coverage at the coordinates for each feature in
+<cite>features</cite>, extending each read by <cite>fragmentsize</cite> bp.</p>
+<p>Some arguments cannot be used for bigWig files due to the structure of
+these files.  The parameters docstring below indicates whether or not an
+argument can be used with bigWig files.</p>
+<p>Depending on the arguments provided, this method can return a vector
+containing values from a single feature or from concatenated features.</p>
+<p>An example of the flexibility afforded by the latter case:</p>
+<blockquote>
+<div><cite>features</cite> can be a 3-tuple of pybedtools.Intervals representing (TSS
++ 1kb upstream, gene, TTS + 1kb downstream) and <cite>bins</cite> can be [100,
+1000, 100].  This will return a vector of length 1200 containing the
+three genomic intervals binned into 100, 1000, and 100 bins
+respectively.  Note that is up to the caller to construct the right
+axes labels in the final plot!</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>features</strong> : str, interval-like object, or list</p>
+<blockquote>
+<div><p>Can be a single interval or an iterable yielding intervals.</p>
+<p>Interval-like objects must have chrom, start, and stop attributes, and
+optionally a strand attribute.  One exception to this that if
+<cite>features</cite> is a single string, it can be of the form &#8220;chrom:start-stop&#8221;
+or &#8220;chrom:start-stop[strand]&#8221;.</p>
+<p>If <cite>features</cite> is a single interval, then return a 1-D array for that
+interval.</p>
+<p>If <cite>features</cite> is an iterable of intervals, then return a 1-D
+array that is a concatenation of signal for these intervals.</p>
+<p>Available for bigWig.</p>
+</div></blockquote>
+<p><strong>bins</strong> : None, int, list</p>
+<blockquote>
+<div><p>If <cite>bins</cite> is None, then each value in the returned array will
+correspond to one bp in the genome.</p>
+<p>If <cite>features</cite> is a single Interval, then <cite>bins</cite> is an integer or None.</p>
+<p>If <cite>features</cite> is an iterable of Intervals, <cite>bins</cite> is an iterable of
+integers of the same length as <cite>features</cite>.</p>
+<p>Available for bigWig.</p>
+</div></blockquote>
+<p><strong>fragment_size</strong> : None or int</p>
+<blockquote>
+<div><p>If not None, then each item from the genomic signal (e.g., reads from
+a BAM file) will be extended <cite>fragment_size</cite> bp in the 3&#8217; direction.
+Higher fragment sizes will result in smoother signal.  Not available
+for bigWig.</p>
+</div></blockquote>
+<p><strong>shift_width</strong> : int</p>
+<blockquote>
+<div><p>Each item from the genomic signal (e.g., reads from a BAM
+file) will be shifted <cite>shift_width</cite> bp in the 3&#8217; direction.  This can
+be useful for reconstructing a ChIP-seq profile, using the shift width
+determined from the peak-caller (e.g., modeled <cite>d</cite> in MACS). Not
+available for bigWig.</p>
+</div></blockquote>
+<p><strong>read_strand</strong> : None or str</p>
+<blockquote>
+<div><p>If <cite>read_strand</cite> is one of &#8220;+&#8221; or &#8220;-&#8221;, then only items from the genomic
+signal (e.g., reads from a BAM file) on that strand will be considered
+and reads on the opposite strand ignored.  Useful for plotting genomic
+signal for stranded libraries. Not available for bigWig.</p>
+</div></blockquote>
+<p><strong>stranded</strong> : bool</p>
+<blockquote>
+<div><p>If True, then the profile will be reversed for features whose strand
+attribute is &#8220;-&#8221;.</p>
+</div></blockquote>
+<p><strong>use_score</strong> : bool</p>
+<blockquote>
+<div><p>If True, then each bin will contain the sum of the <em>score</em> attribute of
+genomic features in that bin instead of the <em>number</em> of genomic
+features falling within each bin. Not available for bigWig.</p>
+</div></blockquote>
+<p><strong>accumulate</strong> : bool</p>
+<blockquote>
+<div><p>If False, then only record <em>that</em> there was something there, rather
+than acumulating reads.  This is useful for making matrices with called
+peaks. Available for bigWig.</p>
+</div></blockquote>
+<p><strong>preserve_total</strong> : bool</p>
+<blockquote>
+<div><p>If True, re-scales the returned value so that each binned row&#8217;s total
+is equal to the sum of the original, un-binned data.  The units of the
+returned array will be in &#8220;total per bin&#8221;.  This is useful for, e.g.,
+counting reads in features.  If <cite>preserve_total</cite> is False, then the
+returned array will have units of &#8220;density&#8221;; this is more generally
+useful and is the default behavior.  Available for bigWig, but not when
+using method=&#8221;ucsc_summarize&#8221;.</p>
+</div></blockquote>
+<p><strong>method</strong> : str; one of [ &#8220;summarize&#8221; | &#8220;get_as_array&#8221; | &#8220;ucsc_summarize&#8221; ]</p>
+<blockquote>
+<div><p>Only used for bigWig.  The method specifies how data are extracted from
+the bigWig file.  &#8220;summarize&#8221; is the default.  It&#8217;s quite fast, but may
+yield slightly different results when compared to running this same
+function on the BAM file from which the bigWig was created.</p>
+<p>&#8220;summarize&#8221; uses bx-python.  The values returned will not be exactly
+the same as the values returned when local_coverage is called on a BAM,
+BED, or bigBed file, but they will be close.  This method is quite
+fast, and is the default when bins is not None.</p>
+<p>&#8220;get_as_array&#8221; uses bx-python, but does a separate binning step.  This
+can be slower than the other two methods, but the results are exactly
+the same as those from a BAM, BED, or bigBed file.  This method is
+always used if bins=None.</p>
+<p>&#8220;ucsc_summarize&#8221; is an alternative version of &#8220;summarize&#8221;.  It uses the
+UCSC program <cite>bigWigSummary</cite>, which must already installed and on your
+path.</p>
+</div></blockquote>
+<p><strong>processes</strong> : int or None</p>
+<blockquote>
+<div><p>The feature can be split across multiple processes.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">1-d NumPy array</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>If a feature has a &#8220;-&#8221; strand attribute, then the resulting profile will be
+<em>relative to a minus-strand feature</em>.  That is, the resulting profile will
+be reversed.</p>
+<p>Returns arrays <cite>x</cite> and <cite>y</cite>.  <cite>x</cite> is in genomic coordinates, and <cite>y</cite> is
+the coverage at each of those coordinates after extending fragments.</p>
+<p>The total number of reads is guaranteed to be the same no matter how it&#8217;s
+binned.</p>
+<p>(with ideas from
+<a class="reference external" href="http://www-huber.embl.de/users/anders/HTSeq/doc/tss.html">http://www-huber.embl.de/users/anders/HTSeq/doc/tss.html</a>)</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/autodocs/metaseq._genomic_signal.BigWigSignal.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../autodocs.html" >API docs</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2015, Ryan Dale.
+  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+  <br />Theme based on <a href="http://readthedocs.org/">Read The Docs</a>
+
+</div>
+
+
+
+
+
+  </body>
+</html>

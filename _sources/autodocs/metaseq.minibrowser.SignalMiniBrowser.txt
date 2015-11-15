@@ -1,0 +1,24 @@
+metaseq.minibrowser.SignalMiniBrowser
+=====================================
+
+.. currentmodule:: metaseq.minibrowser
+
+.. autoclass:: SignalMiniBrowser
+    :inherited-members:
+    :show-inheritance:
+    :members:
+
+    
+    .. rubric:: Methods
+    
+    .. autosummary::
+    
+        ~SignalMiniBrowser.__init__
+        ~SignalMiniBrowser.close_all
+        ~SignalMiniBrowser.example_panel
+        ~SignalMiniBrowser.make_fig
+        ~SignalMiniBrowser.panels
+        ~SignalMiniBrowser.plot
+        ~SignalMiniBrowser.signal_panel
+    
+    .. automethod:: __init__ 

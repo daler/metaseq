@@ -1,0 +1,6 @@
+metaseq.plotutils.tip_fdr
+=========================
+
+.. currentmodule:: metaseq.plotutils
+
+.. autofunction:: tip_fdr

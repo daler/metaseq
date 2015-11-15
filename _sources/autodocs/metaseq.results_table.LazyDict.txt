@@ -1,0 +1,21 @@
+metaseq.results_table.LazyDict
+==============================
+
+.. currentmodule:: metaseq.results_table
+
+.. autoclass:: LazyDict
+    :inherited-members:
+    :show-inheritance:
+    :members:
+
+    
+    .. rubric:: Methods
+    
+    .. autosummary::
+    
+        ~LazyDict.__init__
+        ~LazyDict.items
+        ~LazyDict.keys
+        ~LazyDict.values
+    
+    .. automethod:: __init__ 

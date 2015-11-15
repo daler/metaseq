@@ -1,0 +1,6 @@
+metaseq.plotutils.input_ip_plots
+================================
+
+.. currentmodule:: metaseq.plotutils
+
+.. autofunction:: input_ip_plots

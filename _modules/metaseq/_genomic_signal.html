@@ -1,0 +1,390 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>metaseq._genomic_signal &mdash; metaseq 0.5.6 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.6',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
+    <link rel="top" title="metaseq 0.5.6 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for metaseq._genomic_signal</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">The classes in this module enable random access to a variety of file formats</span>
+<span class="sd">(BAM, bigWig, bigBed, BED) using a uniform syntax, and allow you to compute</span>
+<span class="sd">coverage across many features in parallel or just a single feature.</span>
+
+<span class="sd">Using classes in the :mod:`metaseq.integration` and :mod:`metaseq.minibrowser`</span>
+<span class="sd">modules, you can connect these objects to matplotlib figures that show a window</span>
+<span class="sd">into the data, making exploration easy and interactive.</span>
+
+<span class="sd">Generally, the :func:`genomic_signal` function is all you need -- just provide</span>
+<span class="sd">a filename and the format and it will take care of the rest, returning</span>
+<span class="sd">a genomic signal of the proper type.</span>
+
+<span class="sd">Adding support for a new format is straightforward:</span>
+
+<span class="sd">    * Write a new adapter for the format in :mod:`metaseq.filetype_adapters`</span>
+<span class="sd">    * Subclass one of the existing classes below, setting the `adapter`</span>
+<span class="sd">      attribute to be an instance of this new adapter</span>
+<span class="sd">    * Add the new class to the `_registry` dictionary to enable support for the</span>
+<span class="sd">      file format.</span>
+
+<span class="sd">Note that to support parallel processing and to avoid repeating code, these</span>
+<span class="sd">classes delegate their local_coverage methods to the</span>
+<span class="sd">:func:`metaseq.array_helpers._local_coverage` function.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">bx.bbi.bigwig_file</span> <span class="kn">import</span> <span class="n">BigWigFile</span>
+
+<span class="kn">import</span> <span class="nn">pybedtools</span>
+
+<span class="kn">from</span> <span class="nn">array_helpers</span> <span class="kn">import</span> <span class="n">_array</span><span class="p">,</span> <span class="n">_array_parallel</span><span class="p">,</span> <span class="n">_local_coverage</span><span class="p">,</span> \
+    <span class="n">_local_count</span>
+<span class="kn">import</span> <span class="nn">filetype_adapters</span>
+<span class="kn">import</span> <span class="nn">helpers</span>
+<span class="kn">from</span> <span class="nn">helpers</span> <span class="kn">import</span> <span class="n">rebin</span>
+
+
+<div class="viewcode-block" id="supported_formats"><a class="viewcode-back" href="../../autodocs/metaseq._genomic_signal.supported_formats.html#metaseq._genomic_signal.supported_formats">[docs]</a><span class="k">def</span> <span class="nf">supported_formats</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns list of formats supported by metaseq&#39;s genomic signal objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_registry</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="genomic_signal"><a class="viewcode-back" href="../../autodocs/metaseq._genomic_signal.genomic_signal.html#metaseq._genomic_signal.genomic_signal">[docs]</a><span class="k">def</span> <span class="nf">genomic_signal</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Factory function that makes the right class for the file format.</span>
+
+<span class="sd">    Typically you&#39;ll only need this function to create a new genomic signal</span>
+<span class="sd">    object.</span>
+
+<span class="sd">    :param fn: Filename</span>
+<span class="sd">    :param kind:</span>
+<span class="sd">        String.  Format of the file; see</span>
+<span class="sd">        metaseq.genomic_signal._registry.keys()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">klass</span> <span class="o">=</span> <span class="n">_registry</span><span class="p">[</span><span class="n">kind</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s">&#39;No support for </span><span class="si">%s</span><span class="s"> format, choices are </span><span class="si">%s</span><span class="s">&#39;</span>
+            <span class="o">%</span> <span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="n">_registry</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">klass</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+    <span class="n">m</span><span class="o">.</span><span class="n">kind</span> <span class="o">=</span> <span class="n">kind</span>
+    <span class="k">return</span> <span class="n">m</span>
+
+</div>
+<div class="viewcode-block" id="BaseSignal"><a class="viewcode-back" href="../../autodocs/metaseq._genomic_signal.BaseSignal.html#metaseq._genomic_signal.BaseSignal">[docs]</a><span class="k">class</span> <span class="nc">BaseSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class to represent objects from which genomic signal can be</span>
+<span class="sd">    calculated/extracted.</span>
+
+<span class="sd">    `__getitem__` uses the underlying adapter the instance was created with</span>
+<span class="sd">    (e.g., :class:`metaseq.filetype_adapters.BamAdapter` for</span>
+<span class="sd">    a :class:`BamSignal` object).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="BaseSignal.__init__"><a class="viewcode-back" href="../../autodocs/metaseq._genomic_signal.BaseSignal.html#metaseq._genomic_signal.BaseSignal.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn</span> <span class="o">=</span> <span class="n">fn</span>
+</div>
+<div class="viewcode-block" id="BaseSignal.array"><a class="viewcode-back" href="../../autodocs/metaseq._genomic_signal.BaseSignal.html#metaseq._genomic_signal.BaseSignal.array">[docs]</a>    <span class="k">def</span> <span class="nf">array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ragged</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+              <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates an MxN NumPy array of genomic signal for the region defined by</span>
+<span class="sd">        each feature in `features`, where M=len(features) and N=(bins or</span>
+<span class="sd">        feature length)</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        features : iterable of interval-like objects</span>
+<span class="sd">            An iterable of interval-like objects; see docstring for</span>
+<span class="sd">            `local_coverage` method for more details.</span>
+
+<span class="sd">        processes : int or None</span>
+<span class="sd">            If not None, then create the array in parallel, giving each process</span>
+<span class="sd">            chunks of length `chunksize` to work on.</span>
+
+<span class="sd">        chunksize : int</span>
+<span class="sd">            `features` will be split into `chunksize` pieces, and each piece</span>
+<span class="sd">            will be given to a different process. The optimum value is</span>
+<span class="sd">            dependent on the size of the features and the underlying data set,</span>
+<span class="sd">            but `chunksize=100` is a good place to start.</span>
+
+<span class="sd">        ragged : bool</span>
+<span class="sd">            If False (default), then return a 2-D NumPy array.  This requires</span>
+<span class="sd">            all rows to have the same number of columns, which you get when</span>
+<span class="sd">            supplying `bins` or if all features are of uniform length.  If</span>
+<span class="sd">            True, then return a list of 1-D NumPy arrays</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Additional keyword args are passed to local_coverage() which performs</span>
+<span class="sd">        the work for each feature; see that method for more details.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">processes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">arrays</span> <span class="o">=</span> <span class="n">_array_parallel</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="n">processes</span><span class="p">,</span>
+                <span class="n">chunksize</span><span class="o">=</span><span class="n">chunksize</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">arrays</span> <span class="o">=</span> <span class="n">_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ragged</span><span class="p">:</span>
+            <span class="n">stacked_arrays</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">row_stack</span><span class="p">(</span><span class="n">arrays</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">arrays</span>
+            <span class="k">return</span> <span class="n">stacked_arrays</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">arrays</span>
+</div>
+<div class="viewcode-block" id="BaseSignal.local_coverage"><a class="viewcode-back" href="../../autodocs/metaseq._genomic_signal.BaseSignal.html#metaseq._genomic_signal.BaseSignal.local_coverage">[docs]</a>    <span class="k">def</span> <span class="nf">local_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">processes</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;processes&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">processes</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_local_coverage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s">&quot;only single features are supported for parallel &quot;</span>
+                <span class="s">&quot;local_coverage&quot;</span><span class="p">)</span>
+
+        <span class="c"># we don&#39;t want to have self.array do the binning</span>
+        <span class="n">bins</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;bins&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+        <span class="c"># since if we got here processes is not None, then this will trigger</span>
+        <span class="c"># a parallel array creation</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">tointerval</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">features</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">features</span><span class="o">.</span><span class="n">stop</span><span class="p">)</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">helpers</span><span class="o">.</span><span class="n">split_feature</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">processes</span><span class="p">))</span>
+        <span class="n">ys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="n">features</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="n">processes</span><span class="p">,</span> <span class="n">ragged</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c"># now we ravel() and re-bin</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">(</span><span class="n">ys</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">bins</span><span class="p">:</span>
+            <span class="n">xi</span><span class="p">,</span> <span class="n">yi</span> <span class="o">=</span> <span class="n">rebin</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">bins</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+            <span class="k">return</span> <span class="n">xi</span><span class="p">,</span> <span class="n">yi</span>
+        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+</div>
+    <span class="n">local_coverage</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">_local_coverage</span><span class="o">.</span><span class="n">__doc__</span>
+
+</div>
+<div class="viewcode-block" id="BigWigSignal"><a class="viewcode-back" href="../../autodocs/metaseq._genomic_signal.BigWigSignal.html#metaseq._genomic_signal.BigWigSignal">[docs]</a><span class="k">class</span> <span class="nc">BigWigSignal</span><span class="p">(</span><span class="n">BaseSignal</span><span class="p">):</span>
+<div class="viewcode-block" id="BigWigSignal.__init__"><a class="viewcode-back" href="../../autodocs/metaseq._genomic_signal.BigWigSignal.html#metaseq._genomic_signal.BigWigSignal.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Class for operating on bigWig files</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BigWigSignal</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span> <span class="o">=</span> <span class="n">filetype_adapters</span><span class="o">.</span><span class="n">BigWigAdapter</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="IntervalSignal"><a class="viewcode-back" href="../../autodocs/metaseq._genomic_signal.IntervalSignal.html#metaseq._genomic_signal.IntervalSignal">[docs]</a><span class="k">class</span> <span class="nc">IntervalSignal</span><span class="p">(</span><span class="n">BaseSignal</span><span class="p">):</span>
+<div class="viewcode-block" id="IntervalSignal.__init__"><a class="viewcode-back" href="../../autodocs/metaseq._genomic_signal.IntervalSignal.html#metaseq._genomic_signal.IntervalSignal.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Abstract class for bed, BAM and bigBed files.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">BaseSignal</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="IntervalSignal.local_count"><a class="viewcode-back" href="../../autodocs/metaseq._genomic_signal.IntervalSignal.html#metaseq._genomic_signal.IntervalSignal.local_count">[docs]</a>    <span class="k">def</span> <span class="nf">local_count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_local_count</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+    <span class="n">local_count</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">_local_count</span><span class="o">.</span><span class="n">__doc__</span>
+
+</div>
+<div class="viewcode-block" id="BamSignal"><a class="viewcode-back" href="../../autodocs/metaseq._genomic_signal.BamSignal.html#metaseq._genomic_signal.BamSignal">[docs]</a><span class="k">class</span> <span class="nc">BamSignal</span><span class="p">(</span><span class="n">IntervalSignal</span><span class="p">):</span>
+<div class="viewcode-block" id="BamSignal.__init__"><a class="viewcode-back" href="../../autodocs/metaseq._genomic_signal.BamSignal.html#metaseq._genomic_signal.BamSignal.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Class for operating on BAM files.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">BaseSignal</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_readcount</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span> <span class="o">=</span> <span class="n">filetype_adapters</span><span class="o">.</span><span class="n">BamAdapter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BamSignal.genome"><a class="viewcode-back" href="../../autodocs/metaseq._genomic_signal.BamSignal.html#metaseq._genomic_signal.BamSignal.genome">[docs]</a>    <span class="k">def</span> <span class="nf">genome</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;genome&quot; dictionary ready for pybedtools, based on the BAM header.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># This gets the underlying pysam Samfile object</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span><span class="o">.</span><span class="n">fileobj</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">ref</span><span class="p">,</span> <span class="n">length</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">references</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">lengths</span><span class="p">):</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">ref</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">d</span>
+</div>
+<div class="viewcode-block" id="BamSignal.mapped_read_count"><a class="viewcode-back" href="../../autodocs/metaseq._genomic_signal.BamSignal.html#metaseq._genomic_signal.BamSignal.mapped_read_count">[docs]</a>    <span class="k">def</span> <span class="nf">mapped_read_count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Counts total reads in a BAM file.</span>
+
+<span class="sd">        If a file self.bam + &#39;.scale&#39; exists, then just read the first line of</span>
+<span class="sd">        that file that doesn&#39;t start with a &quot;#&quot;.  If such a file doesn&#39;t exist,</span>
+<span class="sd">        then it will be created with the number of reads as the first and only</span>
+<span class="sd">        line in the file.</span>
+
+<span class="sd">        The result is also stored in self._readcount so that the time-consuming</span>
+<span class="sd">        part only runs once; use force=True to force re-count.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        force : bool</span>
+<span class="sd">            If True, then force a re-count; otherwise use cached data if</span>
+<span class="sd">            available.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Already run?</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readcount</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readcount</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fn</span> <span class="o">+</span> <span class="s">&#39;.mmr&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fn</span> <span class="o">+</span> <span class="s">&#39;.mmr&#39;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;#&#39;</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_readcount</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readcount</span>
+
+        <span class="n">cmds</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;samtools&#39;</span><span class="p">,</span>
+                <span class="s">&#39;view&#39;</span><span class="p">,</span>
+                <span class="s">&#39;-c&#39;</span><span class="p">,</span>
+                <span class="s">&#39;-F&#39;</span><span class="p">,</span> <span class="s">&#39;0x4&#39;</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">]</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+            <span class="n">cmds</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+        <span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">stderr</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;samtools says: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">stderr</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="n">mapped_reads</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">stdout</span><span class="p">)</span>
+
+        <span class="c"># write to file so the next time you need the lib size you can access</span>
+        <span class="c"># it quickly</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fn</span> <span class="o">+</span> <span class="s">&#39;.mmr&#39;</span><span class="p">):</span>
+            <span class="n">fout</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fn</span> <span class="o">+</span> <span class="s">&#39;.mmr&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+            <span class="n">fout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">mapped_reads</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="n">fout</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_readcount</span> <span class="o">=</span> <span class="n">mapped_reads</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readcount</span>
+
+</div></div>
+<div class="viewcode-block" id="BigBedSignal"><a class="viewcode-back" href="../../autodocs/metaseq._genomic_signal.BigBedSignal.html#metaseq._genomic_signal.BigBedSignal">[docs]</a><span class="k">class</span> <span class="nc">BigBedSignal</span><span class="p">(</span><span class="n">IntervalSignal</span><span class="p">):</span>
+<div class="viewcode-block" id="BigBedSignal.__init__"><a class="viewcode-back" href="../../autodocs/metaseq._genomic_signal.BigBedSignal.html#metaseq._genomic_signal.BigBedSignal.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Class for operating on bigBed files.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">IntervalSignal</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span> <span class="o">=</span> <span class="n">filetype_adapters</span><span class="o">.</span><span class="n">BigBedAdapter</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="BedSignal"><a class="viewcode-back" href="../../autodocs/metaseq._genomic_signal.BedSignal.html#metaseq._genomic_signal.BedSignal">[docs]</a><span class="k">class</span> <span class="nc">BedSignal</span><span class="p">(</span><span class="n">IntervalSignal</span><span class="p">):</span>
+<div class="viewcode-block" id="BedSignal.__init__"><a class="viewcode-back" href="../../autodocs/metaseq._genomic_signal.BedSignal.html#metaseq._genomic_signal.BedSignal.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Class for operating on BED files.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">IntervalSignal</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adapter</span> <span class="o">=</span> <span class="n">filetype_adapters</span><span class="o">.</span><span class="n">BedAdapter</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+
+</div></div>
+<span class="n">_registry</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;bam&#39;</span><span class="p">:</span> <span class="n">BamSignal</span><span class="p">,</span>
+    <span class="s">&#39;bed&#39;</span><span class="p">:</span> <span class="n">BedSignal</span><span class="p">,</span>
+    <span class="s">&#39;gff&#39;</span><span class="p">:</span> <span class="n">BedSignal</span><span class="p">,</span>
+    <span class="s">&#39;gtf&#39;</span><span class="p">:</span> <span class="n">BedSignal</span><span class="p">,</span>
+    <span class="s">&#39;vcf&#39;</span><span class="p">:</span> <span class="n">BedSignal</span><span class="p">,</span>
+    <span class="s">&#39;bigwig&#39;</span><span class="p">:</span> <span class="n">BigWigSignal</span><span class="p">,</span>
+    <span class="s">&#39;bigbed&#39;</span><span class="p">:</span> <span class="n">BigBedSignal</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2015, Ryan Dale.
+  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+  <br />Theme based on <a href="http://readthedocs.org/">Read The Docs</a>
+
+</div>
+
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>metaseq.plotutils.MarginalHistScatter &mdash; metaseq 0.5.6 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.6',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/searchtools.js"></script>
+    <link rel="top" title="metaseq 0.5.6 documentation" href="../index.html" />
+    <link rel="up" title="API docs" href="../autodocs.html" />
+    <link rel="prev" title="metaseq.plotutils.input_ip_plots" href="metaseq.plotutils.input_ip_plots.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="metaseq.plotutils.input_ip_plots.html" title="metaseq.plotutils.input_ip_plots"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../autodocs.html" accesskey="U">API docs</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="metaseq-plotutils-marginalhistscatter">
+<h1>metaseq.plotutils.MarginalHistScatter<a class="headerlink" href="#metaseq-plotutils-marginalhistscatter" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="metaseq.plotutils.MarginalHistScatter">
+<em class="property">class </em><code class="descclassname">metaseq.plotutils.</code><code class="descname">MarginalHistScatter</code><span class="sig-paren">(</span><em>ax</em>, <em>hist_size=0.6</em>, <em>pad=0.05</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/plotutils.html#MarginalHistScatter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.plotutils.MarginalHistScatter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Class to enable incremental appending of scatterplots, each of which
+generate additional marginal histograms.</p>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">limits</span></code></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">xmax</span></code></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">xmin</span></code></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">ymax</span></code></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">ymin</span></code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.plotutils.MarginalHistScatter.add_legends" title="metaseq.plotutils.MarginalHistScatter.add_legends"><code class="xref py py-obj docutils literal"><span class="pre">add_legends</span></code></a>([xhists,&nbsp;yhists,&nbsp;scatter])</td>
+<td>Add legends to axes.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.plotutils.MarginalHistScatter.append" title="metaseq.plotutils.MarginalHistScatter.append"><code class="xref py py-obj docutils literal"><span class="pre">append</span></code></a>(x,&nbsp;y,&nbsp;scatter_kwargs[,&nbsp;hist_kwargs,&nbsp;...])</td>
+<td>Adds a new scatter to self.scatter_ax as well as marginal histograms for the same data, borrowing addtional room from the axes.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.plotutils.MarginalHistScatter.__init__" title="metaseq.plotutils.MarginalHistScatter.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>(ax[,&nbsp;hist_size,&nbsp;pad])</td>
+<td>Class to enable incremental appending of scatterplots, each of which generate additional marginal histograms.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#metaseq.plotutils.MarginalHistScatter.add_legends" title="metaseq.plotutils.MarginalHistScatter.add_legends"><code class="xref py py-obj docutils literal"><span class="pre">add_legends</span></code></a>([xhists,&nbsp;yhists,&nbsp;scatter])</td>
+<td>Add legends to axes.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#metaseq.plotutils.MarginalHistScatter.append" title="metaseq.plotutils.MarginalHistScatter.append"><code class="xref py py-obj docutils literal"><span class="pre">append</span></code></a>(x,&nbsp;y,&nbsp;scatter_kwargs[,&nbsp;hist_kwargs,&nbsp;...])</td>
+<td>Adds a new scatter to self.scatter_ax as well as marginal histograms for the same data, borrowing addtional room from the axes.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="metaseq.plotutils.MarginalHistScatter.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>ax</em>, <em>hist_size=0.6</em>, <em>pad=0.05</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/plotutils.html#MarginalHistScatter.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.plotutils.MarginalHistScatter.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to enable incremental appending of scatterplots, each of which
+generate additional marginal histograms.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.plotutils.MarginalHistScatter.add_legends">
+<code class="descname">add_legends</code><span class="sig-paren">(</span><em>xhists=True</em>, <em>yhists=False</em>, <em>scatter=True</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/plotutils.html#MarginalHistScatter.add_legends"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.plotutils.MarginalHistScatter.add_legends" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add legends to axes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metaseq.plotutils.MarginalHistScatter.append">
+<code class="descname">append</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>scatter_kwargs</em>, <em>hist_kwargs=None</em>, <em>xhist_kwargs=None</em>, <em>yhist_kwargs=None</em>, <em>num_ticks=3</em>, <em>labels=None</em>, <em>hist_share=False</em>, <em>marginal_histograms=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/plotutils.html#MarginalHistScatter.append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.plotutils.MarginalHistScatter.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a new scatter to self.scatter_ax as well as marginal histograms
+for the same data, borrowing addtional room from the axes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x, y</strong> : array-like</p>
+<blockquote>
+<div><p>Data to be plotted</p>
+</div></blockquote>
+<p><strong>scatter_kwargs</strong> : dict</p>
+<blockquote>
+<div><p>Keyword arguments that are passed directly to scatter().</p>
+</div></blockquote>
+<p><strong>hist_kwargs</strong> : dict</p>
+<blockquote>
+<div><p>Keyword arguments that are passed directly to hist(), for both the
+top and side histograms.</p>
+</div></blockquote>
+<p><strong>xhist_kwargs, yhist_kwargs</strong> : dict</p>
+<blockquote>
+<div><p>Additional, margin-specific kwargs for the x or y histograms
+respectively.  These are used to update <cite>hist_kwargs</cite></p>
+</div></blockquote>
+<p><strong>num_ticks</strong> : int</p>
+<blockquote>
+<div><p>How many tick marks to use in each histogram&#8217;s y-axis</p>
+</div></blockquote>
+<p><strong>labels</strong> : array-like</p>
+<blockquote>
+<div><p>Optional NumPy array of labels that will be set on the collection
+so that they can be accessed by a callback function.</p>
+</div></blockquote>
+<p><strong>hist_share</strong> : bool</p>
+<blockquote>
+<div><p>If True, then all histograms will share the same frequency axes.
+Useful for showing relative heights if you don&#8217;t want to use the
+hist_kwarg <cite>normed=True</cite></p>
+</div></blockquote>
+<p><strong>marginal_histograms</strong> : bool</p>
+<blockquote class="last">
+<div><p>Set to False in order to disable marginal histograms and just use
+as a normal scatterplot.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="metaseq.plotutils.input_ip_plots.html"
+                        title="previous chapter">metaseq.plotutils.input_ip_plots</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/autodocs/metaseq.plotutils.MarginalHistScatter.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="metaseq.plotutils.input_ip_plots.html" title="metaseq.plotutils.input_ip_plots"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../autodocs.html" >API docs</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2015, Ryan Dale.
+  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+  <br />Theme based on <a href="http://readthedocs.org/">Read The Docs</a>
+
+</div>
+
+
+
+
+
+  </body>
+</html>

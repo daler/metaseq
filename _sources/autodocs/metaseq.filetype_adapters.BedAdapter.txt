@@ -1,0 +1,19 @@
+metaseq.filetype_adapters.BedAdapter
+====================================
+
+.. currentmodule:: metaseq.filetype_adapters
+
+.. autoclass:: BedAdapter
+    :inherited-members:
+    :show-inheritance:
+    :members:
+
+    
+    .. rubric:: Methods
+    
+    .. autosummary::
+    
+        ~BedAdapter.__init__
+        ~BedAdapter.make_fileobj
+    
+    .. automethod:: __init__ 

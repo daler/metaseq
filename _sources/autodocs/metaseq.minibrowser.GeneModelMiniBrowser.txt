@@ -1,0 +1,25 @@
+metaseq.minibrowser.GeneModelMiniBrowser
+========================================
+
+.. currentmodule:: metaseq.minibrowser
+
+.. autoclass:: GeneModelMiniBrowser
+    :inherited-members:
+    :show-inheritance:
+    :members:
+
+    
+    .. rubric:: Methods
+    
+    .. autosummary::
+    
+        ~GeneModelMiniBrowser.__init__
+        ~GeneModelMiniBrowser.close_all
+        ~GeneModelMiniBrowser.example_panel
+        ~GeneModelMiniBrowser.gene_panel
+        ~GeneModelMiniBrowser.make_fig
+        ~GeneModelMiniBrowser.panels
+        ~GeneModelMiniBrowser.plot
+        ~GeneModelMiniBrowser.signal_panel
+    
+    .. automethod:: __init__ 

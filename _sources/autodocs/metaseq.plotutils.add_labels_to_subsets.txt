@@ -1,0 +1,6 @@
+metaseq.plotutils.add_labels_to_subsets
+=======================================
+
+.. currentmodule:: metaseq.plotutils
+
+.. autofunction:: add_labels_to_subsets

@@ -1,0 +1,19 @@
+metaseq.filetype_adapters.BaseAdapter
+=====================================
+
+.. currentmodule:: metaseq.filetype_adapters
+
+.. autoclass:: BaseAdapter
+    :inherited-members:
+    :show-inheritance:
+    :members:
+
+    
+    .. rubric:: Methods
+    
+    .. autosummary::
+    
+        ~BaseAdapter.__init__
+        ~BaseAdapter.make_fileobj
+    
+    .. automethod:: __init__ 

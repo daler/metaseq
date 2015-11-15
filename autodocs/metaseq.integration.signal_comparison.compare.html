@@ -1,0 +1,191 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>metaseq.integration.signal_comparison.compare &mdash; metaseq 0.5.6 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.6',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/searchtools.js"></script>
+    <link rel="top" title="metaseq 0.5.6 documentation" href="../index.html" />
+    <link rel="up" title="API docs" href="../autodocs.html" />
+    <link rel="next" title="metaseq.plotutils.imshow" href="metaseq.plotutils.imshow.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="metaseq.plotutils.imshow.html" title="metaseq.plotutils.imshow"
+             accesskey="N">next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../autodocs.html" accesskey="U">API docs</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="metaseq-integration-signal-comparison-compare">
+<h1>metaseq.integration.signal_comparison.compare<a class="headerlink" href="#metaseq-integration-signal-comparison-compare" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="metaseq.integration.signal_comparison.compare">
+<code class="descclassname">metaseq.integration.signal_comparison.</code><code class="descname">compare</code><span class="sig-paren">(</span><em>signal1</em>, <em>signal2</em>, <em>features</em>, <em>outfn</em>, <em>comparefunc=&lt;ufunc 'subtract'&gt;</em>, <em>batchsize=5000</em>, <em>array_kwargs=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/integration/signal_comparison.html#compare"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.integration.signal_comparison.compare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compares two genomic signal objects and outputs results as a bedGraph file.
+Can be used for entire genome-wide comparisons due to its parallel nature.</p>
+<p>Typical usage would be to create genome-wide windows of equal size to
+provide as <cite>features</cite>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">windowsize</span> <span class="o">=</span> <span class="mi">10000</span>
+<span class="n">features</span> <span class="o">=</span> <span class="n">pybedtools</span><span class="o">.</span><span class="n">BedTool</span><span class="p">()</span><span class="o">.</span><span class="n">window_maker</span><span class="p">(</span>
+   <span class="n">genome</span><span class="o">=</span><span class="s">&#39;hg19&#39;</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">windowsize</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You will usually want to choose bins for the array based on the final
+resolution you would like. Say you would like 10-bp bins in the final
+bedGraph; using the example above you would use array_kwargs={&#8216;bins&#8217;:
+windowsize/10}.  Or, for single-bp resolution (beware: file will be large),
+use {&#8216;bins&#8217;: windowsize}.</p>
+<p>Here&#8217;s how it works.  This function:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Takes <cite>batchsize</cite> features at a time from <cite>features</cite></li>
+<li>Constructs normalized (RPMMR) arrays in parallel for each input
+genomic signal object for those <cite>batchsize</cite> features</li>
+<li>Applies <cite>comparefunc</cite> (np.subtract by default) to the arrays to get
+a &#8220;compared&#8221; (e.g., difference matrix by default) for the <cite>batchsize</cite>
+features.</li>
+<li>For each row in this matrix, it outputs each nonzero column as
+a bedGraph format line in <cite>outfn</cite></li>
+</ul>
+</div></blockquote>
+<p><cite>comparefunc</cite> is a function with the signature:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">z</span>
+</pre></div>
+</div>
+<p>where <cite>x</cite> and <cite>y</cite> will be arrays for <cite>signal1</cite> and <cite>signal2</cite> (normalized to
+RPMMR) and <cite>z</cite> is a new array.  By default this is np.subtract, but another
+common <cite>comparefunc</cite> might be a log2-fold-change function:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">lfc</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">x</span> <span class="o">/</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>signal1</strong> &#8211; A genomic_signal object</li>
+<li><strong>signal2</strong> &#8211; Another genomic_signal object</li>
+<li><strong>features</strong> &#8211; An iterable of pybedtools.Interval objects. A list will be
+created for every <cite>batchsize</cite> features, so you need enough memory for
+this.</li>
+<li><strong>comparefunc</strong> &#8211; Function to use to compare arrays (default is
+np.subtract)</li>
+<li><strong>outfn</strong> &#8211; String filename to write bedGraph file</li>
+<li><strong>batchsize</strong> &#8211; Number of features (each with length <cite>windowsize</cite> bp) to
+process at a time</li>
+<li><strong>array_kwargs</strong> &#8211; Kwargs passed directly to genomic_signal.array.  Needs
+<cite>processes</cite> and <cite>chunksize</cite> if you want parallel processing</li>
+<li><strong>verbose</strong> &#8211; Be noisy</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Next topic</h4>
+  <p class="topless"><a href="metaseq.plotutils.imshow.html"
+                        title="next chapter">metaseq.plotutils.imshow</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/autodocs/metaseq.integration.signal_comparison.compare.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="metaseq.plotutils.imshow.html" title="metaseq.plotutils.imshow"
+             >next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../autodocs.html" >API docs</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2015, Ryan Dale.
+  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+  <br />Theme based on <a href="http://readthedocs.org/">Read The Docs</a>
+
+</div>
+
+
+
+
+
+  </body>
+</html>
