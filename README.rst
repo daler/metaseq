@@ -13,7 +13,7 @@ Briefly, the goal of `metaseq` is to tie together lots of existing software into
 a framework for exploring genomic data.  It focuses on flexibility and
 interactive exploration and plotting of disparate genomic data sets.
 
-The main documentation for `metaseq` can be found at http://packages.python.org/metaseq/.
+The main documentation for `metaseq` can be found at https://daler.github.io/metaseq.
 
 If you use `metaseq` in your work, please cite the following publication:
 
@@ -26,7 +26,7 @@ If you use `metaseq` in your work, please cite the following publication:
 Example 1: Average ChIP-seq signal over promoters
 -------------------------------------------------
 
-`Example 1 <https://pythonhosted.org/metaseq/example_session.html>`_ walks you
+`Example 1 <https://daler.github.io/metaseq/example_session.html>`_ walks you
 through the creation of the following heatmap and line-plot figure:
 
 .. figure:: demo.png
@@ -40,7 +40,7 @@ through the creation of the following heatmap and line-plot figure:
 Example 2: Differential expression scatterplots
 -----------------------------------------------
 
-`Example 2 <https://pythonhosted.org/metaseq/example_session_2.html>`_ walks
+`Example 2 <https://daler.github.io/metaseq/example_session_2.html>`_ walks
 you through the creation of the following scatterplot and marginal histogram
 figure:
 
@@ -72,5 +72,5 @@ In addition, `metaseq` offers:
 * Integrates data keyed by genomic interval (think BAM or BED files) with data
   keyed by gene ID (e.g., Cufflinks or DESeq results tables)
 
-Check out the `full documentation <http://packages.python.org/metaseq/>`_ for
+Check out the `full documentation <https://daler.github.io/metaseq/>`_ for
 more.
