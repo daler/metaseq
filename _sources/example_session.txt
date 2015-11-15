@@ -41,18 +41,18 @@ prepared data:
 
 .. parsed-literal::
 
-    --2015-11-15 09:57:43--  https://raw.githubusercontent.com/daler/metaseq-example-data/master/metaseq-example-data.tar.gz
-    Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 23.235.39.133
-    Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|23.235.39.133|:443... connected.
+    --2015-11-15 10:31:50--  https://raw.githubusercontent.com/daler/metaseq-example-data/master/metaseq-example-data.tar.gz
+    Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 23.235.46.133
+    Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|23.235.46.133|:443... connected.
     HTTP request sent, awaiting response... 200 OK
     Length: 96655384 (92M) [application/octet-stream]
     Saving to: ‘metaseq-example-data.tar.gz’
     
-         0K ........ ........ ........ ........ 34% 29.6M 2s
-     32768K ........ ........ ........ ........ 69% 35.0M 1s
-     65536K ........ ........ ........ ....    100% 37.3M=2.8s
+         0K ........ ........ ........ ........ 34% 87.0M 1s
+     32768K ........ ........ ........ ........ 69% 84.6M 0s
+     65536K ........ ........ ........ ....    100% 78.6M=1.1s
     
-    2015-11-15 09:57:45 (33.5 MB/s) - ‘metaseq-example-data.tar.gz’ saved [96655384/96655384]
+    2015-11-15 10:31:51 (83.5 MB/s) - ‘metaseq-example-data.tar.gz’ saved [96655384/96655384]
     
 
 
