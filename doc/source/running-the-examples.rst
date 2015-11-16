@@ -1,6 +1,6 @@
 Running the examples
 --------------------
-The examples use the `IPython Notebook <http://ipython.org/notebook.html>`_ to
+The examples use the `Jupyter Notebook <http://jupyter.org>`_ to
 provide narrative descriptions along with executable code.
 
 See `IPython Notebook Tutorials
@@ -11,7 +11,7 @@ to learn more about using the IPython Notebook.
 #. Make sure you are using the environment where metaseq is installed
 #. Make sure you have the IPython Notebook::
 
-    pip install ipython[all]
+    conda install jupyter
 
 #. Download each example notebook as a file (right-click, save as):
 
