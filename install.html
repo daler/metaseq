@@ -63,112 +63,44 @@
 <p><code class="xref py py-mod docutils literal"><span class="pre">metaseq</span></code> relies on the standard <a class="reference external" href="http://www.scipy.org/stackspec.html">Scientific Python Stack</a>, specifically, <a class="reference external" href="http://www.numpy.org/">NumPy</a>, <a class="reference external" href="http://www.scipy.org/index.html">SciPy</a>,
 <a class="reference external" href="http://matplotlib.org/">matplotlib</a>, and <a class="reference external" href="http://pandas.pydata.org/">pandas</a>. It also relies on standard genomics tools like
 <a class="reference external" href="http://bedtools.readthedocs.org/en/latest/">BEDTools</a>, <a class="reference external" href="http://samtools.sourceforge.net/">samtools</a>, and others.</p>
-<p>These prerequisites can make <code class="xref py py-mod docutils literal"><span class="pre">metaseq</span></code> difficult to install, so we provide
-an installation script that handles all of the complicated work.</p>
+<p>Installing each of these prerequisites would be time-consuming and frustrating.
+However <a class="reference external" href="http://conda.pydata.org/docs/intro.html">conda</a> combined with the
+<a class="reference external" href="https://github.com/bioconda/recipes">bioconda project</a> makes it easy and
+straightforward.</p>
 <div class="section" id="easy-installation-method">
 <h2>Easy installation method<a class="headerlink" href="#easy-installation-method" title="Permalink to this headline">¶</a></h2>
-<p>If you already do genomics work, you probably already have most of the
-prerequistes installed. In that case, you can simply run:</p>
-<div class="highlight-python"><div class="highlight"><pre>pip install metaseq
+<p>The following assumes you have <a class="reference external" href="http://conda.pydata.org/docs/intro.html">conda</a> installed. <cite>conda</cite> is
+a cross-platform package manager that started on Python but now includes other
+languages and binaries as well.  There are two options for installing conda:
+the <a class="reference external" href="https://store.continuum.io/cshop/anaconda/">Anaconda Python distribution</a>, which includes the full
+scientific Python stack, or the smaller, barebones <a class="reference external" href="http://conda.pydata.org/miniconda.html">Miniconda</a>.</p>
+<p>The commands below work with either Linux or Mac OSX. See <a class="reference external" href="http://conda.pydata.org/docs/using/envs.html">managing
+environments</a> to decide if you
+want to use the main <cite>conda</cite> environment or an isoloated environment.</p>
+<p><strong>Option 1:</strong> Install the <cite>metaseq</cite> package and Python dependencies</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="c"># install into main environment</span>
+conda install --channel bioconda metaseq
+
+<span class="c"># ...or create a new isolated environment</span>
+conda create -n my-env-name --channel bioconda metaseq
 </pre></div>
 </div>
-<p>Otherwise, see the instructions for your operating system below for an
-all-in-one installation script which will give you a complete scientific Python
-installation along with some commonly-used genomics tools.</p>
-<ul class="simple">
-<li><a class="reference internal" href="#mac"><span>Install on Mac OSX</span></a></li>
-<li><a class="reference internal" href="#linux"><span>Install on Linux</span></a></li>
-<li><a class="reference internal" href="#windows"><span>Install on Windows</span></a></li>
-</ul>
-<p id="whatitsdoing">If you are just trying out <code class="xref py py-mod docutils literal"><span class="pre">metaseq</span></code> we provide an installation script
-that installs all the prerequisites for running <code class="xref py py-mod docutils literal"><span class="pre">metaseq</span></code> (see the
-appropriate section below for your operating system, <a class="reference internal" href="#mac"><span>Mac OSX</span></a> or
-<a class="reference internal" href="#linux"><span>Linux</span></a>).  This script works on Mac OSX and Linux, and will:</p>
-<blockquote>
-<div><ul class="simple">
-<li>Download and install <a class="reference external" href="http://bedtools.readthedocs.org/en/latest/">BEDTools</a>, <a class="reference external" href="http://samtools.sourceforge.net/">samtools</a>, <a class="reference external" href="http://samtools.sourceforge.net/tabix.shtml">tabix</a>, and the UCSC tools
-<a class="reference external" href="http://hgdownload.cse.ucsc.edu/admin/exe/">bigWigSummary, bigWigToBedGraph, and bedGraphToBigWig</a></li>
-<li>Download and install <a class="reference external" href="http://conda.pydata.org/miniconda.html">Miniconda</a> (a slimmed-down version of the
-<a class="reference external" href="https://store.continuum.io/cshop/anaconda/">Anaconda Python distribution</a>) which sets up an isolated
-Python environment that is separate from anything you might already have
-installed (see <a class="reference internal" href="#whyconda"><span>Miniconda instead of virtualenv?</span></a> for more details on this).</li>
-<li>Create an isolated Python environment with <a class="reference external" href="http://conda.pydata.org/docs/examples/create.html">conda</a></li>
-<li>Download and install prerequisites for <code class="xref py py-mod docutils literal"><span class="pre">metaseq</span></code> into the test
-environment</li>
-<li>Download and install <code class="xref py py-mod docutils literal"><span class="pre">metaseq</span></code> itself into the test environment</li>
-</ul>
-</div></blockquote>
-<p>The script will tell you what it&#8217;s doing, and at the end will prompt you if you
-want to add the installation locations to your PATH variable (if you&#8217;re not
-sure what this is, then you should say &#8220;yes&#8221;).  It will print a README.txt file
-with the results and some additional instructions to finalize the installation.</p>
-<div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p>The installation script depends on several external servers (UCSC, github,
-PyPI) beyond our immediate control.  If the script seems to hang for more
-than a couple of minutes, or you get unxplained error messages, please use
-Ctrl-C to abort and try again later.</p>
-<p class="last">If you run into difficulties that are not solved by re-running the script,
-please <a class="reference external" href="https://github.com/daler/metaseq/issues">open an issue on github</a>
-describing the details of the problem.</p>
-</div>
-<div class="section" id="mac-osx">
-<span id="mac"></span><h3>Mac OSX<a class="headerlink" href="#mac-osx" title="Permalink to this headline">¶</a></h3>
-<p>Installation on Mac OSX has been tested on versions 10.6.8 (Snow Leopard) and
-10.9 (Mavericks).</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">On Mac OSX, you will first need to install <a class="reference external" href="https://developer.apple.com/xcode/">Xcode</a>, which provides C and C++ compilers.
-You can get Xcode for free directly from Apple, and the version to get
-depends on the version of OSX you are running.  Note that you may have to
-register for a free developer account.</p>
-</div>
-<p>To download the script and perform the installation using default settings,
-paste the following two commands in a Terminal window.  The first command
-downloads the script, and the second command runs it:</p>
-<div class="highlight-python"><div class="highlight"><pre>curl -O https://raw.githubusercontent.com/daler/metaseq/master/create-metaseq-test-environment.sh
+<p><strong>Option 2:</strong> Install the <cite>metaseq</cite> package and Python dependencies, plus BEDTools, samtools,
+htslib, and the UCSC tools bigWigSummary, bedGraphToBigWig, bedToBigBed, and
+bigBedToBed. This is a good option if you don&#8217;t already maintain separate
+installations of these tools</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="c"># install into main environment</span>
+conda install --channel bioconda metaseq-all
+
+<span class="c"># ...or create a new isolated environment</span>
+conda create -n my-env-name --channel bioconda metaseq-all
 </pre></div>
-</div>
-<div class="highlight-python"><div class="highlight"><pre>bash create-metaseq-test-environment.sh
-</pre></div>
-</div>
-<p>Learn more about <a class="reference internal" href="#whatitsdoing"><span>what it&#8217;s doing</span></a>.</p>
-</div>
-<div class="section" id="linux">
-<span id="id4"></span><h3>Linux<a class="headerlink" href="#linux" title="Permalink to this headline">¶</a></h3>
-<p>Installation on Linux has been tested on Ubuntu 12.04.1, Ubuntu 14.04, and
-RHLES 5.10.  We noticed that RHLES 5.10 ships with an old version of gcc
-(v4.1.2, from 2007) which causes compilation errors in some Python packages
-(pysam, bx-python).  Upgrading gcc to at least to v4.7.0 (from 2012) eliminates
-these errors.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p>On Linux, you will need a C and C++ compiler as well as the zlib
-development libraries, which don&#8217;t come installed by default.  In Ubuntu,
-the following command should install these for you:</p>
-<div class="last highlight-python"><div class="highlight"><pre>sudo apt-get install build-essential zlib1g-dev
-</pre></div>
-</div>
-</div>
-<p>On Linux, <cite>wget</cite> is usually available by default instead of <cite>curl</cite>.  So paste
-these two commands into a terminal instead to perform the installation using
-default settings.  The first command downloads the script, and the second
-command runs it:</p>
-<div class="highlight-python"><div class="highlight"><pre>wget --no-check-certificate https://raw.githubusercontent.com/daler/metaseq/master/create-metaseq-test-environment.sh
-</pre></div>
-</div>
-<div class="highlight-python"><div class="highlight"><pre>bash create-metaseq-test-environment.sh
-</pre></div>
-</div>
-<p>Learn more about <a class="reference internal" href="#whatitsdoing"><span>what it&#8217;s doing</span></a>.</p>
 </div>
 <div class="section" id="windows">
-<span id="id5"></span><h3>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h3>
+<span id="id3"></span><h3>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h3>
 <p>It is difficult to do bioinformatics work on Windows. The most convenient
 option will be to run Ubuntu Linux on your Windows machine, and follow the
-Linux instructions above to install metaseq and requirements (options 1 or
-2 below). Alternatively, you could install Cygwin and compile everything
-yourself, but this is untested.</p>
+Linux instructions above to install metaseq and requirements.</p>
 <div class="section" id="option-1-dual-boot-windows-and-ubuntu">
 <h4>Option 1: Dual boot Windows and Ubuntu<a class="headerlink" href="#option-1-dual-boot-windows-and-ubuntu" title="Permalink to this headline">¶</a></h4>
 <p>See instructions here: <a class="reference external" href="https://wiki.ubuntu.com/WubiGuide">https://wiki.ubuntu.com/WubiGuide</a>.</p>
@@ -197,168 +129,6 @@ yourself, but this is untested.</p>
 </tbody>
 </table>
 </div>
-<div class="section" id="option-3-install-cygwin">
-<h4>Option 3: Install Cygwin<a class="headerlink" href="#option-3-install-cygwin" title="Permalink to this headline">¶</a></h4>
-<ol class="arabic">
-<li><p class="first">Install <a class="reference external" href="https://www.cygwin.com/">Cygwin</a>.</p>
-</li>
-<li><p class="first">Install the <a class="reference external" href="http://continuum.io/downloads">Anaconda Python Distribution</a>.</p>
-</li>
-<li><p class="first">Download and install <a class="reference external" href="http://bedtools.readthedocs.org/en/latest/">BEDTools</a>,
-<a class="reference external" href="http://samtools.sourceforge.net/">samtools</a>,
-<a class="reference external" href="http://samtools.sourceforge.net/tabix.shtml">tabix</a>,
-and the UCSC tools <a class="reference external" href="http://hgdownload.cse.ucsc.edu/admin/exe/">bigWigSummary, bigWigToBedGraph, and bedGraphToBigWig</a></p>
-</li>
-<li><p class="first">Activate the Anaconda Python distribution environment, and install metaseq with:</p>
-<div class="highlight-python"><div class="highlight"><pre>pip install metaseq
-</pre></div>
-</div>
-</li>
-</ol>
-</div>
-</div>
-<div class="section" id="customizing">
-<h3>Customizing<a class="headerlink" href="#customizing" title="Permalink to this headline">¶</a></h3>
-<p>If you want to customize the installation locations, specify versions, or only
-install a subset of the prerequisites, you can view the help with:</p>
-<div class="highlight-python"><div class="highlight"><pre>bash create-metaseq-test-environment.sh -h
-</pre></div>
-</div>
-</div>
-<div class="section" id="uninstalling">
-<h3>Uninstalling<a class="headerlink" href="#uninstalling" title="Permalink to this headline">¶</a></h3>
-<p>Uninstalling is straightforward.  <strong>Assuming you used the default locations:</strong></p>
-<ul>
-<li><p class="first">Delete <code class="docutils literal"><span class="pre">~/miniconda/envs/metaseq-test</span></code> to uninstall just the test
-environment.</p>
-</li>
-<li><p class="first">Delete <code class="docutils literal"><span class="pre">~/miniconda</span></code> to uninstall the test environment and all of miniconda.</p>
-</li>
-<li><p class="first">Delete <code class="docutils literal"><span class="pre">~/tools</span></code> to uninstall the genomics tools.  Specifically, the
-installation script creates the following directories and files within
-<cite>~/tools</cite>:</p>
-<blockquote>
-<div><ul class="simple">
-<li><code class="docutils literal"><span class="pre">bedtools&lt;VERSION&gt;/</span></code>  (where BEDTools is installed)</li>
-<li><code class="docutils literal"><span class="pre">samtools&lt;VERSION&gt;/</span></code>  (where samtools is installed)</li>
-<li><code class="docutils literal"><span class="pre">tabix&lt;VERSION&gt;/</span></code>  (where tabix is installed)</li>
-<li><code class="docutils literal"><span class="pre">ucsc/</span></code> (where bigWigSummary and other UCSC programs are installed)</li>
-<li><code class="docutils literal"><span class="pre">logs/</span></code>  (any logs from the installation process)</li>
-<li><code class="docutils literal"><span class="pre">README.txt</span></code> (post-installation instructions)</li>
-<li><code class="docutils literal"><span class="pre">miniconda-paths</span></code> (describes where miniconda was installed)</li>
-<li><code class="docutils literal"><span class="pre">paths</span></code> (describes where genomics tools were installed)</li>
-</ul>
-</div></blockquote>
-</li>
-<li><p class="first">Optionally, if you added anything to your PATH, you can delete the relevant
-lines in your <cite>~/.bashrc</cite> or <cite>~/.bash_profile</cite> file, but this is not strictly
-necessary if these directories are deleted.</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="section" id="custom-installation">
-<h2>Custom installation<a class="headerlink" href="#custom-installation" title="Permalink to this headline">¶</a></h2>
-<p>Even if you do not want to use the default full installation script described
-above, it can still be useful to install the individual components.  See the
-help for that script for the full details, but useful flags are:</p>
-<ul class="simple">
-<li><cite>-M</cite> disables the miniconda installation</li>
-<li><cite>-i</cite> controls which genomics tools are installed</li>
-<li><cite>-g</cite> controls which <code class="xref py py-mod docutils literal"><span class="pre">metaseq</span></code> version to install (specified as tags or commits from
-github).  The special tag &#8220;disable&#8221; will disable installation of metaseq.</li>
-</ul>
-<p>Some example use-cases:</p>
-<ul>
-<li><p class="first">Only install BEDTools:</p>
-<div class="highlight-python"><div class="highlight"><pre>bash create-metaseq-test-environment.sh -M -i &quot;bedtools&quot; -g disable
-</pre></div>
-</div>
-</li>
-<li><p class="first">Install just the latest commit of metaseq into your system-wide Python
-installation (note: you will need to run the script with sudo priviliges,
-since it uses <cite>pip install</cite>):</p>
-<div class="highlight-python"><div class="highlight"><pre>bash create-metaseq-test-environment.sh -M -i &quot;&quot; -g master
-</pre></div>
-</div>
-</li>
-<li><p class="first">Same thing, but install it into the test environment:</p>
-<div class="highlight-python"><div class="highlight"><pre>bash create-metaseq-test-environment.sh -i &quot;&quot; -g master
-</pre></div>
-</div>
-</li>
-</ul>
-</div>
-<div class="section" id="manual-installation">
-<h2>Manual installation<a class="headerlink" href="#manual-installation" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="step-1-non-python-programs">
-<h3>Step 1: Non-python programs<a class="headerlink" href="#step-1-non-python-programs" title="Permalink to this headline">¶</a></h3>
-<p>The following non-Python programs are needed:</p>
-<ul class="simple">
-<li>A C and C++ compiler</li>
-<li><cite>BEDTools</cite>, <cite>samtools</cite>, and <cite>Tabix</cite></li>
-<li>bigWigSummary, bigWigToBedGraph, bedGraphToBigWig</li>
-</ul>
-<p>If you don&#8217;t already have them installed, the installation script described
-above is the easiest way to get these.</p>
-</div>
-<div class="section" id="step-2-install-python-packages">
-<h3>Step 2. Install Python packages<a class="headerlink" href="#step-2-install-python-packages" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="option-1-install-from-pypi">
-<h4>Option 1: Install from PyPI<a class="headerlink" href="#option-1-install-from-pypi" title="Permalink to this headline">¶</a></h4>
-<p>The most robust method for installing <code class="xref py py-mod docutils literal"><span class="pre">metaseq</span></code> is to do a 2-stage
-installation.  First, ensure the base prerequisites are installed.  If any of
-these are installed, a message will be printed on the screen indicating so.  Note that the
-Anaconda Python Distribution comes with these packages, so you don&#8217;t
-necessarily need to run this:</p>
-<div class="highlight-python"><div class="highlight"><pre>pip install Cython numpy pycurl
-</pre></div>
-</div>
-<p>Then install <code class="xref py py-mod docutils literal"><span class="pre">metaseq</span></code>, which will install any remaining dependencies:</p>
-<div class="highlight-python"><div class="highlight"><pre>pip install metaseq
-</pre></div>
-</div>
-<p>If you are not using the Anaconda Python Distribution, you may need to
-be root in order to successfully run the above commands.</p>
-</div>
-<div class="section" id="option-2-install-from-source">
-<h4>Option 2: Install from source<a class="headerlink" href="#option-2-install-from-source" title="Permalink to this headline">¶</a></h4>
-<div class="highlight-python"><div class="highlight"><pre>git clone https://github.com/daler/metaseq.git
-cd metaseq
-pip install -r requirements.txt
-python setup.py develop
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="section" id="footnotes">
-<h2>Footnotes<a class="headerlink" href="#footnotes" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="miniconda-instead-of-virtualenv">
-<span id="whyconda"></span><h3>Miniconda instead of virtualenv?<a class="headerlink" href="#miniconda-instead-of-virtualenv" title="Permalink to this headline">¶</a></h3>
-<p>In the past, the standard way of creating isolated environments was to use
-<a class="reference external" href="http://virtualenv.readthedocs.org/en/latest/">virtualenv</a>.  The standard
-procedure is to create a blank environment, and <cite>pip install</cite> all necessary
-requirements, essentially installing everything from scratch.  However, for
-packages like <code class="xref py py-mod docutils literal"><span class="pre">metaseq</span></code> with many dependencies, installing and compiling
-from scratch can take a lot of time.</p>
-<p>Recently, the Anaconda Python distribution has provided another way of creating
-isolated environments.  It has made it much easier to install the scienfific
-Python stack because it provides pre-compiled versions of numpy, scipy,
-matplotlib, and other hard-to-install packages.  This drastically reduces the
-amount of time it takes to set up an isolated environment.</p>
-<p>We decided to use Miniconda (a slimmed-down version of Anaconda) for the
-<code class="xref py py-mod docutils literal"><span class="pre">metaseq</span></code> installation script because it provides the user with an
-isolated environment in a fraction of the time of a full virtualenv
-installation, and does not require a FORTRAN compiler for installing scipy.</p>
-</div>
-<div class="section" id="tests">
-<h3>Tests<a class="headerlink" href="#tests" title="Permalink to this headline">¶</a></h3>
-<p>After every change to <code class="xref py py-mod docutils literal"><span class="pre">metaseq</span></code>, tests are run by the Travis-CI continuous
-integration service.  You can always check the status by visiting
-<a class="reference external" href="https://travis-ci.org/daler/metaseq/">https://travis-ci.org/daler/metaseq/</a>.  These tests are run by setting up the
-test environment in Ubuntu 12.04 using the <cite>create-metaseq-test-environment.sh</cite>
-script described above.</p>
 </div>
 </div>
 </div>
@@ -373,31 +143,11 @@ script described above.</p>
   <ul>
 <li><a class="reference internal" href="#">Installation</a><ul>
 <li><a class="reference internal" href="#easy-installation-method">Easy installation method</a><ul>
-<li><a class="reference internal" href="#mac-osx">Mac OSX</a></li>
-<li><a class="reference internal" href="#linux">Linux</a></li>
 <li><a class="reference internal" href="#windows">Windows</a><ul>
 <li><a class="reference internal" href="#option-1-dual-boot-windows-and-ubuntu">Option 1: Dual boot Windows and Ubuntu</a></li>
 <li><a class="reference internal" href="#option-2-run-ubuntu-on-a-virtual-machine">Option 2: Run Ubuntu on a virtual machine</a></li>
-<li><a class="reference internal" href="#option-3-install-cygwin">Option 3: Install Cygwin</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#customizing">Customizing</a></li>
-<li><a class="reference internal" href="#uninstalling">Uninstalling</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#custom-installation">Custom installation</a></li>
-<li><a class="reference internal" href="#manual-installation">Manual installation</a><ul>
-<li><a class="reference internal" href="#step-1-non-python-programs">Step 1: Non-python programs</a></li>
-<li><a class="reference internal" href="#step-2-install-python-packages">Step 2. Install Python packages</a><ul>
-<li><a class="reference internal" href="#option-1-install-from-pypi">Option 1: Install from PyPI</a></li>
-<li><a class="reference internal" href="#option-2-install-from-source">Option 2: Install from source</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a class="reference internal" href="#footnotes">Footnotes</a><ul>
-<li><a class="reference internal" href="#miniconda-instead-of-virtualenv">Miniconda instead of virtualenv?</a></li>
-<li><a class="reference internal" href="#tests">Tests</a></li>
 </ul>
 </li>
 </ul>
