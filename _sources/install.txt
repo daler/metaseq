@@ -32,17 +32,15 @@ scientific Python stack, or the smaller, barebones `Miniconda
 
 The commands below work with either Linux or Mac OSX. See `managing
 environments <http://conda.pydata.org/docs/using/envs.html>`_ to decide if you
-want to use the main `conda` environment or an isoloated environment.
+want to use the main `conda` environment or an isolated environment. If you
+want to use an isolated environment, use `create -n my-env-name` instead of
+`install` in the commands below.
 
 **Option 1:** Install the `metaseq` package and Python dependencies
 
 .. code-block:: bash
 
-    # install into main environment
     conda install --channel bioconda metaseq
-
-    # ...or create a new isolated environment
-    conda create -n my-env-name --channel bioconda metaseq
 
 **Option 2:** Install the `metaseq` package and Python dependencies, plus BEDTools, samtools,
 htslib, and the UCSC tools bigWigSummary, bedGraphToBigWig, bedToBigBed, and
@@ -51,11 +49,7 @@ installations of these tools
 
 .. code-block:: bash
 
-    # install into main environment
     conda install --channel bioconda metaseq-all
-
-    # ...or create a new isolated environment
-    conda create -n my-env-name --channel bioconda metaseq-all
 
 
 .. _windows:
@@ -63,21 +57,6 @@ installations of these tools
 Windows
 ~~~~~~~
 It is difficult to do bioinformatics work on Windows. The most convenient
-option will be to run Ubuntu Linux on your Windows machine, and follow the
-Linux instructions above to install metaseq and requirements.
-
-Option 1: Dual boot Windows and Ubuntu
-++++++++++++++++++++++++++++++++++++++
-See instructions here: https://wiki.ubuntu.com/WubiGuide.
-
-:Advantages: You'll get the best performance
-
-:Disadvantages: When you want to switch between Windows and Ubuntu you need to restart your computer
-
-Option 2: Run Ubuntu on a virtual machine
-+++++++++++++++++++++++++++++++++++++++++
-See instructions here: http://www.instructables.com/id/Introduction-38/.
-
-:Advantages: You can start Ubuntu just like another program
-
-:Disadvantages: Some additional complexity in setup, and performance won't be as good.
+option will be to run Linux on your Windows machine (via dual-boot or virtual
+machine), and follow the Linux instructions above to install metaseq and
+requirements.

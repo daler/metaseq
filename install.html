@@ -76,59 +76,26 @@ the <a class="reference external" href="https://store.continuum.io/cshop/anacond
 scientific Python stack, or the smaller, barebones <a class="reference external" href="http://conda.pydata.org/miniconda.html">Miniconda</a>.</p>
 <p>The commands below work with either Linux or Mac OSX. See <a class="reference external" href="http://conda.pydata.org/docs/using/envs.html">managing
 environments</a> to decide if you
-want to use the main <cite>conda</cite> environment or an isoloated environment.</p>
+want to use the main <cite>conda</cite> environment or an isolated environment. If you
+want to use an isolated environment, use <cite>create -n my-env-name</cite> instead of
+<cite>install</cite> in the commands below.</p>
 <p><strong>Option 1:</strong> Install the <cite>metaseq</cite> package and Python dependencies</p>
-<div class="highlight-bash"><div class="highlight"><pre><span class="c"># install into main environment</span>
-conda install --channel bioconda metaseq
-
-<span class="c"># ...or create a new isolated environment</span>
-conda create -n my-env-name --channel bioconda metaseq
+<div class="highlight-bash"><div class="highlight"><pre>conda install --channel bioconda metaseq
 </pre></div>
 </div>
 <p><strong>Option 2:</strong> Install the <cite>metaseq</cite> package and Python dependencies, plus BEDTools, samtools,
 htslib, and the UCSC tools bigWigSummary, bedGraphToBigWig, bedToBigBed, and
 bigBedToBed. This is a good option if you don&#8217;t already maintain separate
 installations of these tools</p>
-<div class="highlight-bash"><div class="highlight"><pre><span class="c"># install into main environment</span>
-conda install --channel bioconda metaseq-all
-
-<span class="c"># ...or create a new isolated environment</span>
-conda create -n my-env-name --channel bioconda metaseq-all
+<div class="highlight-bash"><div class="highlight"><pre>conda install --channel bioconda metaseq-all
 </pre></div>
 </div>
 <div class="section" id="windows">
 <span id="id3"></span><h3>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h3>
 <p>It is difficult to do bioinformatics work on Windows. The most convenient
-option will be to run Ubuntu Linux on your Windows machine, and follow the
-Linux instructions above to install metaseq and requirements.</p>
-<div class="section" id="option-1-dual-boot-windows-and-ubuntu">
-<h4>Option 1: Dual boot Windows and Ubuntu<a class="headerlink" href="#option-1-dual-boot-windows-and-ubuntu" title="Permalink to this headline">¶</a></h4>
-<p>See instructions here: <a class="reference external" href="https://wiki.ubuntu.com/WubiGuide">https://wiki.ubuntu.com/WubiGuide</a>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Advantages:</th><td class="field-body">You&#8217;ll get the best performance</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Disadvantages:</th><td class="field-body">When you want to switch between Windows and Ubuntu you need to restart your computer</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section" id="option-2-run-ubuntu-on-a-virtual-machine">
-<h4>Option 2: Run Ubuntu on a virtual machine<a class="headerlink" href="#option-2-run-ubuntu-on-a-virtual-machine" title="Permalink to this headline">¶</a></h4>
-<p>See instructions here: <a class="reference external" href="http://www.instructables.com/id/Introduction-38/">http://www.instructables.com/id/Introduction-38/</a>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Advantages:</th><td class="field-body">You can start Ubuntu just like another program</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Disadvantages:</th><td class="field-body">Some additional complexity in setup, and performance won&#8217;t be as good.</td>
-</tr>
-</tbody>
-</table>
-</div>
+option will be to run Linux on your Windows machine (via dual-boot or virtual
+machine), and follow the Linux instructions above to install metaseq and
+requirements.</p>
 </div>
 </div>
 </div>
@@ -143,11 +110,7 @@ Linux instructions above to install metaseq and requirements.</p>
   <ul>
 <li><a class="reference internal" href="#">Installation</a><ul>
 <li><a class="reference internal" href="#easy-installation-method">Easy installation method</a><ul>
-<li><a class="reference internal" href="#windows">Windows</a><ul>
-<li><a class="reference internal" href="#option-1-dual-boot-windows-and-ubuntu">Option 1: Dual boot Windows and Ubuntu</a></li>
-<li><a class="reference internal" href="#option-2-run-ubuntu-on-a-virtual-machine">Option 2: Run Ubuntu on a virtual machine</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#windows">Windows</a></li>
 </ul>
 </li>
 </ul>
