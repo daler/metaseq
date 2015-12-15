@@ -34,7 +34,7 @@ from bx.bbi.bigwig_file import BigWigFile
 import pybedtools
 
 from array_helpers import _array, _array_parallel, _local_coverage, \
-    _local_count
+    _local_count, _count_array, _count_array_parallel
 import filetype_adapters
 import helpers
 from helpers import rebin
@@ -181,6 +181,15 @@ class IntervalSignal(BaseSignal):
         return _local_count(self.adapter, *args, **kwargs)
 
     local_count.__doc__ = _local_count.__doc__
+
+    def count_array(self, features, processes=None, chunksize=1,  **kwargs):
+        if processes is not None:
+            arrays = _count_array_parallel(
+                self.fn, self.__class__, features, processes=processes,
+                chunksize=chunksize, **kwargs)
+        else:
+            arrays = _count_array(self.fn, self.__class__, features, **kwargs)
+        return np.concatenate(arrays)
 
 
 class BamSignal(IntervalSignal):
