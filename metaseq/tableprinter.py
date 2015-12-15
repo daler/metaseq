@@ -1,3 +1,5 @@
+import fisher
+
 def print_2x2_table(table, row_labels, col_labels, fmt="%d"):
     """
     Prints a table used for Fisher's exact test. Adds row, column, and grand
