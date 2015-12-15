@@ -385,6 +385,34 @@ def _array_parallel(fn, cls, genelist, chunksize=250, processes=1, **kwargs):
     pool.join()
     return results
 
+def _count_array_parallel(fn, cls, genelist, chunksize=250, processes=1, **kwargs):
+    pool = multiprocessing.Pool(processes)
+    chunks = list(chunker(genelist, chunksize))
+    results = pool.map(
+        func=_count_array_star,
+        iterable=itertools.izip(
+            itertools.repeat(fn),
+            itertools.repeat(cls),
+            chunks,
+            itertools.repeat(kwargs)))
+    pool.close()
+    pool.join()
+    return results
+
+
+def _count_array_star(args):
+    fn, cls, genelist, kwargs = args
+    return _count_array(fn, cls, genelist, **kwargs)
+
+def _count_array(fn, cls, genelist, **kwargs):
+    reader = cls(fn)
+    _local_count_func = cls.local_count
+    biglist = []
+    for gene in genelist:
+        c = _local_count_func(
+            reader, gene, **kwargs)
+        biglist.append(c)
+    return biglist
 
 def _array_star(args):
     """

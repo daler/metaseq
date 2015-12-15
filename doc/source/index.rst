@@ -47,6 +47,7 @@ Contents:
     :maxdepth: 2
 
     install
+    running-the-examples
     example_session
     example_session_2
     autodocs

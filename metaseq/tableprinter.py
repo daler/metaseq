@@ -1,4 +1,5 @@
 import fisher
+import numpy as np
 
 def print_2x2_table(table, row_labels, col_labels, fmt="%d"):
     """
@@ -67,11 +68,20 @@ def print_row_perc_table(table, row_labels, col_labels):
     row1 = r1c1 + r1c2
     row2 = r2c1 + r2c2
 
-    new_table = [
-        r1c1 / row1,
-        r1c2 / row1,
-        r2c1 / row2,
-        r2c2 / row2]
+    blocks = [
+        (r1c1, row1),
+        (r1c2, row1),
+        (r2c1, row2),
+        (r2c2, row2)]
+
+    new_table = []
+
+    for cell, row in blocks:
+        try:
+            x = cell / row
+        except ZeroDivisionError:
+            x = 0
+        new_table.append(x)
 
     s = print_2x2_table(new_table, row_labels, col_labels, fmt="%.2f")
     s = s.splitlines(True)
@@ -87,11 +97,21 @@ def print_col_perc_table(table, row_labels, col_labels):
     col1 = r1c1 + r2c1
     col2 = r1c2 + r2c2
 
-    new_table = [
-        r1c1 / col1,
-        r1c2 / col2,
-        r2c1 / col1,
-        r2c2 / col2]
+
+    blocks = [
+        (r1c1, col1),
+        (r1c2, col2),
+        (r2c1, col1),
+        (r2c2, col2)]
+
+    new_table = []
+
+    for cell, row in blocks:
+        try:
+            x = cell / row
+        except ZeroDivisionError:
+            x = 0
+        new_table.append(x)
 
     s = print_2x2_table(new_table, row_labels, col_labels, fmt="%.2f")
     s = s.splitlines(False)

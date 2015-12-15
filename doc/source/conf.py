@@ -54,7 +54,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'metaseq'
-copyright = u'2014, Ryan Dale'
+copyright = u'2015, Ryan Dale'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -264,7 +264,7 @@ texinfo_documents = [
 epub_title = u'metaseq'
 epub_author = u'Ryan Dale'
 epub_publisher = u'Ryan Dale'
-epub_copyright = u'2011, Ryan Dale'
+epub_copyright = u'2015, Ryan Dale'
 
 # The language of the text. It defaults to the language option
 # or en if the language is not set.

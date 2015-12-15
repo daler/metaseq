@@ -1,0 +1,7 @@
+bedtools
+htslib
+samtools
+ucsc-bedgraphtobigwig
+ucsc-bedtobigbed
+ucsc-bigwigsummary
+ucsc-bigwigtobedgraph

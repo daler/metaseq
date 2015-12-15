@@ -14,6 +14,8 @@ ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) sou
 # the i18n builder cannot share the environment and doctrees with the others
 I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) source
 
+NBCONVERT_CMD = ipython nbconvert --ExecutePreprocessor.enabled=True --to=rst
+
 .PHONY: help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest gettext
 
 help:
@@ -46,17 +48,19 @@ html:
 	# links to the examples. So clicking on them in GitHub takes you to the
 	# compiled docs.  But when compiling the docs, change it to the Sphinx
 	# relative link syntax.
-	cat ../README.rst | sed "s|\`Example 1 <https://pythonhosted.org/metaseq/example_session.html>\`_|:ref:\`Example 1 <example_session>\`|g" | sed "s|\`Example 2 <https://pythonhosted.org/metaseq/example_session_2.html>\`_|:ref:\`Example 2 <example_session_2>\`|g" > source/README.rst
-	-rm -r source/autodocs
-	-rm -r $(BUILDDIR)/html
-	(cd source && ipython nbconvert --to rst example_session.ipynb && sed -i "s/\`\`/\`/g" example_session.rst)
-	(cd source && ipython nbconvert --to rst example_session_2.ipynb && sed -i "s/\`\`/\`/g" example_session_2.rst)
+	cat ../README.rst | sed "s|\`Example 1 <https://daler.github.io/metaseq/example_session.html>\`_|:ref:\`Example 1 <example_session>\`|g" | sed "s|\`Example 2 <https://daler.github.io/metaseq/example_session_2.html>\`_|:ref:\`Example 2 <example_session_2>\`|g" > source/README.rst
+	-rm -rf source/autodocs
+	-rm -rf $(BUILDDIR)/html
+	-rm -rf source/metaseq-example
+	-rm -rf source/example.npz
+	-rm -rf source/example.features
+	(cd source && ./notebook-runner.sh example_session.ipynb)
+	(cd source && ./notebook-runner.sh example_session_2.ipynb)
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	cp source/demo.png $(BUILDDIR)/html/demo.png
 	cp source/demo.png ..
 	cp source/expression-demo.png $(BUILDDIR)/html/expression-demo.png
 	cp source/expression-demo.png ..
-	(cd $(BUILDDIR)/html && zip -rq docs.zip .)
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 

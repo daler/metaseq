@@ -6,3 +6,5 @@ set -e
 export METASEQ_PROCESSES=1
 
 nosetests -v metaseq/test/test.py
+
+(cd doc && make html)
