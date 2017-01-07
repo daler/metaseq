@@ -81,18 +81,11 @@ class BedAdapter(BaseAdapter):
         super(BedAdapter, self).__init__(fn)
 
     def make_fileobj(self):
-        obj = pybedtools.BedTool(self.fn)
-        if not obj._tabixed():
-            obj = obj.sort().tabix(in_place=False, force=False, is_sorted=True)
-            self.fn = obj.fn
-        return obj
+        return pybedtools.IntervalFile(self.fn)
 
     def __getitem__(self, key):
-        bt = self.fileobj.tabix_intervals(
-            '%s:%s-%s' % (key.chrom, key.start, key.stop))
-        for i in bt:
+        for i in self.fileobj.all_hits(key):
             yield i
-        del bt
 
 
 class BigBedAdapter(BaseAdapter):
