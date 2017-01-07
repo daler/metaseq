@@ -161,7 +161,8 @@ class BigWigAdapter(BaseAdapter):
         method : summarize | ucsc_summarize | get_as_array
             "summarize" and "get_as_array" use bx-python; "ucsc_summarize" uses
             bigWigSummarize. See other notes in docstring for
-            metaseq.array_helpers._local_coverage.
+            metaseq.array_helpers._local_coverage. If None, defaults to
+            "summarize".
 
         function : mean | min | max | std | coverage
             Determines the nature of the summarized values. Ignored if
@@ -173,6 +174,9 @@ class BigWigAdapter(BaseAdapter):
             returning. If `zero_nan` is True, set any nan values to zero before
             returning.
         """
+
+        if method is None:
+            method = 'summarize'
 
         # We may be dividing by zero in some cases, which raises a warning in
         # NumPy based on the IEEE 754 standard (see
