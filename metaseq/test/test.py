@@ -10,6 +10,10 @@ from metaseq.array_helpers import ArgumentError
 import numpy as np
 from nose.tools import assert_raises
 from nose.plugins.skip import SkipTest
+
+nan = np.nan
+inf = np.inf
+
 gs = {}
 for kind in ['bed', 'bam', 'bigbed', 'bigwig']:
     gs[kind] = metaseq.genomic_signal(metaseq.example_filename('gdc.%s' % kind), kind)
@@ -549,4 +553,96 @@ def test_bigwig_out_of_range():
 
     x, y = gs['bigwig'].local_coverage('chr2L:1-100', bins=None, method='ucsc_summarize')
 
+def test_valid_bigwig_method():
+    assert_raises(ValueError, gs['bigwig'].local_coverage, 'chr2L:1-100', method='nonexistent')
 
+def test_bigwig_zero_inf_nan():
+    def check(coord, kwargs, expected):
+        expected = [
+                np.array([ 1., 23., 45., 67., 89., 111., 133., 155.,  177., 199.]),
+                expected
+        ]
+        result = gs['bigwig'].local_coverage(coord, bins=10, **kwargs)
+
+        valid = ~(np.isinf(expected[1]) | np.isnan(expected[1]))
+        print(coord, kwargs, result)
+        assert np.all(result[0] == expected[0])
+        assert np.all(np.isinf(expected[1]) == np.isinf(result[1]))
+        assert np.all(np.isnan(expected[1]) == np.isnan(result[1]))
+        assert np.all(result[1][valid] == expected[1][valid])
+
+    for coord, kwargs, expected in [
+        (
+            'chr2L:1-200',
+            dict(zero_inf=True, zero_nan=True, method='summarize', function='mean'),
+            np.array([ 1., 0. , 0.,  2.,  0.,  0.,   0.,   1.625, 1.,   0.   ])
+        ),
+        (
+            'chr2L:1-200',
+            dict(zero_inf=True, zero_nan=False, method='summarize', function='mean'),
+            np.array([1., nan, nan, 2.,  nan, nan,  nan,  1.625,  1.,    nan])
+        ),
+        (
+            'chr2L:1-200',
+            dict(zero_inf=False, zero_nan=False, method='summarize', function='std'),
+            np.array([ 1.,   nan, nan, 4.,  nan, nan,  nan,  2.875, 1.,    nan])
+        ),
+        (
+            'chr2L:1-200',
+            dict(zero_inf=False, zero_nan=True, method='summarize', function='std'),
+            np.array([ 1.,   0. , 0. , 4.,  0. , 0. ,  0. ,  2.875, 1.,    0. ])
+        ),
+
+        # ucsc_summarize has slightly different value for [-3] and always
+        # returns zero for missing values (even when zero_inf and zero_nan are
+        # False)
+        (
+            'chr2L:1-200',
+            dict(zero_inf=False, zero_nan=False, method='ucsc_summarize', function='mean'),
+            np.array([1., 0. , 0. , 2.,  0. , 0. ,  0.,   1.5  ,  1.,    0.])
+        ),
+
+        # ucsc_summarize disagrees with bx-python for std
+        (
+            'chr2L:1-200',
+            dict(zero_inf=False, zero_nan=False, method='ucsc_summarize', function='std'),
+            np.array([ 0.,   0. , 0. , 0.,  0. , 0. ,  0. ,  0.527046, 0.,    0. ])
+        ),
+        (
+            'chr2L:1-200',
+            dict(zero_inf=False, zero_nan=False, method='summarize', function='min'),
+            np.array([  1.,  inf,  inf,   2.,  inf,  inf,  inf,   1.,   1.,  inf])
+        ),
+        (
+            'chr2L:1-200',
+            dict(zero_inf=True, zero_nan=True, method='summarize', function='min'),
+            np.array([  1.,  0.,  0.,   2.,  0.,  0.,  0.,   1.,   1.,  0.])
+        ),
+
+        # ucsc_summarize *does* aggree on min...
+        (
+            'chr2L:1-200',
+            dict(zero_inf=False, zero_nan=False, method='ucsc_summarize', function='min'),
+            np.array([  1.,  0.,  0.,   2.,  0.,  0.,  0.,   1.,   1.,  0.])
+        ),
+
+        (
+            'chr2L:1-200',
+            dict(zero_inf=False, zero_nan=False, method='summarize', function='max'),
+            np.array([  1., -inf, -inf,   2., -inf, -inf, -inf,   2.,   1., -inf])
+        ),
+
+        (
+            'chr2L:1-200',
+            dict(zero_inf=True, zero_nan=True, method='summarize', function='max'),
+            np.array([  1., 0., 0.,   2., 0., 0., 0.,   2.,   1., 0.])
+        ),
+
+        # ...and on max
+        (
+            'chr2L:1-200',
+            dict(zero_inf=True, zero_nan=True, method='ucsc_summarize', function='max'),
+            np.array([  1., 0., 0.,   2., 0., 0., 0.,   2.,   1., 0.])
+        ),
+    ]:
+        yield check, coord, kwargs, expected
