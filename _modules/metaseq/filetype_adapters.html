@@ -188,12 +188,12 @@
             <span class="k">yield</span> <span class="n">interval</span></div>
 
 
-<span class="k">class</span> <span class="nc">BigWigAdapter</span><span class="p">(</span><span class="n">BaseAdapter</span><span class="p">):</span>
+<div class="viewcode-block" id="BigWigAdapter"><a class="viewcode-back" href="../../autodocs/metaseq.filetype_adapters.BigWigAdapter.html#metaseq.filetype_adapters.BigWigAdapter">[docs]</a><span class="k">class</span> <span class="nc">BigWigAdapter</span><span class="p">(</span><span class="n">BaseAdapter</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adapter that provides random access to bigWig files bia bx-python</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">BigWigAdapter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+<div class="viewcode-block" id="BigWigAdapter.__init__"><a class="viewcode-back" href="../../autodocs/metaseq.filetype_adapters.BigWigAdapter.html#metaseq.filetype_adapters.BigWigAdapter.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BigWigAdapter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">make_fileobj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span>
@@ -305,7 +305,7 @@
                     <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                     <span class="k">pass</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y</span><span class="p">)</span></div>
 </pre></div>
 
           </div>

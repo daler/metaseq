@@ -1,0 +1,21 @@
+metaseq.filetype_adapters.BigWigAdapter
+=======================================
+
+.. currentmodule:: metaseq.filetype_adapters
+
+.. autoclass:: BigWigAdapter
+    :inherited-members:
+    :show-inheritance:
+    :members:
+
+    
+    .. rubric:: Methods
+    
+    .. autosummary::
+    
+        ~BigWigAdapter.__init__
+        ~BigWigAdapter.make_fileobj
+        ~BigWigAdapter.summarize
+        ~BigWigAdapter.ucsc_summarize
+    
+    .. automethod:: __init__ 
