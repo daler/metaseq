@@ -26,7 +26,7 @@ If you use `metaseq` in your work, please cite the following publication:
 Example 1: Average ChIP-seq signal over promoters
 -------------------------------------------------
 
-:ref:`Example 1 <example_session>` walks you
+`Example 1 <https://github.com/daler/metaseq/blob/master/doc/source/example_session.ipynb>`_ walks you
 through the creation of the following heatmap and line-plot figure:
 
 .. figure:: demo.png
@@ -40,7 +40,7 @@ through the creation of the following heatmap and line-plot figure:
 Example 2: Differential expression scatterplots
 -----------------------------------------------
 
-:ref:`Example 2 <example_session_2>` walks
+`Example 2 <https://github.com/daler/metaseq/blob/master/doc/source/example_session_2.ipynb>`_ walks
 you through the creation of the following scatterplot and marginal histogram
 figure:
 
