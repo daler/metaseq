@@ -140,7 +140,36 @@ class BigWigAdapter(BaseAdapter):
             "__getitem__ not implemented for %s" % self.__class__.__name__)
 
     def summarize(self, interval, bins=None, method='summarize',
-                  function='mean'):
+                  function='mean', zero_inf=True, zero_nan=True):
+        """
+        Parameters
+        ----------
+
+        interval : object
+            Object with chrom (str), start (int) and stop (int) attributes.
+
+        bins : int or None
+            Number of bins; if None, bins will be the length of the interval
+
+        method : summarize | ucsc_summarize | get_as_array
+            "summarize" and "get_as_array" use bx-python; "ucsc_summarize" uses
+            bigWigSummarize. See other notes in docstring for
+            metaseq.array_helpers._local_coverage. If None, defaults to
+            "summarize".
+
+        function : mean | min | max | std | coverage
+            Determines the nature of the summarized values. Ignored if
+            `method="get_as_array"`; "coverage" is only valid if method is
+            "ucsc_summarize".
+
+        zero_inf, zero_nan : bool
+            If `zero_inf` is True, set any inf or -inf to zero before
+            returning. If `zero_nan` is True, set any nan values to zero before
+            returning.
+        """
+
+        if method is None:
+            method = 'summarize'
 
         # We may be dividing by zero in some cases, which raises a warning in
         # NumPy based on the IEEE 754 standard (see
@@ -170,7 +199,7 @@ class BigWigAdapter(BaseAdapter):
                 raise ValueError('function "%s" not supported by UCSC\'s'
                                  'bigWigSummary')
 
-        else:
+        elif method == 'summarize':
             bw = BigWigFile(open(self.fn))
             s = bw.summarize(
                 interval.chrom,
@@ -181,18 +210,29 @@ class BigWigAdapter(BaseAdapter):
             else:
                 if function == 'sum':
                     s = s.sum_data
-                if function == 'mean':
+                elif function == 'mean':
                     s = s.sum_data / s.valid_count
-                    s[np.isnan(s)] = 0
-                if function == 'min':
+                    if zero_nan:
+                        s[np.isnan(s)] = 0
+                elif function == 'min':
                     s = s.min_val
-                    s[np.isinf(s)] = 0
-                if function == 'max':
+                    if zero_inf:
+                        s[np.isinf(s)] = 0
+                elif function == 'max':
                     s = s.max_val
-                    s[np.isinf(s)] = 0
-                if function == 'std':
+                    if zero_inf:
+                        s[np.isinf(s)] = 0
+                elif function == 'std':
                     s = (s.sum_squares / s.valid_count)
-                    s[np.isnan(s)] = 0
+                    if zero_nan:
+                        s[np.isnan(s)] = 0
+                else:
+                    raise ValueError(
+                            'function "%s" not supported by bx-python'
+                            % function
+                    )
+        else:
+            raise ValueError("method '%s' not in [summarize, ucsc_summarize, get_as_array]" % method)
 
         # Reset NumPy error reporting
         np.seterr(divide=orig)
