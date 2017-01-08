@@ -7,7 +7,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
 
-    <title>metaseq.results_table &mdash; metaseq 0.5.6 documentation</title>
+    <title>metaseq.results_table &#8212; metaseq 0.5.6 documentation</title>
 
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
@@ -22,15 +22,16 @@
         VERSION:     '0.5.6',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
-    <link rel="top" title="metaseq 0.5.6 documentation" href="../../index.html" />
-    <link rel="up" title="Module code" href="../index.html" /> 
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -42,8 +43,8 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">metaseq 0.5.6 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -53,41 +54,41 @@
           <div class="body" role="main">
             
   <h1>Source code for metaseq.results_table</h1><div class="highlight"><pre>
-<span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">from</span> <span class="nn">textwrap</span> <span class="kn">import</span> <span class="n">dedent</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span></span><span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">textwrap</span> <span class="k">import</span> <span class="n">dedent</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span>
-<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
-<span class="kn">from</span> <span class="nn">mpl_toolkits.axes_grid1</span> <span class="kn">import</span> <span class="n">make_axes_locatable</span>
-<span class="kn">import</span> <span class="nn">matplotlib.patches</span> <span class="kn">as</span> <span class="nn">patches</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">mpl_toolkits.axes_grid1</span> <span class="k">import</span> <span class="n">make_axes_locatable</span>
+<span class="kn">import</span> <span class="nn">matplotlib.patches</span> <span class="k">as</span> <span class="nn">patches</span>
 <span class="kn">import</span> <span class="nn">matplotlib</span>
 <span class="kn">import</span> <span class="nn">plotutils</span>
-<span class="kn">from</span> <span class="nn">matplotlib.transforms</span> <span class="kn">import</span> <span class="n">blended_transform_factory</span>
-<span class="kn">from</span> <span class="nn">matplotlib.collections</span> <span class="kn">import</span> <span class="n">EventCollection</span>
+<span class="kn">from</span> <span class="nn">matplotlib.transforms</span> <span class="k">import</span> <span class="n">blended_transform_factory</span>
+<span class="kn">from</span> <span class="nn">matplotlib.collections</span> <span class="k">import</span> <span class="n">EventCollection</span>
 <span class="kn">import</span> <span class="nn">gffutils</span>
 <span class="kn">import</span> <span class="nn">pybedtools</span>
-<span class="kn">from</span> <span class="nn">pybedtools</span> <span class="kn">import</span> <span class="n">featurefuncs</span>
+<span class="kn">from</span> <span class="nn">pybedtools</span> <span class="k">import</span> <span class="n">featurefuncs</span>
 
-<span class="n">_base_doc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="si">%s</span><span class="s"></span>
-<span class="s">The underlying pandas.DataFrame is always available with the `data`</span>
-<span class="s">attribute.</span>
+<span class="n">_base_doc</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="si">%s</span><span class="s2"></span>
+<span class="s2">The underlying pandas.DataFrame is always available with the `data`</span>
+<span class="s2">attribute.</span>
 
-<span class="s">Any attributes not explicitly in this class will be looked for in the</span>
-<span class="s">underlying pandas.DataFrame.</span>
+<span class="s2">Any attributes not explicitly in this class will be looked for in the</span>
+<span class="s2">underlying pandas.DataFrame.</span>
 
-<span class="s">Parameters</span>
-<span class="s">----------</span>
-<span class="s">data : string or pandas.DataFrame</span>
-<span class="s">    If string, assumes it&#39;s a filename and calls</span>
-<span class="s">    pandas.read_table(data, **import_kwargs).</span>
+<span class="s2">Parameters</span>
+<span class="s2">----------</span>
+<span class="s2">data : string or pandas.DataFrame</span>
+<span class="s2">    If string, assumes it&#39;s a filename and calls</span>
+<span class="s2">    pandas.read_table(data, **import_kwargs).</span>
 
-<span class="s">db : string or gffutils.FeatureDB</span>
-<span class="s">    Optional database that can be used to generate features</span>
+<span class="s2">db : string or gffutils.FeatureDB</span>
+<span class="s2">    Optional database that can be used to generate features</span>
 
-<span class="s">import_kwargs : dict</span>
-<span class="s">    These arguments will be passed to pandas.read_table() if `data` is</span>
-<span class="s">    a filename.</span>
-<span class="s">&quot;&quot;&quot;</span>
+<span class="s2">import_kwargs : dict</span>
+<span class="s2">    These arguments will be passed to pandas.read_table() if `data` is</span>
+<span class="s2">    a filename.</span>
+<span class="s2">&quot;&quot;&quot;</span>
 
 
 <div class="viewcode-block" id="ResultsTable"><a class="viewcode-back" href="../../autodocs/metaseq.results_table.ResultsTable.html#metaseq.results_table.ResultsTable">[docs]</a><span class="k">class</span> <span class="nc">ResultsTable</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -95,25 +96,25 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Wrapper around a pandas.DataFrame that adds additional functionality.</span>
 <span class="sd">        &quot;&quot;&quot;</span><span class="p">)</span>
-<div class="viewcode-block" id="ResultsTable.__init__"><a class="viewcode-back" href="../../autodocs/metaseq.results_table.ResultsTable.html#metaseq.results_table.ResultsTable.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">import_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+<div class="viewcode-block" id="ResultsTable.__init__"><a class="viewcode-back" href="../../autodocs/metaseq.results_table.ResultsTable.html#metaseq.results_table.ResultsTable.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">import_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">basestring</span><span class="p">):</span>
             <span class="n">import_kwargs</span> <span class="o">=</span> <span class="n">import_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">import_kwargs</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;`data` is not a pandas.DataFrame&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`data` is not a pandas.DataFrame&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">db</span><span class="o">=</span><span class="n">db</span><span class="p">,</span> <span class="n">import_kwargs</span><span class="o">=</span><span class="n">import_kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">attach_db</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_cached_features</span> <span class="o">=</span> <span class="bp">None</span>
-</div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cached_features</span> <span class="o">=</span> <span class="kc">None</span></div>
+
     <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">basestring</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">__getitem__</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">__getitem__</span><span class="p">(</span><span class="n">attr</span><span class="p">),</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
@@ -125,20 +126,20 @@
 <span class="sd">        This extra step is required to get around the fancy pandas.DataFrame</span>
 <span class="sd">        indexing (like .ix, .iloc, etc).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
-</div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span></div>
+
     <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">,</span> <span class="n">import_kwargs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">s</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;&lt;</span><span class="si">%s</span><span class="s"> instance, wrapping the following:&quot;</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&lt;</span><span class="si">%s</span><span class="s2"> instance, wrapping the following:&quot;</span>
                  <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
-        <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)</span>
-        <span class="n">s</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">(</span><span class="bp">False</span><span class="p">))</span>
-        <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;&gt;&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">(</span><span class="kc">False</span><span class="p">))</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&gt;&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ResultsTable.attach_db"><a class="viewcode-back" href="../../autodocs/metaseq.results_table.ResultsTable.html#metaseq.results_table.ResultsTable.attach_db">[docs]</a>    <span class="k">def</span> <span class="nf">attach_db</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -151,16 +152,16 @@
 <span class="sd">        ----------</span>
 <span class="sd">        db : gffutils.FeatureDB</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">db</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">db</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">basestring</span><span class="p">):</span>
                 <span class="n">db</span> <span class="o">=</span> <span class="n">gffutils</span><span class="o">.</span><span class="n">FeatureDB</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">gffutils</span><span class="o">.</span><span class="n">FeatureDB</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s">&quot;`db` must be a filename or a gffutils.FeatureDB&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="s">&#39;db&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">db</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="n">db</span>
-</div>
-<div class="viewcode-block" id="ResultsTable.features"><a class="viewcode-back" href="../../autodocs/metaseq.results_table.ResultsTable.html#metaseq.results_table.ResultsTable.features">[docs]</a>    <span class="k">def</span> <span class="nf">features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ignore_unknown</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+                    <span class="s2">&quot;`db` must be a filename or a gffutils.FeatureDB&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="s1">&#39;db&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">db</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="n">db</span></div>
+
+<div class="viewcode-block" id="ResultsTable.features"><a class="viewcode-back" href="../../autodocs/metaseq.results_table.ResultsTable.html#metaseq.results_table.ResultsTable.features">[docs]</a>    <span class="k">def</span> <span class="nf">features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ignore_unknown</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generator of features.</span>
 
@@ -173,7 +174,7 @@
 <span class="sd">            If True, silently ignores features that are not found in the db.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Please attach a gffutils.FeatureDB&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Please attach a gffutils.FeatureDB&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">yield</span> <span class="n">gffutils</span><span class="o">.</span><span class="n">helpers</span><span class="o">.</span><span class="n">asinterval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
@@ -181,9 +182,9 @@
                 <span class="k">if</span> <span class="n">ignore_unknown</span><span class="p">:</span>
                     <span class="k">continue</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="n">gffutils</span><span class="o">.</span><span class="n">FeatureNotFoundError</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> not found&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">)</span>
-</div>
-<div class="viewcode-block" id="ResultsTable.reindex_to"><a class="viewcode-back" href="../../autodocs/metaseq.results_table.ResultsTable.html#metaseq.results_table.ResultsTable.reindex_to">[docs]</a>    <span class="k">def</span> <span class="nf">reindex_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="s">&quot;Name&quot;</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="n">gffutils</span><span class="o">.</span><span class="n">FeatureNotFoundError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> not found&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ResultsTable.reindex_to"><a class="viewcode-back" href="../../autodocs/metaseq.results_table.ResultsTable.html#metaseq.results_table.ResultsTable.reindex_to">[docs]</a>    <span class="k">def</span> <span class="nf">reindex_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="s2">&quot;Name&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a copy that only has rows corresponding to feature names in x.</span>
 
@@ -199,8 +200,8 @@
         <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">x</span><span class="p">]</span>
         <span class="n">new</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">new</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">new</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">new</span>
-</div>
+        <span class="k">return</span> <span class="n">new</span></div>
+
 <div class="viewcode-block" id="ResultsTable.five_prime"><a class="viewcode-back" href="../../autodocs/metaseq.results_table.ResultsTable.html#metaseq.results_table.ResultsTable.five_prime">[docs]</a>    <span class="k">def</span> <span class="nf">five_prime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">upstream</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">downstream</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a BED/GFF file of the 5&#39; end of each feature represented in the</span>
@@ -214,8 +215,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">pybedtools</span><span class="o">.</span><span class="n">BedTool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">())</span>\
             <span class="o">.</span><span class="n">each</span><span class="p">(</span><span class="n">featurefuncs</span><span class="o">.</span><span class="n">five_prime</span><span class="p">,</span> <span class="n">upstream</span><span class="p">,</span> <span class="n">downstream</span><span class="p">)</span>\
-            <span class="o">.</span><span class="n">saveas</span><span class="p">()</span>
-</div>
+            <span class="o">.</span><span class="n">saveas</span><span class="p">()</span></div>
+
 <div class="viewcode-block" id="ResultsTable.three_prime"><a class="viewcode-back" href="../../autodocs/metaseq.results_table.ResultsTable.html#metaseq.results_table.ResultsTable.three_prime">[docs]</a>    <span class="k">def</span> <span class="nf">three_prime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">upstream</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">downstream</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a BED/GFF file of the 3&#39; end of each feature represented in the</span>
@@ -229,8 +230,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">pybedtools</span><span class="o">.</span><span class="n">BedTool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">())</span>\
             <span class="o">.</span><span class="n">each</span><span class="p">(</span><span class="n">featurefuncs</span><span class="o">.</span><span class="n">three_prime</span><span class="p">,</span> <span class="n">upstream</span><span class="p">,</span> <span class="n">downstream</span><span class="p">)</span>\
-            <span class="o">.</span><span class="n">saveas</span><span class="p">()</span>
-</div>
+            <span class="o">.</span><span class="n">saveas</span><span class="p">()</span></div>
+
     <span class="n">TSS</span> <span class="o">=</span> <span class="n">five_prime</span>
     <span class="n">TTS</span> <span class="o">=</span> <span class="n">three_prime</span>
 
@@ -238,14 +239,14 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Align the dataframe&#39;s index with another.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">reindex_like</span><span class="p">(</span><span class="n">other</span><span class="p">),</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
-</div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">reindex_like</span><span class="p">(</span><span class="n">other</span><span class="p">),</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="ResultsTable.genes_in_common"><a class="viewcode-back" href="../../autodocs/metaseq.results_table.ResultsTable.html#metaseq.results_table.ResultsTable.genes_in_common">[docs]</a>    <span class="k">def</span> <span class="nf">genes_in_common</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convenience method for getting the genes found in both dataframes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">&amp;</span> <span class="n">other</span><span class="o">.</span><span class="n">index</span>
-</div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">&amp;</span> <span class="n">other</span><span class="o">.</span><span class="n">index</span></div>
+
     <span class="k">def</span> <span class="nf">__and__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">&amp;</span> <span class="n">other</span><span class="o">.</span><span class="n">index</span>
 
@@ -258,15 +259,15 @@
     <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 
-<div class="viewcode-block" id="ResultsTable.scatter"><a class="viewcode-back" href="../../autodocs/metaseq.results_table.ResultsTable.html#metaseq.results_table.ResultsTable.scatter">[docs]</a>    <span class="k">def</span> <span class="nf">scatter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">xfunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">yfunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">xscale</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">yscale</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                <span class="n">xlab</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ylab</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">genes_to_highlight</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                <span class="n">label_genes</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">marginal_histograms</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                <span class="n">general_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&quot;k&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">picker</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
-                <span class="n">general_hist_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">offset_kwargs</span><span class="o">=</span><span class="p">{},</span> <span class="n">label_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                <span class="n">ax</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">one_to_one</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">xlab_prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                <span class="n">ylab_prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sizefunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">hist_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">hist_pad</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<div class="viewcode-block" id="ResultsTable.scatter"><a class="viewcode-back" href="../../autodocs/metaseq.results_table.ResultsTable.html#metaseq.results_table.ResultsTable.scatter">[docs]</a>    <span class="k">def</span> <span class="nf">scatter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">xfunc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">yfunc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xscale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">yscale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">xlab</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ylab</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">genes_to_highlight</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">label_genes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">marginal_histograms</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">general_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">picker</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                <span class="n">general_hist_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">offset_kwargs</span><span class="o">=</span><span class="p">{},</span> <span class="n">label_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">one_to_one</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xlab_prefix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">ylab_prefix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sizefunc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hist_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">hist_pad</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
                 <span class="n">nan_offset</span><span class="o">=</span><span class="mf">0.015</span><span class="p">,</span> <span class="n">pos_offset</span><span class="o">=</span><span class="mf">0.99</span><span class="p">,</span> <span class="n">linelength</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
-                <span class="n">neg_offset</span><span class="o">=</span><span class="mf">0.005</span><span class="p">,</span> <span class="n">figure_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                <span class="n">neg_offset</span><span class="o">=</span><span class="mf">0.005</span><span class="p">,</span> <span class="n">figure_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Do-it-all method for making annotated scatterplots.</span>
 
@@ -342,66 +343,66 @@
         <span class="n">_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">x</span><span class="p">]</span>
         <span class="n">_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">y</span><span class="p">]</span>
 
-        <span class="c"># Construct defaults---------------------------------------------------</span>
+        <span class="c1"># Construct defaults---------------------------------------------------</span>
         <span class="k">def</span> <span class="nf">identity</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
-        <span class="c"># Axis label setup</span>
-        <span class="k">if</span> <span class="n">xlab_prefix</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">xlab_prefix</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="c1"># Axis label setup</span>
+        <span class="k">if</span> <span class="n">xlab_prefix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">xlab_prefix</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="n">ylab_prefix</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">ylab_prefix</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ylab_prefix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ylab_prefix</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="n">xlab</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">xlab</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">xlab</span> <span class="o">=</span> <span class="n">x</span>
 
-            <span class="k">if</span> <span class="n">xfunc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="n">xlab</span> <span class="o">=</span> <span class="n">xlab_prefix</span> <span class="o">+</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">(</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">xfunc</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">xfunc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">xlab</span> <span class="o">=</span> <span class="n">xlab_prefix</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">xfunc</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">xlab</span> <span class="o">=</span> <span class="n">xlab_prefix</span> <span class="o">+</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+                <span class="n">xlab</span> <span class="o">=</span> <span class="n">xlab_prefix</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
 
-        <span class="k">if</span> <span class="n">ylab</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ylab</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ylab</span> <span class="o">=</span> <span class="n">y</span>
-            <span class="k">if</span> <span class="n">yfunc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="n">ylab</span> <span class="o">=</span> <span class="n">ylab_prefix</span> <span class="o">+</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">(</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">yfunc</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">yfunc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ylab</span> <span class="o">=</span> <span class="n">ylab_prefix</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">yfunc</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">ylab</span> <span class="o">=</span> <span class="n">ylab_prefix</span> <span class="o">+</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+                <span class="n">ylab</span> <span class="o">=</span> <span class="n">ylab_prefix</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
 
-        <span class="k">if</span> <span class="n">xfunc</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">xfunc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">xfunc</span> <span class="o">=</span> <span class="n">identity</span>
 
-        <span class="k">if</span> <span class="n">yfunc</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">yfunc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">yfunc</span> <span class="o">=</span> <span class="n">identity</span>
 
-        <span class="k">if</span> <span class="n">general_kwargs</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">general_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">general_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="k">if</span> <span class="n">general_hist_kwargs</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">general_hist_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">general_hist_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="k">if</span> <span class="n">genes_to_highlight</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">genes_to_highlight</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">genes_to_highlight</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">figure_kwargs</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">figure_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">figure_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="o">**</span><span class="n">figure_kwargs</span><span class="p">)</span>
             <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">label_kwargs</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">label_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">label_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-                <span class="n">horizontalalignment</span><span class="o">=</span><span class="s">&#39;right&#39;</span><span class="p">,</span>
-                <span class="n">verticalalignment</span><span class="o">=</span><span class="s">&#39;center&#39;</span><span class="p">,</span>
-                <span class="n">style</span><span class="o">=</span><span class="s">&#39;italic&#39;</span><span class="p">,</span>
-                <span class="n">bbox</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s">&#39;w&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s">&#39;None&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+                <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">,</span>
+                <span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span>
+                <span class="n">style</span><span class="o">=</span><span class="s1">&#39;italic&#39;</span><span class="p">,</span>
+                <span class="n">bbox</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
             <span class="p">)</span>
 
-        <span class="c"># Clean data ---------------------------------------------------------</span>
+        <span class="c1"># Clean data ---------------------------------------------------------</span>
         <span class="n">xi</span> <span class="o">=</span> <span class="n">xfunc</span><span class="p">(</span><span class="n">_x</span><span class="p">)</span>
         <span class="n">yi</span> <span class="o">=</span> <span class="n">yfunc</span><span class="p">(</span><span class="n">_y</span><span class="p">)</span>
 
-        <span class="c"># handle inf, -inf, and NaN</span>
+        <span class="c1"># handle inf, -inf, and NaN</span>
         <span class="n">x_is_pos_inf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">xi</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
         <span class="n">x_is_neg_inf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">xi</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
         <span class="n">x_is_nan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span>
@@ -409,64 +410,64 @@
         <span class="n">y_is_neg_inf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">yi</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">yi</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
         <span class="n">y_is_nan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">yi</span><span class="p">)</span>
 
-        <span class="c"># Indexes for valid values</span>
+        <span class="c1"># Indexes for valid values</span>
         <span class="n">x_valid</span> <span class="o">=</span> <span class="o">~</span><span class="p">(</span><span class="n">x_is_pos_inf</span> <span class="o">|</span> <span class="n">x_is_neg_inf</span> <span class="o">|</span> <span class="n">x_is_nan</span><span class="p">)</span>
         <span class="n">y_valid</span> <span class="o">=</span> <span class="o">~</span><span class="p">(</span><span class="n">y_is_pos_inf</span> <span class="o">|</span> <span class="n">y_is_neg_inf</span> <span class="o">|</span> <span class="n">y_is_nan</span><span class="p">)</span>
 
-        <span class="c"># global min/max</span>
+        <span class="c1"># global min/max</span>
         <span class="n">gmin</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">xi</span><span class="p">[</span><span class="n">x_valid</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">yi</span><span class="p">[</span><span class="n">y_valid</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
         <span class="n">gmax</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">xi</span><span class="p">[</span><span class="n">x_valid</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">yi</span><span class="p">[</span><span class="n">y_valid</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
 
-        <span class="c"># Convert any integer indexes into boolean, and create a new list of</span>
-        <span class="c"># genes to highlight.  This handles optional hist kwargs.</span>
+        <span class="c1"># Convert any integer indexes into boolean, and create a new list of</span>
+        <span class="c1"># genes to highlight.  This handles optional hist kwargs.</span>
 
-        <span class="c"># We&#39;ll compile a new list of genes to highlight.</span>
+        <span class="c1"># We&#39;ll compile a new list of genes to highlight.</span>
         <span class="n">_genes_to_highlight</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">genes_to_highlight</span><span class="p">:</span>
             <span class="n">ind</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-            <span class="c"># Convert to boolean</span>
-            <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="s">&#39;bool&#39;</span><span class="p">:</span>
+            <span class="c1"># Convert to boolean</span>
+            <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span>
                 <span class="n">new_ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
-                <span class="n">new_ind</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="n">new_ind</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">_genes_to_highlight</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="nb">tuple</span><span class="p">([</span><span class="n">new_ind</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">block</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
                 <span class="p">)</span>
 
-            <span class="c"># If it&#39;s a DataFrame, we only want the boolean values;</span>
+            <span class="c1"># If it&#39;s a DataFrame, we only want the boolean values;</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="s">&#39;values&#39;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="s1">&#39;values&#39;</span><span class="p">):</span>
                     <span class="n">ind</span> <span class="o">=</span> <span class="n">ind</span><span class="o">.</span><span class="n">values</span>
                 <span class="n">_genes_to_highlight</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="nb">tuple</span><span class="p">([</span><span class="n">ind</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">block</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
                 <span class="p">)</span>
 
-        <span class="c"># Now we remove any genes from in allind (which will be plotted using</span>
-        <span class="c"># `general_kwargs`) that will be plotted by genes_to_highlight.  This</span>
-        <span class="c"># avoids double-plotting.</span>
+        <span class="c1"># Now we remove any genes from in allind (which will be plotted using</span>
+        <span class="c1"># `general_kwargs`) that will be plotted by genes_to_highlight.  This</span>
+        <span class="c1"># avoids double-plotting.</span>
         <span class="n">allind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">_genes_to_highlight</span><span class="p">:</span>
             <span class="n">ind</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">allind</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">allind</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
 
-        <span class="c"># Copy over the color and alpha if they&#39;re not specified</span>
+        <span class="c1"># Copy over the color and alpha if they&#39;re not specified</span>
         <span class="n">general_hist_kwargs</span> <span class="o">=</span> <span class="n">plotutils</span><span class="o">.</span><span class="n">_updatecopy</span><span class="p">(</span>
             <span class="n">orig</span><span class="o">=</span><span class="n">general_hist_kwargs</span><span class="p">,</span> <span class="n">update_with</span><span class="o">=</span><span class="n">general_kwargs</span><span class="p">,</span>
-            <span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;color&#39;</span><span class="p">,</span> <span class="s">&#39;alpha&#39;</span><span class="p">])</span>
+            <span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">,</span> <span class="s1">&#39;alpha&#39;</span><span class="p">])</span>
 
-        <span class="c"># Put the non-highlighted genes at the beginning of _genes_to_highlight</span>
-        <span class="c"># list so we can just iterate over one list</span>
+        <span class="c1"># Put the non-highlighted genes at the beginning of _genes_to_highlight</span>
+        <span class="c1"># list so we can just iterate over one list</span>
         <span class="n">_genes_to_highlight</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
             <span class="mi">0</span><span class="p">,</span>
             <span class="p">(</span><span class="n">allind</span><span class="p">,</span> <span class="n">general_kwargs</span><span class="p">,</span> <span class="n">general_hist_kwargs</span><span class="p">)</span>
         <span class="p">)</span>
 
-        <span class="c"># Set up the object that will handle the marginal histograms</span>
+        <span class="c1"># Set up the object that will handle the marginal histograms</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">marginal</span> <span class="o">=</span> <span class="n">plotutils</span><span class="o">.</span><span class="n">MarginalHistScatter</span><span class="p">(</span>
             <span class="n">ax</span><span class="p">,</span> <span class="n">hist_size</span><span class="o">=</span><span class="n">hist_size</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="n">hist_pad</span><span class="p">)</span>
 
-        <span class="c"># Set up kwargs for x and y rug plots</span>
+        <span class="c1"># Set up kwargs for x and y rug plots</span>
         <span class="n">rug_x_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
             <span class="n">linelength</span><span class="o">=</span><span class="n">linelength</span><span class="p">,</span>
             <span class="n">transform</span><span class="o">=</span><span class="n">blended_transform_factory</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">transData</span><span class="p">,</span> <span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">),</span>
@@ -474,25 +475,25 @@
         <span class="n">rug_y_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
             <span class="n">linelength</span><span class="o">=</span><span class="n">linelength</span><span class="p">,</span>
             <span class="n">transform</span><span class="o">=</span><span class="n">blended_transform_factory</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span> <span class="n">ax</span><span class="o">.</span><span class="n">transData</span><span class="p">),</span>
-            <span class="n">orientation</span><span class="o">=</span><span class="s">&#39;vertical&#39;</span><span class="p">,</span>
+            <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;vertical&#39;</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="c"># EventCollection objects need a color as a 3-tuple, so set up</span>
-        <span class="c"># a converter here.</span>
+        <span class="c1"># EventCollection objects need a color as a 3-tuple, so set up</span>
+        <span class="c1"># a converter here.</span>
         <span class="n">color_converter</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">ColorConverter</span><span class="p">()</span><span class="o">.</span><span class="n">to_rgb</span>
 
-        <span class="c"># Plot the one-to-one line, if kwargs were specified</span>
+        <span class="c1"># Plot the one-to-one line, if kwargs were specified</span>
         <span class="k">if</span> <span class="n">one_to_one</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">gmin</span><span class="p">,</span> <span class="n">gmax</span><span class="p">],</span>
                     <span class="p">[</span><span class="n">gmin</span><span class="p">,</span> <span class="n">gmax</span><span class="p">],</span>
                     <span class="o">**</span><span class="n">one_to_one</span><span class="p">)</span>
 
-        <span class="c"># Plot &#39;em all, and label if specified</span>
+        <span class="c1"># Plot &#39;em all, and label if specified</span>
 
-        <span class="c"># In order to avoid calling the callback function multiple times when</span>
-        <span class="c"># we have overlapping genes to highlight (e.g., a gene that is both</span>
-        <span class="c"># upregulated AND has a peak), keep track of everything that&#39;s been</span>
-        <span class="c"># added so far.</span>
+        <span class="c1"># In order to avoid calling the callback function multiple times when</span>
+        <span class="c1"># we have overlapping genes to highlight (e.g., a gene that is both</span>
+        <span class="c1"># upregulated AND has a peak), keep track of everything that&#39;s been</span>
+        <span class="c1"># added so far.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_seen</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">_genes_to_highlight</span><span class="p">:</span>
             <span class="n">ind</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -503,9 +504,9 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">hist_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
 
-            <span class="n">names</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;names&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;names&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="n">_marginal_histograms</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;marginal_histograms&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;marginal_histograms&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">or</span>
                 <span class="n">marginal_histograms</span><span class="p">)</span>
 
             <span class="n">updated_kwargs</span> <span class="o">=</span> <span class="n">plotutils</span><span class="o">.</span><span class="n">_updatecopy</span><span class="p">(</span>
@@ -515,10 +516,10 @@
                 <span class="n">orig</span><span class="o">=</span><span class="n">hist_kwargs</span><span class="p">,</span> <span class="n">update_with</span><span class="o">=</span><span class="n">general_hist_kwargs</span><span class="p">)</span>
             <span class="n">updated_hist_kwargs</span> <span class="o">=</span> <span class="n">plotutils</span><span class="o">.</span><span class="n">_updatecopy</span><span class="p">(</span>
                 <span class="n">orig</span><span class="o">=</span><span class="n">updated_hist_kwargs</span><span class="p">,</span> <span class="n">update_with</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
-                <span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;color&#39;</span><span class="p">,</span> <span class="s">&#39;alpha&#39;</span><span class="p">],</span> <span class="n">override</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                <span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">,</span> <span class="s1">&#39;alpha&#39;</span><span class="p">],</span> <span class="n">override</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-            <span class="n">xhist_kwargs</span> <span class="o">=</span> <span class="n">updated_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;xhist_kwargs&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
-            <span class="n">yhist_kwargs</span> <span class="o">=</span> <span class="n">updated_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;yhist_kwargs&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="n">xhist_kwargs</span> <span class="o">=</span> <span class="n">updated_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;xhist_kwargs&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">yhist_kwargs</span> <span class="o">=</span> <span class="n">updated_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;yhist_kwargs&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">marginal</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">xi</span><span class="p">[</span><span class="n">ind</span> <span class="o">&amp;</span> <span class="n">x_valid</span> <span class="o">&amp;</span> <span class="n">y_valid</span><span class="p">],</span>
@@ -530,35 +531,35 @@
                 <span class="n">marginal_histograms</span><span class="o">=</span><span class="n">_marginal_histograms</span><span class="p">,</span>
             <span class="p">)</span>
 
-            <span class="c"># This is important for callbacks: here we grab the last-created</span>
-            <span class="c"># collection,</span>
+            <span class="c1"># This is important for callbacks: here we grab the last-created</span>
+            <span class="c1"># collection,</span>
             <span class="n">coll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">marginal</span><span class="o">.</span><span class="n">scatter_ax</span><span class="o">.</span><span class="n">collections</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">coll</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
             <span class="n">coll</span><span class="o">.</span><span class="n">ind</span> <span class="o">=</span> <span class="n">ind</span> <span class="o">&amp;</span> <span class="n">x_valid</span> <span class="o">&amp;</span> <span class="n">y_valid</span>
 
-            <span class="n">color</span> <span class="o">=</span> <span class="n">color_converter</span><span class="p">(</span><span class="n">updated_kwargs</span><span class="p">[</span><span class="s">&#39;color&#39;</span><span class="p">])</span>
-            <span class="n">rug_x_kwargs</span><span class="p">[</span><span class="s">&#39;color&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
-            <span class="n">rug_y_kwargs</span><span class="p">[</span><span class="s">&#39;color&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="n">color_converter</span><span class="p">(</span><span class="n">updated_kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">])</span>
+            <span class="n">rug_x_kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
+            <span class="n">rug_y_kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
 
-            <span class="c"># Note: if both x and y are not valid, then they will not be on the</span>
-            <span class="c"># plot.</span>
+            <span class="c1"># Note: if both x and y are not valid, then they will not be on the</span>
+            <span class="c1"># plot.</span>
             <span class="n">items</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="c"># top rug, y is +inf and x is valid</span>
+                <span class="c1"># top rug, y is +inf and x is valid</span>
                 <span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="n">ind</span> <span class="o">&amp;</span> <span class="n">x_valid</span> <span class="o">&amp;</span> <span class="n">y_is_pos_inf</span><span class="p">,</span> <span class="n">pos_offset</span><span class="p">,</span> <span class="n">rug_x_kwargs</span><span class="p">),</span>
 
-                <span class="c"># one of the bottom rugs, where y is NaN</span>
+                <span class="c1"># one of the bottom rugs, where y is NaN</span>
                 <span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="n">ind</span> <span class="o">&amp;</span> <span class="n">x_valid</span> <span class="o">&amp;</span> <span class="n">y_is_nan</span><span class="p">,</span> <span class="n">nan_offset</span><span class="p">,</span> <span class="n">rug_x_kwargs</span><span class="p">),</span>
 
-                <span class="c"># bottom rug, y is -inf</span>
+                <span class="c1"># bottom rug, y is -inf</span>
                 <span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="n">ind</span> <span class="o">&amp;</span> <span class="n">x_valid</span> <span class="o">&amp;</span> <span class="n">y_is_neg_inf</span><span class="p">,</span> <span class="n">neg_offset</span><span class="p">,</span> <span class="n">rug_x_kwargs</span><span class="p">),</span>
 
-                <span class="c"># right rug, x is +inf</span>
+                <span class="c1"># right rug, x is +inf</span>
                 <span class="p">(</span><span class="n">yi</span><span class="p">,</span> <span class="n">ind</span> <span class="o">&amp;</span> <span class="n">y_valid</span> <span class="o">&amp;</span> <span class="n">x_is_pos_inf</span><span class="p">,</span> <span class="n">pos_offset</span><span class="p">,</span> <span class="n">rug_y_kwargs</span><span class="p">),</span>
 
-                <span class="c"># one of the left rugs; x is NaN</span>
+                <span class="c1"># one of the left rugs; x is NaN</span>
                 <span class="p">(</span><span class="n">yi</span><span class="p">,</span> <span class="n">ind</span> <span class="o">&amp;</span> <span class="n">y_valid</span> <span class="o">&amp;</span> <span class="n">x_is_nan</span><span class="p">,</span> <span class="n">nan_offset</span><span class="p">,</span> <span class="n">rug_y_kwargs</span><span class="p">),</span>
 
-                <span class="c"># left rug, x is -inf</span>
+                <span class="c1"># left rug, x is -inf</span>
                 <span class="p">(</span><span class="n">yi</span><span class="p">,</span> <span class="n">ind</span> <span class="o">&amp;</span> <span class="n">y_valid</span> <span class="o">&amp;</span> <span class="n">x_is_neg_inf</span><span class="p">,</span> <span class="n">neg_offset</span><span class="p">,</span> <span class="n">rug_y_kwargs</span><span class="p">),</span>
             <span class="p">]</span>
             <span class="k">for</span> <span class="n">values</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">kwargs</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
@@ -579,22 +580,22 @@
                             <span class="n">transform</span><span class="o">=</span><span class="n">transOffset</span><span class="p">,</span>
                             <span class="o">**</span><span class="n">label_kwargs</span><span class="p">)</span>
 
-        <span class="c"># register callback</span>
-        <span class="k">if</span> <span class="n">callback</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c1"># register callback</span>
+        <span class="k">if</span> <span class="n">callback</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">callback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_callback</span>
 
         <span class="k">def</span> <span class="nf">wrapped_callback</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id_callback</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
                 <span class="n">callback</span><span class="p">(</span><span class="n">_id</span><span class="p">)</span>
 
-        <span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">mpl_connect</span><span class="p">(</span><span class="s">&#39;pick_event&#39;</span><span class="p">,</span> <span class="n">wrapped_callback</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">mpl_connect</span><span class="p">(</span><span class="s1">&#39;pick_event&#39;</span><span class="p">,</span> <span class="n">wrapped_callback</span><span class="p">)</span>
 
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">xlab</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">ylab</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s">&#39;tight&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">ax</span>
-</div>
+        <span class="k">return</span> <span class="n">ax</span></div>
+
 <div class="viewcode-block" id="ResultsTable.radviz"><a class="viewcode-back" href="../../autodocs/metaseq.results_table.ResultsTable.html#metaseq.results_table.ResultsTable.radviz">[docs]</a>    <span class="k">def</span> <span class="nf">radviz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_names</span><span class="p">,</span> <span class="n">transforms</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Radviz plot.</span>
@@ -659,7 +660,7 @@
 <span class="sd">        [3] http://pandas.pydata.org/pandas-docs/stable/visualization.html\</span>
 <span class="sd">                #radviz</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c"># make a copy of data</span>
+        <span class="c1"># make a copy of data</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">column_names</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">transforms</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -686,42 +687,42 @@
             <span class="n">to_plot</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">s</span> <span class="o">*</span> <span class="n">row_</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">row</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
 
         <span class="n">x_</span><span class="p">,</span> <span class="n">y_</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">to_plot</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;radviz_x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;radviz_y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;radviz_x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;radviz_y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_</span>
 
-        <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="s">&#39;radviz_x&#39;</span><span class="p">,</span> <span class="s">&#39;radviz_y&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="s1">&#39;radviz_x&#39;</span><span class="p">,</span> <span class="s1">&#39;radviz_y&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">patches</span><span class="o">.</span><span class="n">Circle</span><span class="p">((</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s">&#39;none&#39;</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">patches</span><span class="o">.</span><span class="n">Circle</span><span class="p">((</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">xy</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">column_names</span><span class="p">):</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">patches</span><span class="o">.</span><span class="n">Circle</span><span class="p">(</span><span class="n">xy</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">0.025</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s">&#39;gray&#39;</span><span class="p">))</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">patches</span><span class="o">.</span><span class="n">Circle</span><span class="p">(</span><span class="n">xy</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">0.025</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.0</span> <span class="ow">and</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.025</span><span class="p">,</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.025</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span>
-                        <span class="n">ha</span><span class="o">=</span><span class="s">&#39;right&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s">&#39;top&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s">&#39;small&#39;</span><span class="p">)</span>
+                        <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s1">&#39;small&#39;</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.0</span> <span class="ow">and</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mf">0.0</span><span class="p">:</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.025</span><span class="p">,</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.025</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span>
-                        <span class="n">ha</span><span class="o">=</span><span class="s">&#39;right&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s">&#39;small&#39;</span><span class="p">)</span>
+                        <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s1">&#39;small&#39;</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mf">0.0</span> <span class="ow">and</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.025</span><span class="p">,</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.025</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span>
-                        <span class="n">ha</span><span class="o">=</span><span class="s">&#39;left&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s">&#39;top&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s">&#39;small&#39;</span><span class="p">)</span>
+                        <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s1">&#39;small&#39;</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mf">0.0</span> <span class="ow">and</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mf">0.0</span><span class="p">:</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.025</span><span class="p">,</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.025</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span>
-                        <span class="n">ha</span><span class="o">=</span><span class="s">&#39;left&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s">&#39;small&#39;</span><span class="p">)</span>
+                        <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s1">&#39;small&#39;</span><span class="p">)</span>
 
-        <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s">&#39;equal&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">ax</span>
-</div>
+        <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ax</span></div>
+
     <span class="k">def</span> <span class="nf">_id_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
-        <span class="c"># event.ind is the index into event&#39;s x and y data.</span>
-        <span class="c">#</span>
-        <span class="c"># event.artist.ind is the index of the entire artist into the original</span>
-        <span class="c"># dataframe.</span>
+        <span class="c1"># event.ind is the index into event&#39;s x and y data.</span>
+        <span class="c1">#</span>
+        <span class="c1"># event.artist.ind is the index of the entire artist into the original</span>
+        <span class="c1"># dataframe.</span>
         <span class="n">subset_df</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">artist</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">ix</span><span class="p">[</span><span class="n">event</span><span class="o">.</span><span class="n">artist</span><span class="o">.</span><span class="n">ind</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">ind</span><span class="p">:</span>
             <span class="n">_id</span> <span class="o">=</span> <span class="n">subset_df</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="k">yield</span> <span class="n">_id</span>
 
     <span class="k">def</span> <span class="nf">_default_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
-        <span class="k">print</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">ix</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="nb">print</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">ix</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
 <div class="viewcode-block" id="ResultsTable.strip_unknown_features"><a class="viewcode-back" href="../../autodocs/metaseq.results_table.ResultsTable.html#metaseq.results_table.ResultsTable.strip_unknown_features">[docs]</a>    <span class="k">def</span> <span class="nf">strip_unknown_features</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -740,10 +741,10 @@
             <span class="k">except</span> <span class="n">gffutils</span><span class="o">.</span><span class="n">FeatureNotFoundError</span><span class="p">:</span>
                 <span class="k">pass</span>
         <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">ix</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
-</div>
-<div class="viewcode-block" id="ResultsTable.genes_with_peak"><a class="viewcode-back" href="../../autodocs/metaseq.results_table.ResultsTable.html#metaseq.results_table.ResultsTable.genes_with_peak">[docs]</a>    <span class="k">def</span> <span class="nf">genes_with_peak</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peaks</span><span class="p">,</span> <span class="n">transform_func</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                        <span class="n">intersect_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">id_attribute</span><span class="o">=</span><span class="s">&#39;ID&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">ix</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ResultsTable.genes_with_peak"><a class="viewcode-back" href="../../autodocs/metaseq.results_table.ResultsTable.html#metaseq.results_table.ResultsTable.genes_with_peak">[docs]</a>    <span class="k">def</span> <span class="nf">genes_with_peak</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peaks</span><span class="p">,</span> <span class="n">transform_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">intersect_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">id_attribute</span><span class="o">=</span><span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span>
                         <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a boolean index of genes that have a peak nearby.</span>
@@ -810,38 +811,38 @@
 
         <span class="n">hits</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">i</span><span class="p">[</span><span class="n">id_attribute</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">features</span><span class="o">.</span><span class="n">intersect</span><span class="p">(</span>
             <span class="n">peaks</span><span class="p">,</span> <span class="o">**</span><span class="n">intersect_kwargs</span><span class="p">)]))</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">hits</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">hits</span><span class="p">)</span></div></div>
 
-</div></div>
+
 <span class="k">class</span> <span class="nc">DifferentialExpressionResults</span><span class="p">(</span><span class="n">ResultsTable</span><span class="p">):</span>
 
-    <span class="n">__doc__</span> <span class="o">=</span> <span class="n">_base_doc</span> <span class="o">%</span> <span class="n">dedent</span><span class="p">(</span><span class="s">&quot;&quot;&quot;</span>
-<span class="s">    A ResultsTable subclass for working with differential expression results.</span>
+    <span class="n">__doc__</span> <span class="o">=</span> <span class="n">_base_doc</span> <span class="o">%</span> <span class="n">dedent</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    A ResultsTable subclass for working with differential expression results.</span>
 
-<span class="s">    Adds methods for up/down regulation, ma_plot, and sets class variables for</span>
-<span class="s">    which columns should be considered for pval, log fold change, and mean</span>
-<span class="s">    values. This class acts as a parent for subclasses like DESeqResults,</span>
-<span class="s">    EdgeRResults, and others/</span>
-<span class="s">    &quot;&quot;&quot;</span><span class="p">)</span>
-    <span class="n">pval_column</span> <span class="o">=</span> <span class="s">&#39;padj&#39;</span>
-    <span class="n">lfc_column</span> <span class="o">=</span> <span class="s">&#39;log2FoldChange&#39;</span>
-    <span class="n">mean_column</span> <span class="o">=</span> <span class="s">&#39;baseMean&#39;</span>
+<span class="s2">    Adds methods for up/down regulation, ma_plot, and sets class variables for</span>
+<span class="s2">    which columns should be considered for pval, log fold change, and mean</span>
+<span class="s2">    values. This class acts as a parent for subclasses like DESeqResults,</span>
+<span class="s2">    EdgeRResults, and others/</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
+    <span class="n">pval_column</span> <span class="o">=</span> <span class="s1">&#39;padj&#39;</span>
+    <span class="n">lfc_column</span> <span class="o">=</span> <span class="s1">&#39;log2FoldChange&#39;</span>
+    <span class="n">mean_column</span> <span class="o">=</span> <span class="s1">&#39;baseMean&#39;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">header_check</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">import_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;import_kwargs&#39;</span><span class="p">,</span> <span class="p">{})</span>
-        <span class="k">if</span> <span class="n">header_check</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
-            <span class="n">comment_char</span> <span class="o">=</span> <span class="n">import_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;comment&#39;</span><span class="p">,</span> <span class="s">&#39;#&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">header_check</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">import_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;import_kwargs&#39;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="k">if</span> <span class="n">header_check</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">basestring</span><span class="p">):</span>
+            <span class="n">comment_char</span> <span class="o">=</span> <span class="n">import_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span> <span class="s1">&#39;#&#39;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">data</span><span class="p">)):</span>
                 <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">comment_char</span><span class="p">:</span>
                     <span class="k">break</span>
-            <span class="n">import_kwargs</span><span class="p">[</span><span class="s">&#39;skiprows&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
-        <span class="n">import_kwargs</span><span class="p">[</span><span class="s">&#39;na_values&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;nan&#39;</span><span class="p">]</span>
+            <span class="n">import_kwargs</span><span class="p">[</span><span class="s1">&#39;skiprows&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="n">import_kwargs</span><span class="p">[</span><span class="s1">&#39;na_values&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;nan&#39;</span><span class="p">]</span>
 
-        <span class="n">import_kwargs</span><span class="p">[</span><span class="s">&#39;index_col&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">import_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;index_col&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">import_kwargs</span><span class="p">[</span><span class="s1">&#39;index_col&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">import_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;index_col&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">DifferentialExpressionResults</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span>
             <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="n">db</span><span class="p">,</span> <span class="n">import_kwargs</span><span class="o">=</span><span class="n">import_kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thresh</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thresh</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Changed features.</span>
 
@@ -852,7 +853,7 @@
             <span class="k">return</span> <span class="n">ind</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">unchanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thresh</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">unchanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thresh</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Changed features.</span>
 
@@ -866,7 +867,7 @@
             <span class="k">return</span> <span class="n">ind</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">enriched</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thresh</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">enriched</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thresh</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Enriched features.</span>
 
@@ -874,7 +875,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">upregulated</span><span class="p">(</span><span class="n">thresh</span><span class="o">=</span><span class="n">thresh</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="n">idx</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">upregulated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thresh</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">upregulated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thresh</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Upregulated features.</span>
 
@@ -888,7 +889,7 @@
             <span class="k">return</span> <span class="n">ind</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">downregulated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thresh</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">downregulated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thresh</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Downregulated features.</span>
 
@@ -902,7 +903,7 @@
             <span class="k">return</span> <span class="n">ind</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">disenriched</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thresh</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">disenriched</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thresh</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Disenriched features.</span>
 
@@ -910,8 +911,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">downregulated</span><span class="p">(</span><span class="n">thresh</span><span class="o">=</span><span class="n">thresh</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="n">idx</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">ma_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thresh</span><span class="p">,</span> <span class="n">up_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">dn_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                <span class="n">zero_line</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">ma_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thresh</span><span class="p">,</span> <span class="n">up_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dn_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">zero_line</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        MA plot</span>
 
@@ -934,20 +935,20 @@
 <span class="sd">            Kwargs passed to matplotlib.axhline(0).</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">genes_to_highlight</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;genes_to_highlight&#39;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">genes_to_highlight</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;genes_to_highlight&#39;</span><span class="p">,</span> <span class="p">[])</span>
         <span class="n">genes_to_highlight</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">upregulated</span><span class="p">(</span><span class="n">thresh</span><span class="p">),</span>
-             <span class="n">up_kwargs</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">)))</span>
+             <span class="n">up_kwargs</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)))</span>
         <span class="n">genes_to_highlight</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">downregulated</span><span class="p">(</span><span class="n">thresh</span><span class="p">),</span>
-             <span class="n">dn_kwargs</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;b&#39;</span><span class="p">)))</span>
-        <span class="k">if</span> <span class="n">zero_line</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+             <span class="n">dn_kwargs</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">zero_line</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">zero_line</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean_column</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lfc_column</span>
 
-        <span class="k">if</span> <span class="s">&#39;xfunc&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;xfunc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span>
+        <span class="k">if</span> <span class="s1">&#39;xfunc&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;xfunc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
             <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
             <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
@@ -957,16 +958,16 @@
             <span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">zero_line</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ax</span>
 
-    <span class="n">threshdoc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
-<span class="s">    Parameters</span>
-<span class="s">    ----------</span>
-<span class="s">    thresh : float</span>
-<span class="s">        Only features with &lt;= `thresh` will be returned</span>
+    <span class="n">threshdoc</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Parameters</span>
+<span class="s2">    ----------</span>
+<span class="s2">    thresh : float</span>
+<span class="s2">        Only features with &lt;= `thresh` will be returned</span>
 
-<span class="s">    idx : bool</span>
-<span class="s">        If True, a boolean index will be returned.  If False, a new object will</span>
-<span class="s">        be returned that has been subsetted.</span>
-<span class="s">    &quot;&quot;&quot;</span>
+<span class="s2">    idx : bool</span>
+<span class="s2">        If True, a boolean index will be returned.  If False, a new object will</span>
+<span class="s2">        be returned that has been subsetted.</span>
+<span class="s2">    &quot;&quot;&quot;</span>
     <span class="n">enriched</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">enriched</span><span class="o">.</span><span class="n">__doc__</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">threshdoc</span><span class="o">=</span><span class="n">threshdoc</span><span class="p">)</span>
     <span class="n">disenriched</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">disenriched</span><span class="o">.</span><span class="n">__doc__</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">threshdoc</span><span class="o">=</span><span class="n">threshdoc</span><span class="p">)</span>
     <span class="n">upregulated</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">upregulated</span><span class="o">.</span><span class="n">__doc__</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">threshdoc</span><span class="o">=</span><span class="n">threshdoc</span><span class="p">)</span>
@@ -982,11 +983,11 @@
 <span class="sd">        pval_column, lfc_column, and mean_column to the names used in edgeR&#39;s</span>
 <span class="sd">        output.</span>
 <span class="sd">        &quot;&quot;&quot;</span><span class="p">)</span>
-    <span class="n">pval_column</span> <span class="o">=</span> <span class="s">&#39;FDR&#39;</span>
-    <span class="n">lfc_column</span> <span class="o">=</span> <span class="s">&#39;logFC&#39;</span>
-    <span class="n">mean_column</span> <span class="o">=</span> <span class="s">&#39;logCPM&#39;</span>
+    <span class="n">pval_column</span> <span class="o">=</span> <span class="s1">&#39;FDR&#39;</span>
+    <span class="n">lfc_column</span> <span class="o">=</span> <span class="s1">&#39;logFC&#39;</span>
+    <span class="n">mean_column</span> <span class="o">=</span> <span class="s1">&#39;logCPM&#39;</span></div>
 
-</div>
+
 <div class="viewcode-block" id="DESeqResults"><a class="viewcode-back" href="../../autodocs/metaseq.results_table.DESeqResults.html#metaseq.results_table.DESeqResults">[docs]</a><span class="k">class</span> <span class="nc">DESeqResults</span><span class="p">(</span><span class="n">DifferentialExpressionResults</span><span class="p">):</span>
     <span class="n">__doc__</span> <span class="o">=</span> <span class="n">_base_doc</span> <span class="o">%</span> <span class="n">dedent</span><span class="p">(</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -996,7 +997,7 @@
 <span class="sd">        pval_column, lfc_column, and mean_column to the names used in edgeR&#39;s</span>
 <span class="sd">        output.</span>
 <span class="sd">        &quot;&quot;&quot;</span><span class="p">)</span>
-<div class="viewcode-block" id="DESeqResults.colormapped_bedfile"><a class="viewcode-back" href="../../autodocs/metaseq.results_table.DESeqResults.html#metaseq.results_table.DESeqResults.colormapped_bedfile">[docs]</a>    <span class="k">def</span> <span class="nf">colormapped_bedfile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">genome</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="DESeqResults.colormapped_bedfile"><a class="viewcode-back" href="../../autodocs/metaseq.results_table.DESeqResults.html#metaseq.results_table.DESeqResults.colormapped_bedfile">[docs]</a>    <span class="k">def</span> <span class="nf">colormapped_bedfile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">genome</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a BED file with padj encoded as color</span>
 
@@ -1012,8 +1013,8 @@
 <span class="sd">        -----</span>
 <span class="sd">        Requires a FeatureDB to be attached.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;FeatureDB required&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;FeatureDB required&quot;</span><span class="p">)</span>
         <span class="n">db</span> <span class="o">=</span> <span class="n">gffutils</span><span class="o">.</span><span class="n">FeatureDB</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">)</span>
 
         <span class="k">def</span> <span class="nf">scored_feature_generator</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
@@ -1036,27 +1037,27 @@
                 <span class="n">fields</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">fields</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
                 <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">padj</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
                 <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">pval</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
-                <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%.3f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">d</span><span class="o">.</span><span class="n">log2FoldChange</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-                <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%.3f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">d</span><span class="o">.</span><span class="n">baseMeanB</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-                <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%.3f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">d</span><span class="o">.</span><span class="n">baseMeanB</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">d</span><span class="o">.</span><span class="n">log2FoldChange</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">d</span><span class="o">.</span><span class="n">baseMeanB</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">d</span><span class="o">.</span><span class="n">baseMeanB</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
                 <span class="k">yield</span> <span class="n">pybedtools</span><span class="o">.</span><span class="n">create_interval_from_list</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="n">pybedtools</span><span class="o">.</span><span class="n">BedTool</span><span class="p">(</span><span class="n">scored_feature_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span><span class="o">.</span><span class="n">saveas</span><span class="p">()</span>
         <span class="n">norm</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">colormap_normalize</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">cmap</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cmap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">cmap</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">RdBu_r</span>
         <span class="n">cmap</span> <span class="o">=</span> <span class="n">colormap_adjust</span><span class="o">.</span><span class="n">cmap_center_point_adjust</span><span class="p">(</span>
             <span class="n">cmap</span><span class="p">,</span> <span class="p">[</span><span class="n">norm</span><span class="o">.</span><span class="n">vmin</span><span class="p">,</span> <span class="n">norm</span><span class="o">.</span><span class="n">vmax</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
 
         <span class="k">def</span> <span class="nf">score_zeroer</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
-            <span class="n">f</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="s">&#39;0&#39;</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
             <span class="k">return</span> <span class="n">f</span>
         <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">each</span><span class="p">(</span><span class="n">add_color</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span>\
                 <span class="o">.</span><span class="n">sort</span><span class="p">()</span>\
                 <span class="o">.</span><span class="n">each</span><span class="p">(</span><span class="n">score_zeroer</span><span class="p">)</span>\
                 <span class="o">.</span><span class="n">truncate_to_chrom</span><span class="p">(</span><span class="n">genome</span><span class="p">)</span>\
-                <span class="o">.</span><span class="n">saveas</span><span class="p">()</span>
-</div>
+                <span class="o">.</span><span class="n">saveas</span><span class="p">()</span></div>
+
 <div class="viewcode-block" id="DESeqResults.autosql_file"><a class="viewcode-back" href="../../autodocs/metaseq.results_table.DESeqResults.html#metaseq.results_table.DESeqResults.autosql_file">[docs]</a>    <span class="k">def</span> <span class="nf">autosql_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate the autosql for DESeq results (to create bigBed)</span>
@@ -1092,12 +1093,12 @@
 <span class="sd">        )</span>
 <span class="sd">        &quot;&quot;&quot;</span><span class="p">)</span>
 
-        <span class="n">fout</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">fout</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
         <span class="n">fout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">AUTOSQL</span><span class="p">)</span>
         <span class="n">fout</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">fn</span>
+        <span class="k">return</span> <span class="n">fn</span></div></div>
 
-</div></div>
+
 <div class="viewcode-block" id="DESeq2Results"><a class="viewcode-back" href="../../autodocs/metaseq.results_table.DESeq2Results.html#metaseq.results_table.DESeq2Results">[docs]</a><span class="k">class</span> <span class="nc">DESeq2Results</span><span class="p">(</span><span class="n">DESeqResults</span><span class="p">):</span>
     <span class="n">__doc__</span> <span class="o">=</span> <span class="n">_base_doc</span> <span class="o">%</span> <span class="n">dedent</span><span class="p">(</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1107,14 +1108,14 @@
 <span class="sd">        pval_column, lfc_column, and mean_column to the names used in edgeR&#39;s</span>
 <span class="sd">        output.</span>
 <span class="sd">        &quot;&quot;&quot;</span><span class="p">)</span>
-    <span class="n">pval_column</span> <span class="o">=</span> <span class="s">&#39;padj&#39;</span>
-    <span class="n">lfc_column</span> <span class="o">=</span> <span class="s">&#39;log2FoldChange&#39;</span>
-    <span class="n">mean_column</span> <span class="o">=</span> <span class="s">&#39;baseMean&#39;</span>
+    <span class="n">pval_column</span> <span class="o">=</span> <span class="s1">&#39;padj&#39;</span>
+    <span class="n">lfc_column</span> <span class="o">=</span> <span class="s1">&#39;log2FoldChange&#39;</span>
+    <span class="n">mean_column</span> <span class="o">=</span> <span class="s1">&#39;baseMean&#39;</span></div>
 
-</div>
+
 <div class="viewcode-block" id="LazyDict"><a class="viewcode-back" href="../../autodocs/metaseq.results_table.LazyDict.html#metaseq.results_table.LazyDict">[docs]</a><span class="k">class</span> <span class="nc">LazyDict</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-<div class="viewcode-block" id="LazyDict.__init__"><a class="viewcode-back" href="../../autodocs/metaseq.results_table.LazyDict.html#metaseq.results_table.LazyDict.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn_dict</span><span class="p">,</span> <span class="n">dbfn</span><span class="p">,</span> <span class="n">index_file</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">DESeqResults</span><span class="p">,</span>
-                 <span class="n">modifier</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="LazyDict.__init__"><a class="viewcode-back" href="../../autodocs/metaseq.results_table.LazyDict.html#metaseq.results_table.LazyDict.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn_dict</span><span class="p">,</span> <span class="n">dbfn</span><span class="p">,</span> <span class="n">index_file</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">DESeqResults</span><span class="p">,</span>
+                 <span class="n">modifier</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Dictionary-like object that lazily-loads ResultsTable objects.</span>
 
@@ -1164,21 +1165,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dbfn</span> <span class="o">=</span> <span class="n">dbfn</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="n">index_file</span><span class="p">)]</span>
-        <span class="k">if</span> <span class="n">extra</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">extra</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">extra</span> <span class="o">=</span> <span class="n">extra</span><span class="o">.</span><span class="n">ix</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">extra</span> <span class="o">=</span> <span class="n">extra</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">modifier</span> <span class="o">=</span> <span class="n">modifier</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_cls</span> <span class="o">=</span> <span class="n">cls</span>
-</div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cls</span> <span class="o">=</span> <span class="n">cls</span></div>
+
     <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">:</span>
             <span class="n">fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
             <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cls</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dbfn</span><span class="p">)</span>
             <span class="n">obj</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">ix</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">extra</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="n">obj</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="p">,</span> <span class="n">left_index</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                                        <span class="n">right_index</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">extra</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="p">,</span> <span class="n">left_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                        <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">modifier</span><span class="p">:</span>
                 <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modifier</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 
@@ -1187,9 +1188,9 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="s">&quot;&lt;</span><span class="si">%s</span><span class="s">&gt; with possible keys</span><span class="se">\n</span><span class="s">:</span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> \
+        <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;&lt;</span><span class="si">%s</span><span class="s2">&gt; with possible keys</span><span class="se">\n</span><span class="s2">:</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> \
             <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;and existing keys:</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;and existing keys:</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="n">s</span> <span class="o">+=</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">s</span>
 
@@ -1211,14 +1212,11 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -1234,13 +1232,13 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">metaseq 0.5.6 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
 <div class="footer">
     &copy; Copyright 2015, Ryan Dale.
-  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.5.1.
   <br />Theme based on <a href="http://readthedocs.org/">Read The Docs</a>
 
 </div>

@@ -1,0 +1,6 @@
+metaseq.plotutils.calculate_limits
+==================================
+
+.. currentmodule:: metaseq.plotutils
+
+.. autofunction:: calculate_limits

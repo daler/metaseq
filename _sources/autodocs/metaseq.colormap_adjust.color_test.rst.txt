@@ -1,0 +1,6 @@
+metaseq.colormap_adjust.color_test
+==================================
+
+.. currentmodule:: metaseq.colormap_adjust
+
+.. autofunction:: color_test

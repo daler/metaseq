@@ -1,0 +1,6 @@
+metaseq.plotutils.clustered_sortind
+===================================
+
+.. currentmodule:: metaseq.plotutils
+
+.. autofunction:: clustered_sortind

@@ -7,7 +7,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
 
-    <title>metaseq.integration.signal_comparison &mdash; metaseq 0.5.6 documentation</title>
+    <title>metaseq.integration.signal_comparison &#8212; metaseq 0.5.6 documentation</title>
 
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
@@ -22,15 +22,16 @@
         VERSION:     '0.5.6',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <script type="text/javascript" src="../../../../../../_static/searchtools.js"></script>
-    <link rel="top" title="metaseq 0.5.6 documentation" href="../../../index.html" />
-    <link rel="up" title="Module code" href="../../index.html" /> 
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -42,8 +43,8 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">metaseq 0.5.6 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -53,18 +54,18 @@
           <div class="body" role="main">
             
   <h1>Source code for metaseq.integration.signal_comparison</h1><div class="highlight"><pre>
-<span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Module for working with comparisons between two genomic_signal objects, e.g.,</span>
 <span class="sd">genome-wide correlation</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">pybedtools</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
 <div class="viewcode-block" id="compare"><a class="viewcode-back" href="../../../autodocs/metaseq.integration.signal_comparison.compare.html#metaseq.integration.signal_comparison.compare">[docs]</a><span class="k">def</span> <span class="nf">compare</span><span class="p">(</span><span class="n">signal1</span><span class="p">,</span> <span class="n">signal2</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">outfn</span><span class="p">,</span> <span class="n">comparefunc</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">subtract</span><span class="p">,</span>
-        <span class="n">batchsize</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">array_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="n">batchsize</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">array_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compares two genomic signal objects and outputs results as a bedGraph file.</span>
 <span class="sd">    Can be used for entire genome-wide comparisons due to its parallel nature.</span>
@@ -122,8 +123,8 @@
 <span class="sd">        `processes` and `chunksize` if you want parallel processing</span>
 <span class="sd">    :param verbose: Be noisy</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">fout</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">outfn</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
-    <span class="n">fout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;track type=bedGraph</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+    <span class="n">fout</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">outfn</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+    <span class="n">fout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;track type=bedGraph</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">this_batch</span> <span class="o">=</span> <span class="p">[]</span>
@@ -134,7 +135,7 @@
             <span class="k">continue</span>
 
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="k">print</span> <span class="s">&#39;working on batch of </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">batchsize</span>
+            <span class="nb">print</span> <span class="s1">&#39;working on batch of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">batchsize</span>
             <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
 
         <span class="n">arr1</span> <span class="o">=</span> <span class="n">signal1</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">this_batch</span><span class="p">,</span> <span class="o">**</span><span class="n">array_kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
@@ -148,8 +149,8 @@
             <span class="n">bins</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
             <span class="n">binsize</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
 
-            <span class="c"># Quickly move on if nothing here.  speed increase prob best for</span>
-            <span class="c"># sparse data</span>
+            <span class="c1"># Quickly move on if nothing here.  speed increase prob best for</span>
+            <span class="c1"># sparse data</span>
             <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">continue</span>
 
@@ -157,40 +158,40 @@
                 <span class="n">score</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
                 <span class="n">stop</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">binsize</span>
                 <span class="k">if</span> <span class="n">score</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">fout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span>
+                    <span class="n">fout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span>
                         <span class="n">feature</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span>
                         <span class="nb">str</span><span class="p">(</span><span class="n">start</span><span class="p">),</span>
                         <span class="nb">str</span><span class="p">(</span><span class="n">stop</span><span class="p">),</span>
-                        <span class="nb">str</span><span class="p">(</span><span class="n">score</span><span class="p">)])</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">score</span><span class="p">)])</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
                 <span class="n">start</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">binsize</span>
         <span class="n">this_batch</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">fout</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">fout</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
-</div>
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">metaseq</span>
     <span class="n">ip_bam</span> <span class="o">=</span> <span class="n">metaseq</span><span class="o">.</span><span class="n">genomic_signal</span><span class="p">(</span>
             <span class="n">metaseq</span><span class="o">.</span><span class="n">example_filename</span><span class="p">(</span>
-                <span class="s">&#39;wgEncodeUwTfbsK562CtcfStdAlnRep1.bam&#39;</span><span class="p">),</span> <span class="s">&#39;bam&#39;</span><span class="p">)</span>
+                <span class="s1">&#39;wgEncodeUwTfbsK562CtcfStdAlnRep1.bam&#39;</span><span class="p">),</span> <span class="s1">&#39;bam&#39;</span><span class="p">)</span>
     <span class="n">control_bam</span> <span class="o">=</span> <span class="n">metaseq</span><span class="o">.</span><span class="n">genomic_signal</span><span class="p">(</span>
             <span class="n">metaseq</span><span class="o">.</span><span class="n">example_filename</span><span class="p">(</span>
-                <span class="s">&#39;wgEncodeUwTfbsK562InputStdAlnRep1.bam&#39;</span><span class="p">),</span> <span class="s">&#39;bam&#39;</span><span class="p">)</span>
+                <span class="s1">&#39;wgEncodeUwTfbsK562InputStdAlnRep1.bam&#39;</span><span class="p">),</span> <span class="s1">&#39;bam&#39;</span><span class="p">)</span>
 
     <span class="n">BINSIZE</span> <span class="o">=</span> <span class="mi">10</span>
     <span class="n">WINDOWSIZE</span> <span class="o">=</span> <span class="mi">10000</span>
     <span class="n">BINS</span> <span class="o">=</span> <span class="n">WINDOWSIZE</span> <span class="o">/</span> <span class="n">BINSIZE</span>
     <span class="n">features</span> <span class="o">=</span> <span class="n">pybedtools</span><span class="o">.</span><span class="n">BedTool</span><span class="p">()</span>\
-            <span class="o">.</span><span class="n">window_maker</span><span class="p">(</span><span class="n">genome</span><span class="o">=</span><span class="s">&#39;hg19&#39;</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">WINDOWSIZE</span><span class="p">)</span>\
-            <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">chrom</span> <span class="o">==</span> <span class="s">&#39;chr19&#39;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">window_maker</span><span class="p">(</span><span class="n">genome</span><span class="o">=</span><span class="s1">&#39;hg19&#39;</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">WINDOWSIZE</span><span class="p">)</span>\
+            <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">chrom</span> <span class="o">==</span> <span class="s1">&#39;chr19&#39;</span><span class="p">)</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">compare</span><span class="p">(</span>
             <span class="n">signal1</span><span class="o">=</span><span class="n">ip_bam</span><span class="p">,</span>
             <span class="n">signal2</span><span class="o">=</span><span class="n">control_bam</span><span class="p">,</span>
             <span class="n">features</span><span class="o">=</span><span class="n">features</span><span class="p">,</span>
-            <span class="n">outfn</span><span class="o">=</span><span class="s">&#39;diffed.bedgraph&#39;</span><span class="p">,</span>
+            <span class="n">outfn</span><span class="o">=</span><span class="s1">&#39;diffed.bedgraph&#39;</span><span class="p">,</span>
             <span class="n">array_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">bins</span><span class="o">=</span><span class="n">BINS</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="mi">50</span><span class="p">),</span>
-            <span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
           </div>
@@ -201,14 +202,11 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -224,13 +222,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">metaseq 0.5.6 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">metaseq 0.5.6 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
 <div class="footer">
     &copy; Copyright 2015, Ryan Dale.
-  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.5.1.
   <br />Theme based on <a href="http://readthedocs.org/">Read The Docs</a>
 
 </div>

@@ -1,0 +1,19 @@
+metaseq.filetype_adapters.BamAdapter
+====================================
+
+.. currentmodule:: metaseq.filetype_adapters
+
+.. autoclass:: BamAdapter
+    :inherited-members:
+    :show-inheritance:
+    :members:
+
+    
+    .. rubric:: Methods
+    
+    .. autosummary::
+    
+        ~BamAdapter.__init__
+        ~BamAdapter.make_fileobj
+    
+    .. automethod:: __init__ 

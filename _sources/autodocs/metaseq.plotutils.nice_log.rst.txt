@@ -1,0 +1,6 @@
+metaseq.plotutils.nice_log
+==========================
+
+.. currentmodule:: metaseq.plotutils
+
+.. autofunction:: nice_log

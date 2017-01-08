@@ -7,7 +7,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
 
-    <title>Metaseq &mdash; metaseq 0.5.6 documentation</title>
+    <title>Metaseq &#8212; metaseq 0.5.6 documentation</title>
 
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
@@ -22,14 +22,16 @@
         VERSION:     '0.5.6',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="_static/searchtools.js"></script>
-    <link rel="top" title="metaseq 0.5.6 documentation" href="#" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Installation" href="install.html" /> 
   </head>
   <body role="document">
@@ -40,9 +42,12 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="install.html" title="Installation"
              accesskey="N">next</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">metaseq 0.5.6 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="#">metaseq 0.5.6 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -54,7 +59,7 @@
   <div class="section" id="metaseq">
 <h1>Metaseq<a class="headerlink" href="#metaseq" title="Permalink to this headline">¶</a></h1>
 <a class="reference external image-reference" href="https://travis-ci.org/daler/metaseq"><img alt="https://travis-ci.org/daler/metaseq.png?branch=master" src="https://travis-ci.org/daler/metaseq.png?branch=master" /></a>
-<a class="reference external image-reference" href="http://badge.fury.io/py/metaseq"><img src="https://badge.fury.io/py/metaseq.svg" /></a>
+<a class="reference external image-reference" href="http://badge.fury.io/py/metaseq"><img alt="https://badge.fury.io/py/metaseq.svg" src="https://badge.fury.io/py/metaseq.svg" /></a>
 <a class="reference external image-reference" href="http://bioconda.github.io"><img alt="https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat-square" src="https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat-square" /></a>
 <p>Briefly, the goal of <cite>metaseq</cite> is to tie together lots of existing software into
 a framework for exploring genomic data.  It focuses on flexibility and
@@ -123,16 +128,16 @@ the <span class="xref std std-ref">CTCF example</span> for more on this as well 
 to bedGraph, then bigWig, uploading your tracks to the genome browser, then
 searching for the region of interest, you can can just connect a mini-browser
 to your raw data and spawn figures locally.  See the <span class="xref std std-ref">example_session</span> for
-more on this as well as the <code class="xref py py-mod docutils literal"><span class="pre">metaseq.minibrowser</span></code> API docs.</li>
+more on this as well as the <a class="reference internal" href="autodocs.html#module-metaseq.minibrowser" title="metaseq.minibrowser"><code class="xref py py-mod docutils literal"><span class="pre">metaseq.minibrowser</span></code></a> API docs.</li>
 <li>Cluster genes based on the spatial distribution of ChIP-seq peaks around
 their TSSs.</li>
 <li>Scatter plot of DESeq results (basemeana vs basemeanb) where points are
 colored according to the number of ChIP peaks in the gene.  This, too, can be
 attached to mini-browsers, enabling you to click on a point to see the
-genomic signal.  See the <code class="xref py py-mod docutils literal"><span class="pre">metaseq.results_table</span></code> module for more on
+genomic signal.  See the <a class="reference internal" href="autodocs.html#module-metaseq.results_table" title="metaseq.results_table"><code class="xref py py-mod docutils literal"><span class="pre">metaseq.results_table</span></code></a> module for more on
 this.</li>
 <li>Pie charts of where peaks fall within annotated genes &#8211; TSS, poly-A
-site, intron, exon, etc.  See the <code class="xref py py-mod docutils literal"><span class="pre">metaseq.integration</span></code> module for more
+site, intron, exon, etc.  See the <a class="reference internal" href="autodocs.html#module-metaseq.integration" title="metaseq.integration"><code class="xref py py-mod docutils literal"><span class="pre">metaseq.integration</span></code></a> module for more
 on this.</li>
 </ul>
 <p>Where possible, the inputs are standard formats &#8211; BED, GFF, GTF, BAM, SAM,
@@ -148,13 +153,13 @@ performance will be improved.</p>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="running-the-examples.html">Running the examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="autodocs.html">API docs</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="autodocs.html#genomic-signal"><code class="docutils literal"><span class="pre">genomic_signal</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="autodocs.html#metaseq-results-table"><code class="docutils literal"><span class="pre">metaseq.results_table</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="autodocs.html#metaseq-integration"><code class="docutils literal"><span class="pre">metaseq.integration</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="autodocs.html#metaseq-plotutils"><code class="docutils literal"><span class="pre">metaseq.plotutils</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="autodocs.html#metaseq-colormap-adjust"><code class="docutils literal"><span class="pre">metaseq.colormap_adjust</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="autodocs.html#metaseq-minibrowser"><code class="docutils literal"><span class="pre">metaseq.minibrowser</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="autodocs.html#metaseq-filetype-adapters"><code class="docutils literal"><span class="pre">metaseq.filetype_adapters</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="autodocs.html#module-metaseq._genomic_signal"><code class="docutils literal"><span class="pre">genomic_signal</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="autodocs.html#module-metaseq.results_table"><code class="docutils literal"><span class="pre">metaseq.results_table</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="autodocs.html#module-metaseq.integration"><code class="docutils literal"><span class="pre">metaseq.integration</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="autodocs.html#module-metaseq.plotutils"><code class="docutils literal"><span class="pre">metaseq.plotutils</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="autodocs.html#module-metaseq.colormap_adjust"><code class="docutils literal"><span class="pre">metaseq.colormap_adjust</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="autodocs.html#module-metaseq.minibrowser"><code class="docutils literal"><span class="pre">metaseq.minibrowser</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="autodocs.html#module-metaseq.filetype_adapters"><code class="docutils literal"><span class="pre">metaseq.filetype_adapters</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="changes.html">Changelog</a><ul>
@@ -192,15 +197,15 @@ performance will be improved.</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/index.txt"
+      <li><a href="_sources/index.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -217,14 +222,17 @@ performance will be improved.</p>
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="install.html" title="Installation"
              >next</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">metaseq 0.5.6 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="#">metaseq 0.5.6 documentation</a> &#187;</li> 
       </ul>
     </div>
 <div class="footer">
     &copy; Copyright 2015, Ryan Dale.
-  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.4.1.
+  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.5.1.
   <br />Theme based on <a href="http://readthedocs.org/">Read The Docs</a>
 
 </div>

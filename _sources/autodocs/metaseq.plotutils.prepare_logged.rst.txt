@@ -1,0 +1,6 @@
+metaseq.plotutils.prepare_logged
+================================
+
+.. currentmodule:: metaseq.plotutils
+
+.. autofunction:: prepare_logged

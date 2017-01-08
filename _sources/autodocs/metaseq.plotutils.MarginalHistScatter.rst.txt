@@ -1,0 +1,20 @@
+metaseq.plotutils.MarginalHistScatter
+=====================================
+
+.. currentmodule:: metaseq.plotutils
+
+.. autoclass:: MarginalHistScatter
+    :inherited-members:
+    :show-inheritance:
+    :members:
+
+    
+    .. rubric:: Methods
+    
+    .. autosummary::
+    
+        ~MarginalHistScatter.__init__
+        ~MarginalHistScatter.add_legends
+        ~MarginalHistScatter.append
+    
+    .. automethod:: __init__ 

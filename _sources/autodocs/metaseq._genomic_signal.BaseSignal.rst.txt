@@ -1,0 +1,20 @@
+metaseq._genomic_signal.BaseSignal
+==================================
+
+.. currentmodule:: metaseq._genomic_signal
+
+.. autoclass:: BaseSignal
+    :inherited-members:
+    :show-inheritance:
+    :members:
+
+    
+    .. rubric:: Methods
+    
+    .. autosummary::
+    
+        ~BaseSignal.__init__
+        ~BaseSignal.array
+        ~BaseSignal.local_coverage
+    
+    .. automethod:: __init__ 

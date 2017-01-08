@@ -1,0 +1,6 @@
+metaseq.plotutils.ci_plot
+=========================
+
+.. currentmodule:: metaseq.plotutils
+
+.. autofunction:: ci_plot

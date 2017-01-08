@@ -1,0 +1,21 @@
+metaseq.integration.chipseq.Chipseq
+===================================
+
+.. currentmodule:: metaseq.integration.chipseq
+
+.. autoclass:: Chipseq
+    :inherited-members:
+    :show-inheritance:
+    :members:
+
+    
+    .. rubric:: Methods
+    
+    .. autosummary::
+    
+        ~Chipseq.__init__
+        ~Chipseq.callback
+        ~Chipseq.diff_array
+        ~Chipseq.plot
+    
+    .. automethod:: __init__ 

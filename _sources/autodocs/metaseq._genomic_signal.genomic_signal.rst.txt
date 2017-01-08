@@ -1,0 +1,6 @@
+metaseq._genomic_signal.genomic_signal
+======================================
+
+.. currentmodule:: metaseq._genomic_signal
+
+.. autofunction:: genomic_signal

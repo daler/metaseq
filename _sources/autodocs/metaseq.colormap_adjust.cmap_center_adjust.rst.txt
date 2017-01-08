@@ -1,0 +1,6 @@
+metaseq.colormap_adjust.cmap_center_adjust
+==========================================
+
+.. currentmodule:: metaseq.colormap_adjust
+
+.. autofunction:: cmap_center_adjust

@@ -1,0 +1,21 @@
+metaseq._genomic_signal.BigBedSignal
+====================================
+
+.. currentmodule:: metaseq._genomic_signal
+
+.. autoclass:: BigBedSignal
+    :inherited-members:
+    :show-inheritance:
+    :members:
+
+    
+    .. rubric:: Methods
+    
+    .. autosummary::
+    
+        ~BigBedSignal.__init__
+        ~BigBedSignal.array
+        ~BigBedSignal.local_count
+        ~BigBedSignal.local_coverage
+    
+    .. automethod:: __init__ 
