@@ -1,0 +1,6 @@
+metaseq.array_helpers._local_coverage
+=====================================
+
+.. currentmodule:: metaseq.array_helpers
+
+.. autofunction:: _local_coverage

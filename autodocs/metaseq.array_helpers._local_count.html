@@ -7,7 +7,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
 
-    <title>Overview: module code &#8212; metaseq 0.5.6 documentation</title>
+    <title>metaseq.array_helpers._local_count &#8212; metaseq 0.5.6 documentation</title>
 
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
@@ -31,7 +31,8 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="../../_static/searchtools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="metaseq.array_helpers._local_coverage" href="metaseq.array_helpers._local_coverage.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -43,7 +44,11 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">metaseq 0.5.6 documentation</a> &#187;</li> 
+        <li class="right" >
+          <a href="metaseq.array_helpers._local_coverage.html" title="metaseq.array_helpers._local_coverage"
+             accesskey="N">next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">metaseq 0.5.6 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../autodocs.html" accesskey="U">API docs</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -52,23 +57,47 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <h1>All modules for which code is available</h1>
-<ul><li><a href="metaseq/_genomic_signal.html">metaseq._genomic_signal</a></li>
-<li><a href="metaseq/array_helpers.html">metaseq.array_helpers</a></li>
-<li><a href="metaseq/colormap_adjust.html">metaseq.colormap_adjust</a></li>
-<li><a href="metaseq/filetype_adapters.html">metaseq.filetype_adapters</a></li>
-<li><a href="metaseq/integration/chipseq.html">metaseq.integration.chipseq</a></li>
-<li><a href="metaseq/integration/signal_comparison.html">metaseq.integration.signal_comparison</a></li>
-<li><a href="metaseq/minibrowser.html">metaseq.minibrowser</a></li>
-<li><a href="metaseq/plotutils.html">metaseq.plotutils</a></li>
-<li><a href="metaseq/results_table.html">metaseq.results_table</a></li>
+  <div class="section" id="metaseq-array-helpers-local-count">
+<h1>metaseq.array_helpers._local_count<a class="headerlink" href="#metaseq-array-helpers-local-count" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="metaseq.array_helpers._local_count">
+<code class="descclassname">metaseq.array_helpers.</code><code class="descname">_local_count</code><span class="sig-paren">(</span><em>reader</em>, <em>feature</em>, <em>stranded=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/metaseq/array_helpers.html#_local_count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#metaseq.array_helpers._local_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>The count of genomic signal (typcially BED features) found within an
+interval.</p>
+<p>Usually this only makes sense for BED or BAM (not bigWig) files.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>feature</strong> &#8211; pybedtools.Interval object</li>
+<li><strong>stranded</strong> &#8211; If <cite>stranded=True</cite>, then only counts signal on the same
+strand as <cite>feature</cite>.</li>
 </ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
 
           </div>
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+  <h4>Next topic</h4>
+  <p class="topless"><a href="metaseq.array_helpers._local_coverage.html"
+                        title="next chapter">metaseq.array_helpers._local_coverage</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/autodocs/metaseq.array_helpers._local_count.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
@@ -92,7 +121,11 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">metaseq 0.5.6 documentation</a> &#187;</li> 
+        <li class="right" >
+          <a href="metaseq.array_helpers._local_coverage.html" title="metaseq.array_helpers._local_coverage"
+             >next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">metaseq 0.5.6 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../autodocs.html" >API docs</a> &#187;</li> 
       </ul>
     </div>
 <div class="footer">

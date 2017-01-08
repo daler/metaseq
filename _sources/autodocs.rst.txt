@@ -174,3 +174,16 @@ API docs
     metaseq.filetype_adapters.BigBedAdapter
     metaseq.filetype_adapters.BigWigAdapter
 
+:mod:`metaseq.array_helpers`
+----------------------------
+.. automodule:: metaseq.array_helpers
+
+.. rubric:: Functions
+
+.. autosummary::
+    :nosignatures:
+    :toctree: autodocs
+
+    _local_count
+    _local_coverage
+

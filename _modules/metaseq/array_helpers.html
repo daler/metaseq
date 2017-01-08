@@ -1,0 +1,520 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>metaseq.array_helpers &#8212; metaseq 0.5.6 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.6',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">metaseq 0.5.6 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for metaseq.array_helpers</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pybedtools</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">pysam</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">helpers</span> <span class="k">import</span> <span class="n">chunker</span>
+<span class="kn">import</span> <span class="nn">helpers</span>
+<span class="kn">from</span> <span class="nn">helpers</span> <span class="k">import</span> <span class="n">rebin</span>
+<span class="kn">import</span> <span class="nn">filetype_adapters</span>
+
+
+<span class="k">class</span> <span class="nc">ArgumentError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="_local_count"><a class="viewcode-back" href="../../autodocs/metaseq.array_helpers._local_count.html#metaseq.array_helpers._local_count">[docs]</a><span class="k">def</span> <span class="nf">_local_count</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="n">feature</span><span class="p">,</span> <span class="n">stranded</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The count of genomic signal (typcially BED features) found within an</span>
+<span class="sd">    interval.</span>
+
+<span class="sd">    Usually this only makes sense for BED or BAM (not bigWig) files.</span>
+
+<span class="sd">    :param feature: pybedtools.Interval object</span>
+<span class="sd">    :param stranded: If `stranded=True`, then only counts signal on the same</span>
+<span class="sd">        strand as `feature`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="n">basestring</span><span class="p">):</span>
+        <span class="n">feature</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">tointerval</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">stranded</span><span class="p">:</span>
+        <span class="n">strand</span> <span class="o">=</span> <span class="n">feature</span><span class="o">.</span><span class="n">strand</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">strand</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span>
+
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">al</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">[</span><span class="n">feature</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">stranded</span> <span class="ow">and</span> <span class="n">al</span><span class="o">.</span><span class="n">strand</span> <span class="o">!=</span> <span class="n">strand</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">count</span></div>
+
+
+<div class="viewcode-block" id="_local_coverage"><a class="viewcode-back" href="../../autodocs/metaseq.array_helpers._local_coverage.html#metaseq.array_helpers._local_coverage">[docs]</a><span class="k">def</span> <span class="nf">_local_coverage</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">read_strand</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fragment_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">shift_width</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">use_score</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">accumulate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">preserve_total</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">stranded</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a binned vector of coverage.</span>
+
+<span class="sd">    Computes a 1D vector of coverage at the coordinates for each feature in</span>
+<span class="sd">    `features`, extending each read by `fragmentsize` bp.</span>
+
+<span class="sd">    Some arguments cannot be used for bigWig files due to the structure of</span>
+<span class="sd">    these files.  The parameters docstring below indicates whether or not an</span>
+<span class="sd">    argument can be used with bigWig files.</span>
+
+<span class="sd">    Depending on the arguments provided, this method can return a vector</span>
+<span class="sd">    containing values from a single feature or from concatenated features.</span>
+
+<span class="sd">    An example of the flexibility afforded by the latter case:</span>
+
+<span class="sd">        `features` can be a 3-tuple of pybedtools.Intervals representing (TSS</span>
+<span class="sd">        + 1kb upstream, gene, TTS + 1kb downstream) and `bins` can be [100,</span>
+<span class="sd">        1000, 100].  This will return a vector of length 1200 containing the</span>
+<span class="sd">        three genomic intervals binned into 100, 1000, and 100 bins</span>
+<span class="sd">        respectively.  Note that is up to the caller to construct the right</span>
+<span class="sd">        axes labels in the final plot!</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    features : str, interval-like object, or list</span>
+
+<span class="sd">        Can be a single interval or an iterable yielding intervals.</span>
+
+<span class="sd">        Interval-like objects must have chrom, start, and stop attributes, and</span>
+<span class="sd">        optionally a strand attribute.  One exception to this that if</span>
+<span class="sd">        `features` is a single string, it can be of the form &quot;chrom:start-stop&quot;</span>
+<span class="sd">        or &quot;chrom:start-stop[strand]&quot;.</span>
+
+<span class="sd">        If `features` is a single interval, then return a 1-D array for that</span>
+<span class="sd">        interval.</span>
+
+<span class="sd">        If `features` is an iterable of intervals, then return a 1-D</span>
+<span class="sd">        array that is a concatenation of signal for these intervals.</span>
+
+<span class="sd">        Available for bigWig.</span>
+
+<span class="sd">    bins : None, int, list</span>
+<span class="sd">        If `bins` is None, then each value in the returned array will</span>
+<span class="sd">        correspond to one bp in the genome.</span>
+
+<span class="sd">        If `features` is a single Interval, then `bins` is an integer or None.</span>
+
+<span class="sd">        If `features` is an iterable of Intervals, `bins` is an iterable of</span>
+<span class="sd">        integers of the same length as `features`.</span>
+
+<span class="sd">        Available for bigWig.</span>
+
+<span class="sd">    fragment_size : None or int</span>
+<span class="sd">        If not None, then each item from the genomic signal (e.g., reads from</span>
+<span class="sd">        a BAM file) will be extended `fragment_size` bp in the 3&#39; direction.</span>
+<span class="sd">        Higher fragment sizes will result in smoother signal.  Not available</span>
+<span class="sd">        for bigWig.</span>
+
+<span class="sd">    shift_width : int</span>
+<span class="sd">        Each item from the genomic signal (e.g., reads from a BAM</span>
+<span class="sd">        file) will be shifted `shift_width` bp in the 3&#39; direction.  This can</span>
+<span class="sd">        be useful for reconstructing a ChIP-seq profile, using the shift width</span>
+<span class="sd">        determined from the peak-caller (e.g., modeled `d` in MACS). Not</span>
+<span class="sd">        available for bigWig.</span>
+
+<span class="sd">    read_strand : None or str</span>
+<span class="sd">        If `read_strand` is one of &quot;+&quot; or &quot;-&quot;, then only items from the genomic</span>
+<span class="sd">        signal (e.g., reads from a BAM file) on that strand will be considered</span>
+<span class="sd">        and reads on the opposite strand ignored.  Useful for plotting genomic</span>
+<span class="sd">        signal for stranded libraries. Not available for bigWig.</span>
+
+<span class="sd">    stranded : bool</span>
+<span class="sd">        If True, then the profile will be reversed for features whose strand</span>
+<span class="sd">        attribute is &quot;-&quot;.</span>
+
+<span class="sd">    use_score : bool</span>
+<span class="sd">        If True, then each bin will contain the sum of the *score* attribute of</span>
+<span class="sd">        genomic features in that bin instead of the *number* of genomic</span>
+<span class="sd">        features falling within each bin. Not available for bigWig.</span>
+
+<span class="sd">    accumulate : bool</span>
+<span class="sd">        If False, then only record *that* there was something there, rather</span>
+<span class="sd">        than acumulating reads.  This is useful for making matrices with called</span>
+<span class="sd">        peaks. Available for bigWig.</span>
+
+<span class="sd">    preserve_total : bool</span>
+<span class="sd">        If True, re-scales the returned value so that each binned row&#39;s total</span>
+<span class="sd">        is equal to the sum of the original, un-binned data.  The units of the</span>
+<span class="sd">        returned array will be in &quot;total per bin&quot;.  This is useful for, e.g.,</span>
+<span class="sd">        counting reads in features.  If `preserve_total` is False, then the</span>
+<span class="sd">        returned array will have units of &quot;density&quot;; this is more generally</span>
+<span class="sd">        useful and is the default behavior.  Available for bigWig, but not when</span>
+<span class="sd">        using method=&quot;ucsc_summarize&quot;.</span>
+
+<span class="sd">    method : str; one of [ &quot;summarize&quot; | &quot;get_as_array&quot; | &quot;ucsc_summarize&quot; ]</span>
+<span class="sd">        Only used for bigWig.  The method specifies how data are extracted from</span>
+<span class="sd">        the bigWig file.  &quot;summarize&quot; is the default.  It&#39;s quite fast, but may</span>
+<span class="sd">        yield slightly different results when compared to running this same</span>
+<span class="sd">        function on the BAM file from which the bigWig was created.</span>
+
+<span class="sd">        &quot;summarize&quot; uses bx-python.  The values returned will not be exactly</span>
+<span class="sd">        the same as the values returned when local_coverage is called on a BAM,</span>
+<span class="sd">        BED, or bigBed file, but they will be close.  This method is quite</span>
+<span class="sd">        fast, and is the default when bins is not None.</span>
+
+<span class="sd">        &quot;get_as_array&quot; uses bx-python, but does a separate binning step.  This</span>
+<span class="sd">        can be slower than the other two methods, but the results are exactly</span>
+<span class="sd">        the same as those from a BAM, BED, or bigBed file.  This method is</span>
+<span class="sd">        always used if bins=None.</span>
+
+<span class="sd">        &quot;ucsc_summarize&quot; is an alternative version of &quot;summarize&quot;.  It uses the</span>
+<span class="sd">        UCSC program `bigWigSummary`, which must already installed and on your</span>
+<span class="sd">        path.</span>
+
+<span class="sd">    processes : int or None</span>
+<span class="sd">        The feature can be split across multiple processes.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    1-d NumPy array</span>
+
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    If a feature has a &quot;-&quot; strand attribute, then the resulting profile will be</span>
+<span class="sd">    *relative to a minus-strand feature*.  That is, the resulting profile will</span>
+<span class="sd">    be reversed.</span>
+
+<span class="sd">    Returns arrays `x` and `y`.  `x` is in genomic coordinates, and `y` is</span>
+<span class="sd">    the coverage at each of those coordinates after extending fragments.</span>
+
+<span class="sd">    The total number of reads is guaranteed to be the same no matter how it&#39;s</span>
+<span class="sd">    binned.</span>
+
+<span class="sd">    (with ideas from</span>
+<span class="sd">    http://www-huber.embl.de/users/anders/HTSeq/doc/tss.html)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># bigWig files are handled differently, so we need to know if we&#39;re working</span>
+    <span class="c1"># with one; raise exeception if a kwarg was supplied that&#39;s not supported.</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="n">filetype_adapters</span><span class="o">.</span><span class="n">BigWigAdapter</span><span class="p">):</span>
+        <span class="n">is_bigwig</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">defaults</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="s1">&#39;read_strand&#39;</span><span class="p">,</span> <span class="n">read_strand</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;fragment_size&#39;</span><span class="p">,</span> <span class="n">fragment_size</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;shift_width&#39;</span><span class="p">,</span> <span class="n">shift_width</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;use_score&#39;</span><span class="p">,</span> <span class="n">use_score</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;preserve_total&#39;</span><span class="p">,</span> <span class="n">preserve_total</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">check</span><span class="p">,</span> <span class="n">default</span> <span class="ow">in</span> <span class="n">defaults</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="p">((</span><span class="n">default</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">check</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">default</span><span class="p">))</span>
+                <span class="ow">or</span>
+                <span class="p">(</span><span class="n">check</span> <span class="o">!=</span> <span class="n">default</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span>
+                    <span class="s2">&quot;Argument &#39;</span><span class="si">%s</span><span class="s2">&#39; not supported for bigWig&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;ucsc_summarize&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">preserve_total</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span>
+                    <span class="s2">&quot;preserve_total=True not supported when using &quot;</span>
+                    <span class="s2">&quot;method=&#39;ucsc_summarize&#39;&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">is_bigwig</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="n">filetype_adapters</span><span class="o">.</span><span class="n">BamAdapter</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">use_score</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="s2">&quot;Argument &#39;use_score&#39; not supported for &quot;</span>
+                                <span class="s2">&quot;bam&quot;</span><span class="p">)</span>
+
+    <span class="c1"># e.g., features = &quot;chr1:1-1000&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">basestring</span><span class="p">):</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">tointerval</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">((</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))):</span>
+        <span class="k">if</span> <span class="n">bins</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bins</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span>
+                    <span class="s2">&quot;bins must be an int, got </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="n">bins</span><span class="p">))</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="p">[</span><span class="n">features</span><span class="p">]</span>
+        <span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="n">bins</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">bins</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">features</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span>
+                <span class="s2">&quot;bins must have same length as feature list&quot;</span><span class="p">)</span>
+
+    <span class="c1"># nomenclature:</span>
+    <span class="c1">#   &quot;window&quot; is region we&#39;re getting data for</span>
+    <span class="c1">#   &quot;alignment&quot; is one item in that region</span>
+    <span class="c1">#</span>
+    <span class="n">profiles</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">window</span><span class="p">,</span> <span class="n">nbin</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">bins</span><span class="p">):</span>
+        <span class="n">window</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">tointerval</span><span class="p">(</span><span class="n">window</span><span class="p">)</span>
+        <span class="n">chrom</span> <span class="o">=</span> <span class="n">window</span><span class="o">.</span><span class="n">chrom</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">window</span><span class="o">.</span><span class="n">start</span>
+        <span class="n">stop</span> <span class="o">=</span> <span class="n">window</span><span class="o">.</span><span class="n">stop</span>
+        <span class="n">strand</span> <span class="o">=</span> <span class="n">window</span><span class="o">.</span><span class="n">strand</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_bigwig</span><span class="p">:</span>
+            <span class="c1"># Extend the window to catch reads that would extend into the</span>
+            <span class="c1"># requested window</span>
+            <span class="n">_fs</span> <span class="o">=</span> <span class="n">fragment_size</span> <span class="ow">or</span> <span class="mi">0</span>
+            <span class="n">padded_window</span> <span class="o">=</span> <span class="n">pybedtools</span><span class="o">.</span><span class="n">Interval</span><span class="p">(</span>
+                <span class="n">chrom</span><span class="p">,</span>
+                <span class="nb">max</span><span class="p">(</span><span class="n">start</span> <span class="o">-</span> <span class="n">_fs</span> <span class="o">-</span> <span class="n">shift_width</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="n">stop</span> <span class="o">+</span> <span class="n">_fs</span> <span class="o">+</span> <span class="n">shift_width</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">window_size</span> <span class="o">=</span> <span class="n">stop</span> <span class="o">-</span> <span class="n">start</span>
+
+            <span class="c1"># start off with an array of zeros to represent the window</span>
+            <span class="n">profile</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">window_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">interval</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">[</span><span class="n">padded_window</span><span class="p">]:</span>
+
+                <span class="k">if</span> <span class="n">read_strand</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">interval</span><span class="o">.</span><span class="n">strand</span> <span class="o">!=</span> <span class="n">read_strand</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
+                <span class="c1"># Shift interval by modeled distance, if specified.</span>
+                <span class="k">if</span> <span class="n">shift_width</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">interval</span><span class="o">.</span><span class="n">strand</span> <span class="o">==</span> <span class="s1">&#39;-&#39;</span><span class="p">:</span>
+                        <span class="n">interval</span><span class="o">.</span><span class="n">start</span> <span class="o">-=</span> <span class="n">shift_width</span>
+                        <span class="n">interval</span><span class="o">.</span><span class="n">stop</span> <span class="o">-=</span> <span class="n">shift_width</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">interval</span><span class="o">.</span><span class="n">start</span> <span class="o">+=</span> <span class="n">shift_width</span>
+                        <span class="n">interval</span><span class="o">.</span><span class="n">stop</span> <span class="o">+=</span> <span class="n">shift_width</span>
+
+                <span class="c1"># Extend fragment size from 3&#39;</span>
+                <span class="k">if</span> <span class="n">fragment_size</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">interval</span><span class="o">.</span><span class="n">strand</span> <span class="o">==</span> <span class="s1">&#39;-&#39;</span><span class="p">:</span>
+                        <span class="n">interval</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="n">interval</span><span class="o">.</span><span class="n">stop</span> <span class="o">-</span> <span class="n">fragment_size</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">interval</span><span class="o">.</span><span class="n">stop</span> <span class="o">=</span> <span class="n">interval</span><span class="o">.</span><span class="n">start</span> <span class="o">+</span> <span class="n">fragment_size</span>
+
+                <span class="c1"># Convert to 0-based coords that can be used as indices into</span>
+                <span class="c1"># array</span>
+                <span class="n">start_ind</span> <span class="o">=</span> <span class="n">interval</span><span class="o">.</span><span class="n">start</span> <span class="o">-</span> <span class="n">start</span>
+
+                <span class="c1"># If the feature goes out of the window, then only include the</span>
+                <span class="c1"># part that&#39;s inside the window</span>
+                <span class="n">start_ind</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">start_ind</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+                <span class="c1"># Same thing for stop</span>
+                <span class="n">stop_ind</span> <span class="o">=</span> <span class="n">interval</span><span class="o">.</span><span class="n">stop</span> <span class="o">-</span> <span class="n">start</span>
+                <span class="n">stop_ind</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">stop_ind</span><span class="p">,</span> <span class="n">window_size</span><span class="p">)</span>
+
+                <span class="c1"># Skip if the feature is shifted outside the window. This can</span>
+                <span class="c1"># happen with large values of `shift_width`.</span>
+                <span class="k">if</span> <span class="n">start_ind</span> <span class="o">&gt;=</span> <span class="n">window_size</span> <span class="ow">or</span> <span class="n">stop_ind</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># Finally, increment profile</span>
+                <span class="k">if</span> <span class="n">use_score</span><span class="p">:</span>
+                    <span class="n">score</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">interval</span><span class="o">.</span><span class="n">score</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">score</span> <span class="o">=</span> <span class="mi">1</span>
+
+                <span class="k">if</span> <span class="n">accumulate</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">preserve_total</span><span class="p">:</span>
+                        <span class="n">profile</span><span class="p">[</span><span class="n">start_ind</span><span class="p">:</span><span class="n">stop_ind</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span>
+                            <span class="n">score</span> <span class="o">/</span> <span class="nb">float</span><span class="p">((</span><span class="n">stop_ind</span> <span class="o">-</span> <span class="n">start_ind</span><span class="p">)))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">profile</span><span class="p">[</span><span class="n">start_ind</span><span class="p">:</span><span class="n">stop_ind</span><span class="p">]</span> <span class="o">+=</span> <span class="n">score</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">profile</span><span class="p">[</span><span class="n">start_ind</span><span class="p">:</span><span class="n">stop_ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">score</span>
+
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># it&#39;s a bigWig</span>
+            <span class="n">profile</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">summarize</span><span class="p">(</span>
+                <span class="n">window</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="p">(</span><span class="n">nbin</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">window</span><span class="p">)))</span>
+
+        <span class="c1"># If no bins, return genomic coords</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">nbin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">)</span>
+
+        <span class="c1"># Otherwise do the downsampling; resulting x is stll in genomic</span>
+        <span class="c1"># coords</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">preserve_total</span><span class="p">:</span>
+                <span class="n">total</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">profile</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_bigwig</span> <span class="ow">or</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;get_as_array&#39;</span><span class="p">:</span>
+                <span class="n">xi</span><span class="p">,</span> <span class="n">profile</span> <span class="o">=</span> <span class="n">rebin</span><span class="p">(</span>
+                    <span class="n">x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">),</span> <span class="n">y</span><span class="o">=</span><span class="n">profile</span><span class="p">,</span> <span class="n">nbin</span><span class="o">=</span><span class="n">nbin</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">accumulate</span><span class="p">:</span>
+                    <span class="n">nonzero</span> <span class="o">=</span> <span class="n">profile</span> <span class="o">!=</span> <span class="mi">0</span>
+                    <span class="n">profile</span><span class="p">[</span><span class="n">profile</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">xi</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nbin</span><span class="p">)</span>
+
+        <span class="c1"># Minus-strand profiles should be flipped left-to-right.</span>
+        <span class="k">if</span> <span class="n">stranded</span> <span class="ow">and</span> <span class="n">strand</span> <span class="o">==</span> <span class="s1">&#39;-&#39;</span><span class="p">:</span>
+            <span class="n">profile</span> <span class="o">=</span> <span class="n">profile</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">xs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">preserve_total</span><span class="p">:</span>
+            <span class="n">scale</span> <span class="o">=</span> <span class="n">profile</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">total</span>
+            <span class="n">profile</span> <span class="o">/=</span> <span class="n">scale</span>
+        <span class="n">profiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">profile</span><span class="p">)</span>
+
+    <span class="n">stacked_xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
+    <span class="n">stacked_profiles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">profiles</span><span class="p">)</span>
+    <span class="k">del</span> <span class="n">xs</span>
+    <span class="k">del</span> <span class="n">profiles</span>
+    <span class="k">return</span> <span class="n">stacked_xs</span><span class="p">,</span> <span class="n">stacked_profiles</span></div>
+
+
+<span class="k">def</span> <span class="nf">_array_parallel</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">cls</span><span class="p">,</span> <span class="n">genelist</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns an array of genes in `genelist`, using `bins` bins.</span>
+
+<span class="sd">    `genelist` is a list of pybedtools.Interval objects</span>
+
+<span class="sd">    Splits `genelist` into pieces of size `chunksize`, creating an array</span>
+<span class="sd">    for each chunk and merging ret</span>
+
+<span class="sd">    A chunksize of 25-100 seems to work well on 8 cores.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="p">)</span>
+    <span class="n">chunks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">chunker</span><span class="p">(</span><span class="n">genelist</span><span class="p">,</span> <span class="n">chunksize</span><span class="p">))</span>
+    <span class="c1"># pool.map can only pass a single argument to the mapped function, so you</span>
+    <span class="c1"># need this trick for passing multiple arguments; idea from</span>
+    <span class="c1"># http://stackoverflow.com/questions/5442910/</span>
+    <span class="c1">#               python-multiprocessing-pool-map-for-multiple-arguments</span>
+    <span class="c1">#</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
+        <span class="n">func</span><span class="o">=</span><span class="n">_array_star</span><span class="p">,</span>
+        <span class="n">iterable</span><span class="o">=</span><span class="n">itertools</span><span class="o">.</span><span class="n">izip</span><span class="p">(</span>
+            <span class="n">itertools</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">fn</span><span class="p">),</span>
+            <span class="n">itertools</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">cls</span><span class="p">),</span>
+            <span class="n">chunks</span><span class="p">,</span>
+            <span class="n">itertools</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)))</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">results</span>
+
+
+<span class="k">def</span> <span class="nf">_array_star</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Unpacks the tuple `args` and calls _array.  Needed to pass multiple args to</span>
+<span class="sd">    a pool.map-ed function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fn</span><span class="p">,</span> <span class="n">cls</span><span class="p">,</span> <span class="n">genelist</span><span class="p">,</span> <span class="n">kwargs</span> <span class="o">=</span> <span class="n">args</span>
+    <span class="k">return</span> <span class="n">_array</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">cls</span><span class="p">,</span> <span class="n">genelist</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_array</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">cls</span><span class="p">,</span> <span class="n">genelist</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a &quot;meta-feature&quot; array, with len(genelist) rows and `bins`</span>
+<span class="sd">    cols.  Each row contains the number of reads falling in each bin of</span>
+<span class="sd">    that row&#39;s modified feature.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">reader</span> <span class="o">=</span> <span class="n">cls</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+    <span class="n">_local_coverage_func</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">local_coverage</span>
+    <span class="n">biglist</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="s1">&#39;bins&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;bins&#39;</span><span class="p">],</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;bins&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;bins&#39;</span><span class="p">]]</span>
+
+    <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">genelist</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gene</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="n">gene</span> <span class="o">=</span> <span class="p">[</span><span class="n">gene</span><span class="p">]</span>
+        <span class="n">coverage_x</span><span class="p">,</span> <span class="n">coverage_y</span> <span class="o">=</span> <span class="n">_local_coverage_func</span><span class="p">(</span>
+            <span class="n">reader</span><span class="p">,</span> <span class="n">gene</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">biglist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coverage_y</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">biglist</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">metaseq 0.5.6 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2015, Ryan Dale.
+  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.5.1.
+  <br />Theme based on <a href="http://readthedocs.org/">Read The Docs</a>
+
+</div>
+
+
+
+
+
+  </body>
+</html>
