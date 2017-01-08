@@ -1,7 +1,21 @@
-sudo: required
-services:
-    - docker
 before_install:
-    - docker pull daler/ubuntu-test
+  - "export DISPLAY=:99.0"
+  - "export PATH=$HOME/miniconda/bin:$PATH"
+
+  # See
+  # http://docs.travis-ci.com/user/gui-and-headless-browsers/#Using-xvfb-to-Run-Tests-That-Require-GUI-(e.g.-a-Web-browser)
+  - "sh -e /etc/init.d/xvfb start"
+
+
+# Most of this is from http://conda.pydata.org/docs/travis.html
+install:
+    - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    - bash miniconda.sh -b -p $HOME/miniconda
+    - export PATH="$HOME/miniconda/bin:$PATH"
+    - hash -r
+    - conda config --set always_yes yes --set changeps1 no
+    - conda update -q conda
+    - conda info -a
+
 script:
-    - docker run -v `pwd`:/metaseq daler/ubuntu-test /metaseq/docker/travis-run.sh
+    - ./travis-test.sh

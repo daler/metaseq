@@ -42,7 +42,8 @@ def _local_count(reader, feature, stranded=False):
 
 def _local_coverage(reader, features, read_strand=None, fragment_size=None,
                     shift_width=0, bins=None, use_score=False, accumulate=True,
-                    preserve_total=False, method=None, processes=None,
+                    preserve_total=False, method=None, function="mean",
+                    zero_inf=True, zero_nan=True, processes=None,
                     stranded=True, verbose=False):
     """
     Returns a binned vector of coverage.
@@ -157,6 +158,34 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
         "ucsc_summarize" is an alternative version of "summarize".  It uses the
         UCSC program `bigWigSummary`, which must already installed and on your
         path.
+
+    function : str; one of ['sum' | 'mean' | 'min' | 'max' | 'std']
+        Determine the nature of the values returned. Only valid if `method` is
+        "summarize" or "ucsc_summarize", which also implies bigWig. Default is
+        "mean". If `method="ucsc_summarize", then there is an additional option
+        for function, "coverage", which returns the percent of region that is
+        covered.
+
+    zero_inf, zero_nan : bool
+        Only used for bigWig. If either are True, sets any missing or inf
+        values to zero before returning.
+
+        If `method="ucsc_summarize"`, missinv values are always reported as
+        zero. If `method="get_as_array"`, missing values always reported as
+        nan.
+
+        Values can be -inf, inf, or nan for missing values when
+        `method="summarize"` according to the following table:
+
+        ========== ========================
+        `function` missing values appear as
+        ========== ========================
+        "sum"      0
+        "mean"     nan
+        "min"      inf
+        "max"      -inf
+        "std"      nan
+        ========== ========================
 
     processes : int or None
         The feature can be split across multiple processes.
@@ -318,7 +347,13 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
 
         else:  # it's a bigWig
             profile = reader.summarize(
-                window, method=method, bins=(nbin or len(window)))
+                window,
+                method=method,
+                function=function,
+                bins=(nbin or len(window)),
+                zero_inf=zero_inf,
+                zero_nan=zero_nan,
+                )
 
         # If no bins, return genomic coords
         if (nbin is None):

@@ -3,3 +3,4 @@ nbconvert
 pygments
 numpydoc
 jupyter
+pandoc
