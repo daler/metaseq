@@ -14,7 +14,7 @@
 
 /* RTD colors
  * light blue: #EDE4D8
- * medium blue: rgba(255, 255, 255, 0.5)
+ * medium blue: #8ca1af
  * dark blue: rgba(160, 109, 52, 1.0)
  * dark grey: 
  *
@@ -215,7 +215,7 @@ div.related ul li.right a {
 }
 /* All navbar links light up as buttons when hovered */
 div.related ul li a:hover {
-    background-color: rgba(255, 255, 255, 0.5);
+    background-color: #8ca1af;
     color: #ffffff;
     text-decoration: none;
     border-radius: 3px;
@@ -637,7 +637,7 @@ p.caption {
     }
 
     div.related ul li:last-child {
-        border-bottom: 1px dotted rgba(255, 255, 255, 0.5);
+        border-bottom: 1px dotted #8ca1af;
         padding-bottom: 0.4em;
         margin-bottom: 1em;
         width: 100%;
@@ -665,7 +665,7 @@ p.caption {
     }
 
     div.related ul li.right a:hover {
-        background-color: rgba(255, 255, 255, 0.5);
+        background-color: #8ca1af;
     }
 
     div.body {

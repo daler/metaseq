@@ -1,4 +1,6 @@
+
 .. _example_session_2:
+
 Example 2: Differential expression scatterplots
 ===============================================
 
@@ -10,6 +12,7 @@ This example looks more closely at using the results table part of
 
     # Enable in-line plots for this IPython Notebook
     %matplotlib inline
+
 Setup
 -----
 
@@ -35,6 +38,7 @@ Import what we'll be using:
     import gffutils
     from gffutils.helpers import asinterval
     import os
+
 We'll be using tables prepared from Cufflinks GTF output from GEO
 entries GSM847565 and GSM847566. These represent results control and
 ATF3 knockdown experiments in the K562 human cell line. You can read
@@ -55,20 +59,21 @@ Let's get the example files:
     && rm metaseq-example-data.tar.gz)
 
 
+
 .. parsed-literal::
 
-    --2015-11-15 19:51:05--  https://raw.githubusercontent.com/daler/metaseq-example-data/master/metaseq-example-data.tar.gz
-    Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 199.27.76.133
-    Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|199.27.76.133|:443... connected.
+    --2017-01-08 10:11:20--  https://raw.githubusercontent.com/daler/metaseq-example-data/master/metaseq-example-data.tar.gz
+    Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 151.101.32.133
+    Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|151.101.32.133|:443... connected.
     HTTP request sent, awaiting response... 200 OK
     Length: 96655384 (92M) [application/octet-stream]
-    Saving to: ‘metaseq-example-data.tar.gz’
+    Saving to: 'metaseq-example-data.tar.gz'
     
-         0K ........ ........ ........ ........ 34% 47.0M 1s
-     32768K ........ ........ ........ ........ 69% 75.9M 0s
-     65536K ........ ........ ........ ....    100% 83.4M=1.4s
+         0K ........ ........ ........ ........ 34% 78.4M 1s
+     32768K ........ ........ ........ ........ 69%  109M 0s
+     65536K ........ ........ ........ ....    100% 91.3M=1.0s
     
-    2015-11-15 19:51:06 (64.0 MB/s) - ‘metaseq-example-data.tar.gz’ saved [96655384/96655384]
+    2017-01-08 10:11:21 (91.2 MB/s) - 'metaseq-example-data.tar.gz' saved [96655384/96655384]
     
 
 
@@ -77,12 +82,14 @@ Let's get the example files:
     data_dir = 'metaseq-example/data'
     control_filename = os.path.join(data_dir, 'GSM847565_SL2585.table')
     knockdown_filename = os.path.join(data_dir, 'GSM847566_SL2592.table')
+
 Let's take a quick peak to see what these files look like:
 
 .. code:: python
 
     # System call; IPython only!
     !head -n5 $control_filename
+
 
 .. parsed-literal::
 
@@ -111,11 +118,13 @@ of it.
     
     control = pandas.read_table(control_filename, index_col=0)
     knockdown = pandas.read_table(knockdown_filename, index_col=0)
+
 Here's what the first few entries look like:
 
 .. code:: python
 
     control.head()
+
 
 
 
@@ -170,6 +179,7 @@ Here's what the first few entries look like:
 .. code:: python
 
     knockdown.head()
+
 
 
 
@@ -231,6 +241,7 @@ use standard `pandas` routines:
     
     df = pandas.merge(control, knockdown, left_index=True, right_index=True, suffixes=('_ct', '_kd'))
     df.head()
+
 
 
 
@@ -304,6 +315,7 @@ it:
     # Create a ResultsTable
     
     d = ResultsTable(df)
+
 :class:`ResultsTable` objects are wrappers around `pandas.DataFrame`
 objects, and are useful for working with annotations and tablular data.
 You can always access the `DataFrame` with the `.data` attribute:
@@ -313,6 +325,7 @@ You can always access the `DataFrame` with the `.data` attribute:
     # DataFrame is always accessible via .data
     
     print type(d), type(d.data)
+
 
 .. parsed-literal::
 
@@ -328,6 +341,7 @@ chromosome 17 of the hg19 human genome assembly:
     
     gtf = os.path.join(data_dir, 'Homo_sapiens.GRCh37.66_chr17.gtf')
     print open(gtf).readline()
+
 
 .. parsed-literal::
 
@@ -365,6 +379,7 @@ IDs, we'll need to create a list of Ensembl transcript IDs on chromosome
     print "original:", len(d.data)
     print "chr17 subset:", len(d2.data)
 
+
 .. parsed-literal::
 
     original: 85699
@@ -389,6 +404,7 @@ later, but for now, let's plot the FPKM of control vs knockdown:
         y='fpkm_kd');
 
 
+
 .. image:: example_session_2_files/example_session_2_30_0.png
 
 
@@ -406,6 +422,7 @@ to show, and then manually call the `_default_callback` like this:
 
 
 
+
 .. parsed-literal::
 
     'ENST00000253788'
@@ -416,6 +433,7 @@ to show, and then manually call the `_default_callback` like this:
 
     # What happens if you were to click on the points in an interactive session
     d2._default_callback(interesting_gene)
+
 
 .. parsed-literal::
 
@@ -438,6 +456,7 @@ do something like this:
 
     # Adding extra variables gets verbose and cluttered
     d2.data['log_fpkm_ct'] = np.log1p(d2.data.fpkm_ct)
+
 But when playing around with different scales, this quickly pollutes the
 dataframe with extra columns. Let's delete that column . . .
 
@@ -445,6 +464,7 @@ dataframe with extra columns. Let's delete that column . . .
 
     # We'll use a better way, so delete it.
     del d2.data['log_fpkm_ct']
+
 . . . and show another way.
 
 You may find it more streamlined to use the `xfunc` and/or `yfunc`
@@ -478,6 +498,7 @@ Here's the next version of the scatterplot:
         );
 
 
+
 .. image:: example_session_2_files/example_session_2_39_0.png
 
 
@@ -505,6 +526,7 @@ with `xlab` or `ylab`, or after the fact using standard
                     
 
 
+
 .. image:: example_session_2_files/example_session_2_41_0.png
 
 
@@ -519,6 +541,7 @@ let's add another variable to the dataframe.
     d2.data['foldchange'] = d2.fpkm_kd / d2.fpkm_ct
     up = (d2.foldchange > 2).values
     dn = (d2.foldchange < 0.5).values
+
 The way to highlight genes is with the `genes_to_highlight` argument.
 OK, OK, it's a little bit of a misnomer here because we're actually
 working with transcripts. But the idea is the same.
@@ -527,10 +550,12 @@ The `genes_to_highlight` argument takes a list of tuples. Each tuple
 consists of two items: an index (boolean or integer, doesn't matter) and
 a style dictionary. This dictionary is passed directly to
 `matplotlib.scatter`, so you can use any supported arguments here.
+
  
 .. note:: 
 
     There are actually other kwargs you can use in the style dictionary -- for example, `names`, `marginal_histograms`, `xhist_kwargs`, and `yhist_kwargs`.  These are `metaseq`-specific and will be explained later.
+
 Here's the plot with up/downregulated genes highlighted:
 
 .. code:: python
@@ -550,6 +575,7 @@ Here's the plot with up/downregulated genes highlighted:
             (up, dict(color='#da3b3a')),
             (dn, dict(color='#00748e'))]
         );          
+
 
 
 .. image:: example_session_2_files/example_session_2_47_0.png
@@ -574,6 +600,7 @@ We can add a 1-to-1 line for reference:
         #------------------------------------------
         one_to_one=dict(color='r', linestyle='--'),
         ); 
+
 
 
 .. image:: example_session_2_files/example_session_2_49_0.png
@@ -606,6 +633,7 @@ adjusting their alpha:
         ); 
 
 
+
 .. image:: example_session_2_files/example_session_2_51_0.png
 
 
@@ -636,6 +664,7 @@ everything:
         #------------------------------------------------------
         marginal_histograms=True,
         ); 
+
 
 
 .. image:: example_session_2_files/example_session_2_53_0.png
@@ -692,6 +721,7 @@ marginal histograms, lets:
          )
         ],
     ); 
+
 
 
 
@@ -779,6 +809,7 @@ nicely match the order of the histograms.
 
 
 
+
 .. image:: example_session_2_files/example_session_2_57_0.png
 
 
@@ -806,6 +837,7 @@ histograms axes as well.
     fig = ax.figure
     fig.savefig('expression-demo.png')
     fig
+
 
 
 

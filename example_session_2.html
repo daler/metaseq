@@ -41,9 +41,6 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
           <a href="autodocs.html" title="API docs"
              accesskey="N">next</a> |</li>
         <li class="right" >
@@ -59,12 +56,12 @@
           <div class="body" role="main">
             
   <div class="section" id="example-2-differential-expression-scatterplots">
-<h1>Example 2: Differential expression scatterplots<a class="headerlink" href="#example-2-differential-expression-scatterplots" title="Permalink to this headline">¶</a></h1>
+<span id="example-session-2"></span><h1>Example 2: Differential expression scatterplots<a class="headerlink" href="#example-2-differential-expression-scatterplots" title="Permalink to this headline">¶</a></h1>
 <p>This example looks more closely at using the results table part of
 <code class="xref py py-mod docutils literal"><span class="pre">metaseq</span></code>, and highlights the flexibility in plotting afforded by
 <code class="xref py py-mod docutils literal"><span class="pre">metaseq</span></code>.</p>
-<div class="code python highlight-python"><div class="highlight"><pre># Enable in-line plots for this IPython Notebook
-%matplotlib inline
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Enable in-line plots for this IPython Notebook</span>
+<span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
 </pre></div>
 </div>
 <div class="section" id="setup">
@@ -76,15 +73,15 @@ out of them.</p>
 <cite>download_metaseq_example_data.py</cite> script, which will download and
 prepare from public sources.</p>
 <p>Import what we&#8217;ll be using:</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">metaseq</span>
-<span class="kn">from</span> <span class="nn">metaseq</span> <span class="kn">import</span> <span class="n">example_filename</span>
-<span class="kn">from</span> <span class="nn">metaseq.results_table</span> <span class="kn">import</span> <span class="n">ResultsTable</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">metaseq</span>
+<span class="kn">from</span> <span class="nn">metaseq</span> <span class="k">import</span> <span class="n">example_filename</span>
+<span class="kn">from</span> <span class="nn">metaseq.results_table</span> <span class="k">import</span> <span class="n">ResultsTable</span>
 <span class="kn">import</span> <span class="nn">pandas</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib</span>
 <span class="kn">import</span> <span class="nn">pybedtools</span>
 <span class="kn">import</span> <span class="nn">gffutils</span>
-<span class="kn">from</span> <span class="nn">gffutils.helpers</span> <span class="kn">import</span> <span class="n">asinterval</span>
+<span class="kn">from</span> <span class="nn">gffutils.helpers</span> <span class="k">import</span> <span class="n">asinterval</span>
 <span class="kn">import</span> <span class="nn">os</span>
 </pre></div>
 </div>
@@ -94,7 +91,7 @@ ATF3 knockdown experiments in the K562 human cell line. You can read
 more about the data on GEO; this example will be more about the features
 of <code class="xref py py-mod docutils literal"><span class="pre">metaseq</span></code> than the biology.</p>
 <p>Let&#8217;s get the example files:</p>
-<div class="code python highlight-python"><div class="highlight"><pre>%%bash
+<div class="code python highlight-default"><div class="highlight"><pre><span></span>%%bash
 example_dir=&quot;metaseq-example&quot;
 
 mkdir -p $example_dir
@@ -104,35 +101,35 @@ mkdir -p $example_dir
 &amp;&amp; rm metaseq-example-data.tar.gz)
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre>--2015-11-15 19:51:05--  https://raw.githubusercontent.com/daler/metaseq-example-data/master/metaseq-example-data.tar.gz
-Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 199.27.76.133
-Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|199.27.76.133|:443... connected.
-HTTP request sent, awaiting response... 200 OK
-Length: 96655384 (92M) [application/octet-stream]
-Saving to: ‘metaseq-example-data.tar.gz’
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">--</span><span class="mi">2017</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">08</span> <span class="mi">10</span><span class="p">:</span><span class="mi">11</span><span class="p">:</span><span class="mi">20</span><span class="o">--</span>  <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">daler</span><span class="o">/</span><span class="n">metaseq</span><span class="o">-</span><span class="n">example</span><span class="o">-</span><span class="n">data</span><span class="o">/</span><span class="n">master</span><span class="o">/</span><span class="n">metaseq</span><span class="o">-</span><span class="n">example</span><span class="o">-</span><span class="n">data</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+<span class="n">Resolving</span> <span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span> <span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="p">)</span><span class="o">...</span> <span class="mf">151.101</span><span class="o">.</span><span class="mf">32.133</span>
+<span class="n">Connecting</span> <span class="n">to</span> <span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span> <span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="p">)</span><span class="o">|</span><span class="mf">151.101</span><span class="o">.</span><span class="mf">32.133</span><span class="o">|</span><span class="p">:</span><span class="mf">443.</span><span class="o">..</span> <span class="n">connected</span><span class="o">.</span>
+<span class="n">HTTP</span> <span class="n">request</span> <span class="n">sent</span><span class="p">,</span> <span class="n">awaiting</span> <span class="n">response</span><span class="o">...</span> <span class="mi">200</span> <span class="n">OK</span>
+<span class="n">Length</span><span class="p">:</span> <span class="mi">96655384</span> <span class="p">(</span><span class="mi">92</span><span class="n">M</span><span class="p">)</span> <span class="p">[</span><span class="n">application</span><span class="o">/</span><span class="n">octet</span><span class="o">-</span><span class="n">stream</span><span class="p">]</span>
+<span class="n">Saving</span> <span class="n">to</span><span class="p">:</span> <span class="s1">&#39;metaseq-example-data.tar.gz&#39;</span>
 
-     0K ........ ........ ........ ........ 34% 47.0M 1s
- 32768K ........ ........ ........ ........ 69% 75.9M 0s
- 65536K ........ ........ ........ ....    100% 83.4M=1.4s
+     <span class="mi">0</span><span class="n">K</span> <span class="o">........</span> <span class="o">........</span> <span class="o">........</span> <span class="o">........</span> <span class="mi">34</span><span class="o">%</span> <span class="mf">78.4</span><span class="n">M</span> <span class="mi">1</span><span class="n">s</span>
+ <span class="mi">32768</span><span class="n">K</span> <span class="o">........</span> <span class="o">........</span> <span class="o">........</span> <span class="o">........</span> <span class="mi">69</span><span class="o">%</span>  <span class="mi">109</span><span class="n">M</span> <span class="mi">0</span><span class="n">s</span>
+ <span class="mi">65536</span><span class="n">K</span> <span class="o">........</span> <span class="o">........</span> <span class="o">........</span> <span class="o">....</span>    <span class="mi">100</span><span class="o">%</span> <span class="mf">91.3</span><span class="n">M</span><span class="o">=</span><span class="mf">1.0</span><span class="n">s</span>
 
-2015-11-15 19:51:06 (64.0 MB/s) - ‘metaseq-example-data.tar.gz’ saved [96655384/96655384]
+<span class="mi">2017</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">08</span> <span class="mi">10</span><span class="p">:</span><span class="mi">11</span><span class="p">:</span><span class="mi">21</span> <span class="p">(</span><span class="mf">91.2</span> <span class="n">MB</span><span class="o">/</span><span class="n">s</span><span class="p">)</span> <span class="o">-</span> <span class="s1">&#39;metaseq-example-data.tar.gz&#39;</span> <span class="n">saved</span> <span class="p">[</span><span class="mi">96655384</span><span class="o">/</span><span class="mi">96655384</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="n">data_dir</span> <span class="o">=</span> <span class="s">&#39;metaseq-example/data&#39;</span>
-<span class="n">control_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s">&#39;GSM847565_SL2585.table&#39;</span><span class="p">)</span>
-<span class="n">knockdown_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s">&#39;GSM847566_SL2592.table&#39;</span><span class="p">)</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">data_dir</span> <span class="o">=</span> <span class="s1">&#39;metaseq-example/data&#39;</span>
+<span class="n">control_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s1">&#39;GSM847565_SL2585.table&#39;</span><span class="p">)</span>
+<span class="n">knockdown_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s1">&#39;GSM847566_SL2592.table&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Let&#8217;s take a quick peak to see what these files look like:</p>
-<div class="code python highlight-python"><div class="highlight"><pre># System call; IPython only!
+<div class="code python highlight-default"><div class="highlight"><pre><span></span># System call; IPython only!
 !head -n5 $control_filename
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre>id  score   fpkm
-ENST00000456328     108.293110992801        1.1183355144
-ENST00000515242     87.2330185289764        0.8306172562
-ENST00000518655     175.175608597549        2.3676823979
-ENST00000473358     343.232678519699        9.7952652359
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="nb">id</span>  <span class="n">score</span>   <span class="n">fpkm</span>
+<span class="n">ENST00000456328</span>     <span class="mf">108.293110992801</span>        <span class="mf">1.1183355144</span>
+<span class="n">ENST00000515242</span>     <span class="mf">87.2330185289764</span>        <span class="mf">0.8306172562</span>
+<span class="n">ENST00000518655</span>     <span class="mf">175.175608597549</span>        <span class="mf">2.3676823979</span>
+<span class="n">ENST00000473358</span>     <span class="mf">343.232678519699</span>        <span class="mf">9.7952652359</span>
 </pre></div>
 </div>
 <p>As documented at <a class="reference external" href="http://cufflinks.cbcb.umd.edu/manual.html#gtfout">http://cufflinks.cbcb.umd.edu/manual.html#gtfout</a>, the
@@ -141,18 +138,18 @@ other isoforms of the same gene, times 1000. The max score is 1000, and
 an isoform with this score is considered the major isoform. A score of
 800 would mean an isoform&#8217;s FPKM is 0.8 that of the major isoform.</p>
 <p>If you&#8217;re working with DESeq results, the
-<a class="reference internal" href="autodocs/metaseq.results_table.DESeqResults.html#metaseq.results_table.DESeqResults" title="metaseq.results_table.DESeqResults"><code class="xref py py-mod docutils literal"><span class="pre">metaseq.results_table.DESeqResults</span></code></a> class is a nice wrapper
+<code class="xref py py-mod docutils literal"><span class="pre">metaseq.results_table.DESeqResults</span></code> class is a nice wrapper
 around those results with one-step import. But here, we&#8217;ll construct a
 <cite>pandas.DataFrame</cite> first and then create a <cite>ResultsTable</cite> object out
 of it.</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Create two pandas.DataFrames</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Create two pandas.DataFrames</span>
 
 <span class="n">control</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="n">control_filename</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">knockdown</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="n">knockdown_filename</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Here&#8217;s what the first few entries look like:</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="n">control</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">control</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 <div>
@@ -197,7 +194,7 @@ of it.</p>
     </tr>
   </tbody>
 </table>
-</div><div class="code python highlight-python"><div class="highlight"><pre><span class="n">knockdown</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</div><div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">knockdown</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 <div>
@@ -245,9 +242,9 @@ of it.</p>
 </div><p>These are two separate objects. It will be easier to work with the data
 if we first combine the data into a single dataframe. For this we will
 use standard <cite>pandas</cite> routines:</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Merge control and knockdown into one DataFrame</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Merge control and knockdown into one DataFrame</span>
 
-<span class="n">df</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">control</span><span class="p">,</span> <span class="n">knockdown</span><span class="p">,</span> <span class="n">left_index</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">suffixes</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;_ct&#39;</span><span class="p">,</span> <span class="s">&#39;_kd&#39;</span><span class="p">))</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">control</span><span class="p">,</span> <span class="n">knockdown</span><span class="p">,</span> <span class="n">left_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suffixes</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;_ct&#39;</span><span class="p">,</span> <span class="s1">&#39;_kd&#39;</span><span class="p">))</span>
 <span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -307,9 +304,9 @@ use standard <cite>pandas</cite> routines:</p>
     </tr>
   </tbody>
 </table>
-</div><p>Now we&#8217;ll create a <a class="reference internal" href="autodocs/metaseq.results_table.ResultsTable.html#metaseq.results_table.ResultsTable" title="metaseq.results_table.ResultsTable"><code class="xref py py-class docutils literal"><span class="pre">metaseq.results_table.ResultsTable</span></code></a> out of
+</div><p>Now we&#8217;ll create a <code class="xref py py-class docutils literal"><span class="pre">metaseq.results_table.ResultsTable</span></code> out of
 it:</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Create a ResultsTable</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Create a ResultsTable</span>
 
 <span class="n">d</span> <span class="o">=</span> <span class="n">ResultsTable</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 </pre></div>
@@ -317,23 +314,23 @@ it:</p>
 <p><code class="xref py py-class docutils literal"><span class="pre">ResultsTable</span></code> objects are wrappers around <cite>pandas.DataFrame</cite>
 objects, and are useful for working with annotations and tablular data.
 You can always access the <cite>DataFrame</cite> with the <cite>.data</cite> attribute:</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># DataFrame is always accessible via .data</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># DataFrame is always accessible via .data</span>
 
-<span class="k">print</span> <span class="nb">type</span><span class="p">(</span><span class="n">d</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+<span class="nb">print</span> <span class="nb">type</span><span class="p">(</span><span class="n">d</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre>&lt;class &#39;metaseq.results_table.ResultsTable&#39;&gt; &lt;class &#39;pandas.core.frame.DataFrame&#39;&gt;
+<div class="highlight-default"><div class="highlight"><pre><span></span>&lt;class &#39;metaseq.results_table.ResultsTable&#39;&gt; &lt;class &#39;pandas.core.frame.DataFrame&#39;&gt;
 </pre></div>
 </div>
 <p>The <cite>metaseq</cite> example data includes a GFF file of the genes on
 chromosome 17 of the hg19 human genome assembly:</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Get gene annotations for chr17</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Get gene annotations for chr17</span>
 
-<span class="n">gtf</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s">&#39;Homo_sapiens.GRCh37.66_chr17.gtf&#39;</span><span class="p">)</span>
-<span class="k">print</span> <span class="nb">open</span><span class="p">(</span><span class="n">gtf</span><span class="p">)</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+<span class="n">gtf</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s1">&#39;Homo_sapiens.GRCh37.66_chr17.gtf&#39;</span><span class="p">)</span>
+<span class="nb">print</span> <span class="nb">open</span><span class="p">(</span><span class="n">gtf</span><span class="p">)</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre>chr17       protein_coding  exon    30898   31270   .       -       .        gene_id &quot;ENSG00000187939&quot;; transcript_id &quot;ENST00000343572&quot;; exon_number &quot;1&quot;; gene_name &quot;DOC2B&quot;; gene_biotype &quot;protein_coding&quot;; transcript_name &quot;DOC2B-201&quot;;
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">chr17</span>       <span class="n">protein_coding</span>  <span class="n">exon</span>    <span class="mi">30898</span>   <span class="mi">31270</span>   <span class="o">.</span>       <span class="o">-</span>       <span class="o">.</span>        <span class="n">gene_id</span> <span class="s2">&quot;ENSG00000187939&quot;</span><span class="p">;</span> <span class="n">transcript_id</span> <span class="s2">&quot;ENST00000343572&quot;</span><span class="p">;</span> <span class="n">exon_number</span> <span class="s2">&quot;1&quot;</span><span class="p">;</span> <span class="n">gene_name</span> <span class="s2">&quot;DOC2B&quot;</span><span class="p">;</span> <span class="n">gene_biotype</span> <span class="s2">&quot;protein_coding&quot;</span><span class="p">;</span> <span class="n">transcript_name</span> <span class="s2">&quot;DOC2B-201&quot;</span><span class="p">;</span>
 </pre></div>
 </div>
 </div>
@@ -347,25 +344,25 @@ that for this to work, the items in the list need to be in the index of
 the dataframe. Since the data frame index consists of Ensembl transcript
 IDs, we&#8217;ll need to create a list of Ensembl transcript IDs on chromosome
 17:</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Get a list of transcript IDs on chr17, and subset the dataframe.</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Get a list of transcript IDs on chr17, and subset the dataframe.</span>
 
-<span class="c"># Here we use pybedtools, but the list of names can come from anywhere</span>
-<span class="n">names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">i</span><span class="p">[</span><span class="s">&#39;transcript_id&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">pybedtools</span><span class="o">.</span><span class="n">BedTool</span><span class="p">(</span><span class="n">gtf</span><span class="p">)]))</span>
+<span class="c1"># Here we use pybedtools, but the list of names can come from anywhere</span>
+<span class="n">names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">i</span><span class="p">[</span><span class="s1">&#39;transcript_id&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">pybedtools</span><span class="o">.</span><span class="n">BedTool</span><span class="p">(</span><span class="n">gtf</span><span class="p">)]))</span>
 <span class="n">names</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
 
-<span class="c"># Make a copy of d</span>
+<span class="c1"># Make a copy of d</span>
 <span class="n">d2</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
-<span class="c"># And subset</span>
+<span class="c1"># And subset</span>
 <span class="n">d2</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">d2</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">ix</span><span class="p">[</span><span class="n">names</span><span class="p">]</span>
 
-<span class="c"># How many did we omit?</span>
-<span class="k">print</span> <span class="s">&quot;original:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
-<span class="k">print</span> <span class="s">&quot;chr17 subset:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">d2</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+<span class="c1"># How many did we omit?</span>
+<span class="nb">print</span> <span class="s2">&quot;original:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+<span class="nb">print</span> <span class="s2">&quot;chr17 subset:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">d2</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre>original: 85699
-chr17 subset: 5708
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">original</span><span class="p">:</span> <span class="mi">85699</span>
+<span class="n">chr17</span> <span class="n">subset</span><span class="p">:</span> <span class="mi">5708</span>
 </pre></div>
 </div>
 </div>
@@ -376,10 +373,10 @@ with plotting genome-wide data, and offers lots of flexibility.</p>
 <p>For its most basic usage, we need to at least supply <cite>x</cite> and <cite>y</cite>.
 These are names of variables in the dataframe. We&#8217;ll add more data
 later, but for now, let&#8217;s plot the FPKM of control vs knockdown:</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Scatterplot of control vs knockdown FPKM</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Scatterplot of control vs knockdown FPKM</span>
 <span class="n">d2</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
-    <span class="n">x</span><span class="o">=</span><span class="s">&#39;fpkm_ct&#39;</span><span class="p">,</span>
-    <span class="n">y</span><span class="o">=</span><span class="s">&#39;fpkm_kd&#39;</span><span class="p">);</span>
+    <span class="n">x</span><span class="o">=</span><span class="s1">&#39;fpkm_ct&#39;</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="s1">&#39;fpkm_kd&#39;</span><span class="p">);</span>
 </pre></div>
 </div>
 <img alt="_images/example_session_2_30_0.png" src="_images/example_session_2_30_0.png" />
@@ -388,23 +385,23 @@ plots, you can click on a point to see what gene it is. In this IPython
 Notebook (and the HTML documentation generated from it), we don&#8217;t have
 that interactive ability. We can simulate it here by choosing a gene ID
 to show, and then manually call the <cite>_default_callback</cite> like this:</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># arbitrary gene for demonstration purposes</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># arbitrary gene for demonstration purposes</span>
 <span class="n">interesting_gene</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">d2</span><span class="o">.</span><span class="n">fpkm_ct</span><span class="p">)</span>
 <span class="n">interesting_gene</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span class="s">&#39;ENST00000253788&#39;</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="s1">&#39;ENST00000253788&#39;</span>
 </pre></div>
 </div>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># What happens if you were to click on the points in an interactive session</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># What happens if you were to click on the points in an interactive session</span>
 <span class="n">d2</span><span class="o">.</span><span class="n">_default_callback</span><span class="p">(</span><span class="n">interesting_gene</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre>score_ct    1047.517457
-fpkm_ct     1422.448488
-score_kd    1070.752317
-fpkm_kd     1671.190119
-Name: ENST00000253788, dtype: float64
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">score_ct</span>    <span class="mf">1047.517457</span>
+<span class="n">fpkm_ct</span>     <span class="mf">1422.448488</span>
+<span class="n">score_kd</span>    <span class="mf">1070.752317</span>
+<span class="n">fpkm_kd</span>     <span class="mf">1671.190119</span>
+<span class="n">Name</span><span class="p">:</span> <span class="n">ENST00000253788</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">float64</span>
 </pre></div>
 </div>
 <p>Clicking around interactively on the points is a great way to get a feel
@@ -413,14 +410,14 @@ for the data.</p>
 the <cite>ResultsTable.scatter</cite> method needs to have <cite>x</cite> and <cite>y</cite>
 variables available in the dataframe. So one way to do this would be to
 do something like this:</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Adding extra variables gets verbose and cluttered</span>
-<span class="n">d2</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;log_fpkm_ct&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">d2</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">fpkm_ct</span><span class="p">)</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Adding extra variables gets verbose and cluttered</span>
+<span class="n">d2</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;log_fpkm_ct&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">d2</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">fpkm_ct</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>But when playing around with different scales, this quickly pollutes the
 dataframe with extra columns. Let&#8217;s delete that column . . .</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># We&#39;ll use a better way, so delete it.</span>
-<span class="k">del</span> <span class="n">d2</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;log_fpkm_ct&#39;</span><span class="p">]</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># We&#39;ll use a better way, so delete it.</span>
+<span class="k">del</span> <span class="n">d2</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;log_fpkm_ct&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>. . . and show another way.</p>
@@ -431,19 +428,19 @@ labels will reflect that.</p>
 additional keyword arguments (kwargs), the stuff we&#8217;ve already talked
 about will be at the top, and a comment line like this will mark the
 start of new stuff to pay attention to:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="c"># -------------  (marks the start of new stuff)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># -------------  (marks the start of new stuff)</span>
 </pre></div>
 </div>
 <p>Here&#8217;s the next version of the scatterplot:</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Scale x and y axes using log2(x + 1)</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Scale x and y axes using log2(x + 1)</span>
 
 <span class="k">def</span> <span class="nf">log2p1</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
 <span class="n">d2</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
-    <span class="n">x</span><span class="o">=</span><span class="s">&#39;fpkm_ct&#39;</span><span class="p">,</span>
-    <span class="n">y</span><span class="o">=</span><span class="s">&#39;fpkm_kd&#39;</span><span class="p">,</span>
-    <span class="c">#----------------</span>
+    <span class="n">x</span><span class="o">=</span><span class="s1">&#39;fpkm_ct&#39;</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="s1">&#39;fpkm_kd&#39;</span><span class="p">,</span>
+    <span class="c1">#----------------</span>
     <span class="n">xfunc</span><span class="o">=</span><span class="n">log2p1</span><span class="p">,</span>
     <span class="n">yfunc</span><span class="o">=</span><span class="n">log2p1</span><span class="p">,</span>
     <span class="p">);</span>
@@ -453,30 +450,30 @@ start of new stuff to pay attention to:</p>
 <p>Of course, we can specify axes labels either directly in the method call
 with <cite>xlab</cite> or <cite>ylab</cite>, or after the fact using standard
 <cite>matplotlib</cite> functionality:</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Manually specify x and y labels</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Manually specify x and y labels</span>
 
 <span class="n">ax</span> <span class="o">=</span> <span class="n">d2</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
-    <span class="n">x</span><span class="o">=</span><span class="s">&#39;fpkm_ct&#39;</span><span class="p">,</span>
-    <span class="n">y</span><span class="o">=</span><span class="s">&#39;fpkm_kd&#39;</span><span class="p">,</span>
+    <span class="n">x</span><span class="o">=</span><span class="s1">&#39;fpkm_ct&#39;</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="s1">&#39;fpkm_kd&#39;</span><span class="p">,</span>
     <span class="n">xfunc</span><span class="o">=</span><span class="n">log2p1</span><span class="p">,</span>
     <span class="n">yfunc</span><span class="o">=</span><span class="n">log2p1</span><span class="p">,</span>
 
-    <span class="c">#-----------------------------</span>
-    <span class="c"># specify xlabel</span>
-    <span class="n">xlab</span><span class="o">=</span><span class="s">&#39;Control, log2(FPKM + 1)&#39;</span>
+    <span class="c1">#-----------------------------</span>
+    <span class="c1"># specify xlabel</span>
+    <span class="n">xlab</span><span class="o">=</span><span class="s1">&#39;Control, log2(FPKM + 1)&#39;</span>
     <span class="p">);</span>
 
-<span class="c"># adjust the ylabel afterwards</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&#39;Knockdown, log2(FPKM + 1)&#39;</span><span class="p">);</span>
+<span class="c1"># adjust the ylabel afterwards</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Knockdown, log2(FPKM + 1)&#39;</span><span class="p">);</span>
 </pre></div>
 </div>
 <img alt="_images/example_session_2_41_0.png" src="_images/example_session_2_41_0.png" />
 <p>Let&#8217;s highlight some genes. How about those that change expression &gt; 2
 fold in upon knockdown in red, and &lt; 2 fold in blue? While we&#8217;re at it,
 let&#8217;s add another variable to the dataframe.</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Crude differential expression detection....</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Crude differential expression detection....</span>
 
-<span class="n">d2</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;foldchange&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">d2</span><span class="o">.</span><span class="n">fpkm_kd</span> <span class="o">/</span> <span class="n">d2</span><span class="o">.</span><span class="n">fpkm_ct</span>
+<span class="n">d2</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;foldchange&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">d2</span><span class="o">.</span><span class="n">fpkm_kd</span> <span class="o">/</span> <span class="n">d2</span><span class="o">.</span><span class="n">fpkm_ct</span>
 <span class="n">up</span> <span class="o">=</span> <span class="p">(</span><span class="n">d2</span><span class="o">.</span><span class="n">foldchange</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
 <span class="n">dn</span> <span class="o">=</span> <span class="p">(</span><span class="n">d2</span><span class="o">.</span><span class="n">foldchange</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
 </pre></div>
@@ -493,39 +490,39 @@ a style dictionary. This dictionary is passed directly to
 <p class="last">There are actually other kwargs you can use in the style dictionary &#8211; for example, <cite>names</cite>, <cite>marginal_histograms</cite>, <cite>xhist_kwargs</cite>, and <cite>yhist_kwargs</cite>.  These are <cite>metaseq</cite>-specific and will be explained later.</p>
 </div>
 <p>Here&#8217;s the plot with up/downregulated genes highlighted:</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Use the genes_to_highlight argument to show up/downregulated genes</span>
-<span class="c"># in different colors</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Use the genes_to_highlight argument to show up/downregulated genes</span>
+<span class="c1"># in different colors</span>
 
 <span class="n">d2</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
-    <span class="n">x</span><span class="o">=</span><span class="s">&#39;fpkm_ct&#39;</span><span class="p">,</span>
-    <span class="n">y</span><span class="o">=</span><span class="s">&#39;fpkm_kd&#39;</span><span class="p">,</span>
+    <span class="n">x</span><span class="o">=</span><span class="s1">&#39;fpkm_ct&#39;</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="s1">&#39;fpkm_kd&#39;</span><span class="p">,</span>
     <span class="n">xfunc</span><span class="o">=</span><span class="n">log2p1</span><span class="p">,</span>
     <span class="n">yfunc</span><span class="o">=</span><span class="n">log2p1</span><span class="p">,</span>
-    <span class="n">xlab</span><span class="o">=</span><span class="s">&#39;Control, log2(FPKM + 1)&#39;</span><span class="p">,</span>
-    <span class="n">ylab</span><span class="o">=</span><span class="s">&#39;Knockdown, log2(FPKM + 1)&#39;</span><span class="p">,</span>
-    <span class="c">#-------------------------------</span>
+    <span class="n">xlab</span><span class="o">=</span><span class="s1">&#39;Control, log2(FPKM + 1)&#39;</span><span class="p">,</span>
+    <span class="n">ylab</span><span class="o">=</span><span class="s1">&#39;Knockdown, log2(FPKM + 1)&#39;</span><span class="p">,</span>
+    <span class="c1">#-------------------------------</span>
     <span class="n">genes_to_highlight</span><span class="o">=</span><span class="p">[</span>
-        <span class="p">(</span><span class="n">up</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;#da3b3a&#39;</span><span class="p">)),</span>
-        <span class="p">(</span><span class="n">dn</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;#00748e&#39;</span><span class="p">))]</span>
+        <span class="p">(</span><span class="n">up</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;#da3b3a&#39;</span><span class="p">)),</span>
+        <span class="p">(</span><span class="n">dn</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;#00748e&#39;</span><span class="p">))]</span>
     <span class="p">);</span>
 </pre></div>
 </div>
 <img alt="_images/example_session_2_47_0.png" src="_images/example_session_2_47_0.png" />
 <p>We can add a 1-to-1 line for reference:</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Add a 1:1 line</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Add a 1:1 line</span>
 
 <span class="n">d2</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
-    <span class="n">x</span><span class="o">=</span><span class="s">&#39;fpkm_ct&#39;</span><span class="p">,</span>
-    <span class="n">y</span><span class="o">=</span><span class="s">&#39;fpkm_kd&#39;</span><span class="p">,</span>
+    <span class="n">x</span><span class="o">=</span><span class="s1">&#39;fpkm_ct&#39;</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="s1">&#39;fpkm_kd&#39;</span><span class="p">,</span>
     <span class="n">xfunc</span><span class="o">=</span><span class="n">log2p1</span><span class="p">,</span>
     <span class="n">yfunc</span><span class="o">=</span><span class="n">log2p1</span><span class="p">,</span>
-    <span class="n">xlab</span><span class="o">=</span><span class="s">&#39;Control, log2(FPKM + 1)&#39;</span><span class="p">,</span>
-    <span class="n">ylab</span><span class="o">=</span><span class="s">&#39;Knockdown, log2(FPKM + 1)&#39;</span><span class="p">,</span>
+    <span class="n">xlab</span><span class="o">=</span><span class="s1">&#39;Control, log2(FPKM + 1)&#39;</span><span class="p">,</span>
+    <span class="n">ylab</span><span class="o">=</span><span class="s1">&#39;Knockdown, log2(FPKM + 1)&#39;</span><span class="p">,</span>
     <span class="n">genes_to_highlight</span><span class="o">=</span><span class="p">[</span>
-        <span class="p">(</span><span class="n">up</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;#da3b3a&#39;</span><span class="p">)),</span>
-        <span class="p">(</span><span class="n">dn</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;#00748e&#39;</span><span class="p">))],</span>
-    <span class="c">#------------------------------------------</span>
-    <span class="n">one_to_one</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s">&#39;--&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">up</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;#da3b3a&#39;</span><span class="p">)),</span>
+        <span class="p">(</span><span class="n">dn</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;#00748e&#39;</span><span class="p">))],</span>
+    <span class="c1">#------------------------------------------</span>
+    <span class="n">one_to_one</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">),</span>
     <span class="p">);</span>
 </pre></div>
 </div>
@@ -535,22 +532,22 @@ determines the base style of all points. By default, it&#8217;s
 <cite>dict(color=&#8217;k&#8217;, alpha=0.2, linewidths=0)</cite>. Let&#8217;s change the default
 style to smaller gray dots, and make the red and blue stand out more by
 adjusting their alpha:</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Style changes:</span>
-<span class="c"># default gray small dots; make changed genes stand out more</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Style changes:</span>
+<span class="c1"># default gray small dots; make changed genes stand out more</span>
 
 <span class="n">d2</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
-    <span class="n">x</span><span class="o">=</span><span class="s">&#39;fpkm_ct&#39;</span><span class="p">,</span>
-    <span class="n">y</span><span class="o">=</span><span class="s">&#39;fpkm_kd&#39;</span><span class="p">,</span>
+    <span class="n">x</span><span class="o">=</span><span class="s1">&#39;fpkm_ct&#39;</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="s1">&#39;fpkm_kd&#39;</span><span class="p">,</span>
     <span class="n">xfunc</span><span class="o">=</span><span class="n">log2p1</span><span class="p">,</span>
     <span class="n">yfunc</span><span class="o">=</span><span class="n">log2p1</span><span class="p">,</span>
-    <span class="n">xlab</span><span class="o">=</span><span class="s">&#39;Control, log2(FPKM + 1)&#39;</span><span class="p">,</span>
-    <span class="n">ylab</span><span class="o">=</span><span class="s">&#39;Knockdown, log2(FPKM + 1)&#39;</span><span class="p">,</span>
-    <span class="n">one_to_one</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s">&#39;:&#39;</span><span class="p">),</span>
-    <span class="c">#------------------------------------------------------</span>
+    <span class="n">xlab</span><span class="o">=</span><span class="s1">&#39;Control, log2(FPKM + 1)&#39;</span><span class="p">,</span>
+    <span class="n">ylab</span><span class="o">=</span><span class="s1">&#39;Knockdown, log2(FPKM + 1)&#39;</span><span class="p">,</span>
+    <span class="n">one_to_one</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="p">),</span>
+    <span class="c1">#------------------------------------------------------</span>
     <span class="n">genes_to_highlight</span><span class="o">=</span><span class="p">[</span>
-        <span class="p">(</span><span class="n">up</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;#da3b3a&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)),</span>
-        <span class="p">(</span><span class="n">dn</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;#00748e&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">))],</span>
-    <span class="n">general_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;0.5&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">up</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;#da3b3a&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)),</span>
+        <span class="p">(</span><span class="n">dn</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;#00748e&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">))],</span>
+    <span class="n">general_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">marker</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;0.5&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
     <span class="p">);</span>
 </pre></div>
 </div>
@@ -562,22 +559,22 @@ adjusting their alpha:</p>
 stacked up on either axes for each set of genes that were plotted. There
 are lots of ways for configuring this. First, let&#8217;s turn them on for
 everything:</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Add marginal histograms</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Add marginal histograms</span>
 
 <span class="n">d2</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
-    <span class="n">x</span><span class="o">=</span><span class="s">&#39;fpkm_ct&#39;</span><span class="p">,</span>
-    <span class="n">y</span><span class="o">=</span><span class="s">&#39;fpkm_kd&#39;</span><span class="p">,</span>
+    <span class="n">x</span><span class="o">=</span><span class="s1">&#39;fpkm_ct&#39;</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="s1">&#39;fpkm_kd&#39;</span><span class="p">,</span>
     <span class="n">xfunc</span><span class="o">=</span><span class="n">log2p1</span><span class="p">,</span>
     <span class="n">yfunc</span><span class="o">=</span><span class="n">log2p1</span><span class="p">,</span>
-    <span class="n">xlab</span><span class="o">=</span><span class="s">&#39;Control, log2(FPKM + 1)&#39;</span><span class="p">,</span>
-    <span class="n">ylab</span><span class="o">=</span><span class="s">&#39;Knockdown, log2(FPKM + 1)&#39;</span><span class="p">,</span>
+    <span class="n">xlab</span><span class="o">=</span><span class="s1">&#39;Control, log2(FPKM + 1)&#39;</span><span class="p">,</span>
+    <span class="n">ylab</span><span class="o">=</span><span class="s1">&#39;Knockdown, log2(FPKM + 1)&#39;</span><span class="p">,</span>
     <span class="n">genes_to_highlight</span><span class="o">=</span><span class="p">[</span>
-        <span class="p">(</span><span class="n">up</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;#da3b3a&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)),</span>
-        <span class="p">(</span><span class="n">dn</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;#00748e&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">))],</span>
-    <span class="n">one_to_one</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s">&#39;:&#39;</span><span class="p">),</span>
-    <span class="n">general_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;0.5&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
-    <span class="c">#------------------------------------------------------</span>
-    <span class="n">marginal_histograms</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">up</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;#da3b3a&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)),</span>
+        <span class="p">(</span><span class="n">dn</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;#00748e&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">))],</span>
+    <span class="n">one_to_one</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="p">),</span>
+    <span class="n">general_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">marker</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;0.5&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
+    <span class="c1">#------------------------------------------------------</span>
+    <span class="n">marginal_histograms</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">);</span>
 </pre></div>
 </div>
@@ -589,33 +586,33 @@ marginal histograms, lets:</p>
 <li>change the number of bins to 50</li>
 <li>remove the edge around each bar</li>
 </ul>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Tweak the marginal histograms:</span>
-<span class="c"># 50 bins, don&#39;t show unchanged genes, and remove outlines</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Tweak the marginal histograms:</span>
+<span class="c1"># 50 bins, don&#39;t show unchanged genes, and remove outlines</span>
 
 <span class="n">d2</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
-    <span class="n">x</span><span class="o">=</span><span class="s">&#39;fpkm_ct&#39;</span><span class="p">,</span>
-    <span class="n">y</span><span class="o">=</span><span class="s">&#39;fpkm_kd&#39;</span><span class="p">,</span>
+    <span class="n">x</span><span class="o">=</span><span class="s1">&#39;fpkm_ct&#39;</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="s1">&#39;fpkm_kd&#39;</span><span class="p">,</span>
     <span class="n">xfunc</span><span class="o">=</span><span class="n">log2p1</span><span class="p">,</span>
     <span class="n">yfunc</span><span class="o">=</span><span class="n">log2p1</span><span class="p">,</span>
-    <span class="n">xlab</span><span class="o">=</span><span class="s">&#39;Control, log2(FPKM + 1)&#39;</span><span class="p">,</span>
-    <span class="n">ylab</span><span class="o">=</span><span class="s">&#39;Knockdown, log2(FPKM + 1)&#39;</span><span class="p">,</span>
-    <span class="n">one_to_one</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s">&#39;:&#39;</span><span class="p">),</span>
-    <span class="n">general_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;0.5&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
-    <span class="c">#------------------------------------------------------</span>
-    <span class="c"># Go back go disabling them globally...</span>
-    <span class="n">marginal_histograms</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+    <span class="n">xlab</span><span class="o">=</span><span class="s1">&#39;Control, log2(FPKM + 1)&#39;</span><span class="p">,</span>
+    <span class="n">ylab</span><span class="o">=</span><span class="s1">&#39;Knockdown, log2(FPKM + 1)&#39;</span><span class="p">,</span>
+    <span class="n">one_to_one</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="p">),</span>
+    <span class="n">general_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">marker</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;0.5&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
+    <span class="c1">#------------------------------------------------------</span>
+    <span class="c1"># Go back go disabling them globally...</span>
+    <span class="n">marginal_histograms</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 
-    <span class="c"># ...and then turn them back on for each set of genes</span>
-    <span class="c"># to highlight.</span>
-    <span class="c">#</span>
-    <span class="c"># By the way, genes_to_highlight is indented to better show the</span>
-    <span class="c"># the structure.</span>
+    <span class="c1"># ...and then turn them back on for each set of genes</span>
+    <span class="c1"># to highlight.</span>
+    <span class="c1">#</span>
+    <span class="c1"># By the way, genes_to_highlight is indented to better show the</span>
+    <span class="c1"># the structure.</span>
     <span class="n">genes_to_highlight</span><span class="o">=</span><span class="p">[</span>
     <span class="p">(</span>
      <span class="n">up</span><span class="p">,</span>
      <span class="nb">dict</span><span class="p">(</span>
-          <span class="n">color</span><span class="o">=</span><span class="s">&#39;#da3b3a&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
-          <span class="n">marginal_histograms</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+          <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#da3b3a&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+          <span class="n">marginal_histograms</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
           <span class="n">xhist_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">bins</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
           <span class="n">yhist_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">bins</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
           <span class="p">)</span>
@@ -623,8 +620,8 @@ marginal histograms, lets:</p>
     <span class="p">(</span>
      <span class="n">dn</span><span class="p">,</span>
      <span class="nb">dict</span><span class="p">(</span>
-          <span class="n">color</span><span class="o">=</span><span class="s">&#39;#00748e&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
-          <span class="n">marginal_histograms</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+          <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#00748e&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+          <span class="n">marginal_histograms</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
           <span class="n">xhist_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">bins</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
           <span class="n">yhist_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">bins</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
           <span class="p">)</span>
@@ -641,73 +638,73 @@ it we&#8217;ll add a title, too.</p>
 incrementally added on top of each other but the legend, lists them
 going down. So we need to flip the order of legend entries to make it
 nicely match the order of the histograms.</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="n">matplotlib</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s">&#39;font.family&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;Arial&quot;</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">matplotlib</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;font.family&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Arial&quot;</span>
 <span class="n">ax</span> <span class="o">=</span> <span class="n">d2</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
-    <span class="n">x</span><span class="o">=</span><span class="s">&#39;fpkm_ct&#39;</span><span class="p">,</span>
-    <span class="n">y</span><span class="o">=</span><span class="s">&#39;fpkm_kd&#39;</span><span class="p">,</span>
+    <span class="n">x</span><span class="o">=</span><span class="s1">&#39;fpkm_ct&#39;</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="s1">&#39;fpkm_kd&#39;</span><span class="p">,</span>
     <span class="n">xfunc</span><span class="o">=</span><span class="n">log2p1</span><span class="p">,</span>
     <span class="n">yfunc</span><span class="o">=</span><span class="n">log2p1</span><span class="p">,</span>
-    <span class="n">xlab</span><span class="o">=</span><span class="s">&#39;Control, log2(FPKM + 1)&#39;</span><span class="p">,</span>
-    <span class="n">ylab</span><span class="o">=</span><span class="s">&#39;Knockdown, log2(FPKM + 1)&#39;</span><span class="p">,</span>
-    <span class="n">one_to_one</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s">&#39;:&#39;</span><span class="p">),</span>
-    <span class="n">marginal_histograms</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-    <span class="c">#------------------------------------------------------</span>
-    <span class="c"># add the &quot;unchanged&quot; label</span>
-    <span class="n">general_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;0.5&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;unchanged&#39;</span><span class="p">),</span>
+    <span class="n">xlab</span><span class="o">=</span><span class="s1">&#39;Control, log2(FPKM + 1)&#39;</span><span class="p">,</span>
+    <span class="n">ylab</span><span class="o">=</span><span class="s1">&#39;Knockdown, log2(FPKM + 1)&#39;</span><span class="p">,</span>
+    <span class="n">one_to_one</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="p">),</span>
+    <span class="n">marginal_histograms</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="c1">#------------------------------------------------------</span>
+    <span class="c1"># add the &quot;unchanged&quot; label</span>
+    <span class="n">general_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">marker</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;0.5&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;unchanged&#39;</span><span class="p">),</span>
 
     <span class="n">genes_to_highlight</span><span class="o">=</span><span class="p">[</span>
     <span class="p">(</span>
      <span class="n">up</span><span class="p">,</span>
      <span class="nb">dict</span><span class="p">(</span>
-          <span class="n">color</span><span class="o">=</span><span class="s">&#39;#da3b3a&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
-          <span class="n">marginal_histograms</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+          <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#da3b3a&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+          <span class="n">marginal_histograms</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
           <span class="n">xhist_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">bins</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
           <span class="n">yhist_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">bins</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
 
-          <span class="c"># add label</span>
-          <span class="n">label</span><span class="o">=</span><span class="s">&#39;upregulated&#39;</span><span class="p">,</span>
+          <span class="c1"># add label</span>
+          <span class="n">label</span><span class="o">=</span><span class="s1">&#39;upregulated&#39;</span><span class="p">,</span>
           <span class="p">)</span>
      <span class="p">),</span>
     <span class="p">(</span>
      <span class="n">dn</span><span class="p">,</span>
      <span class="nb">dict</span><span class="p">(</span>
-          <span class="n">color</span><span class="o">=</span><span class="s">&#39;#00748e&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
-          <span class="n">marginal_histograms</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+          <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#00748e&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+          <span class="n">marginal_histograms</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
           <span class="n">xhist_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">bins</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
           <span class="n">yhist_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">bins</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
 
-          <span class="c"># add label</span>
-          <span class="n">label</span><span class="o">=</span><span class="s">&#39;downregulated&#39;</span>
+          <span class="c1"># add label</span>
+          <span class="n">label</span><span class="o">=</span><span class="s1">&#39;downregulated&#39;</span>
           <span class="p">)</span>
      <span class="p">)</span>
     <span class="p">],</span>
 <span class="p">);</span>
 
-<span class="c"># Get handles and labels, and then reverse their order</span>
+<span class="c1"># Get handles and labels, and then reverse their order</span>
 <span class="n">handles</span><span class="p">,</span> <span class="n">legend_labels</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_legend_handles_labels</span><span class="p">()</span>
 <span class="n">handles</span> <span class="o">=</span> <span class="n">handles</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 <span class="n">legend_labels</span> <span class="o">=</span> <span class="n">legend_labels</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
-<span class="c"># Draw a legend using the flipped handles and labels.</span>
+<span class="c1"># Draw a legend using the flipped handles and labels.</span>
 <span class="n">leg</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">handles</span><span class="p">,</span>
           <span class="n">legend_labels</span><span class="p">,</span>
 
-          <span class="c"># These values may take some tweaking.</span>
-          <span class="c"># By default they are in axes coordinates, so this means</span>
-          <span class="c"># the legend is slightly outside the axes.</span>
+          <span class="c1"># These values may take some tweaking.</span>
+          <span class="c1"># By default they are in axes coordinates, so this means</span>
+          <span class="c1"># the legend is slightly outside the axes.</span>
           <span class="n">loc</span><span class="o">=</span><span class="p">(</span><span class="mf">1.01</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">),</span>
 
-          <span class="c"># Various style fixes to default legend.</span>
+          <span class="c1"># Various style fixes to default legend.</span>
           <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span>
           <span class="n">scatterpoints</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
           <span class="n">borderpad</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
           <span class="n">handletextpad</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
-          <span class="n">frameon</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-          <span class="n">title</span><span class="o">=</span><span class="s">&#39;chr17 transcripts&#39;</span><span class="p">,</span>
+          <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+          <span class="n">title</span><span class="o">=</span><span class="s1">&#39;chr17 transcripts&#39;</span><span class="p">,</span>
           <span class="p">);</span>
 
-<span class="c"># Adjust the legend title after it&#39;s created</span>
-<span class="n">leg</span><span class="o">.</span><span class="n">get_title</span><span class="p">()</span><span class="o">.</span><span class="n">set_weight</span><span class="p">(</span><span class="s">&#39;bold&#39;</span><span class="p">)</span>
+<span class="c1"># Adjust the legend title after it&#39;s created</span>
+<span class="n">leg</span><span class="o">.</span><span class="n">get_title</span><span class="p">()</span><span class="o">.</span><span class="n">set_weight</span><span class="p">(</span><span class="s1">&#39;bold&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <img alt="_images/example_session_2_57_0.png" src="_images/example_session_2_57_0.png" />
@@ -717,18 +714,18 @@ object created as a by-product of the plotting is stored in the
 <cite>marginal</cite> attribute. This, in turn, has a <cite>top_hists</cite> attribute,
 and we can grab the last one created. While we&#8217;re at it, let&#8217;s
 histograms axes as well.</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># When `d2.scatter` is called, we get a `marginal` attribute.</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># When `d2.scatter` is called, we get a `marginal` attribute.</span>
 <span class="n">top_axes</span> <span class="o">=</span> <span class="n">d2</span><span class="o">.</span><span class="n">marginal</span><span class="o">.</span><span class="n">top_hists</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-<span class="n">top_axes</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s">&#39;Differential expression, ATF3 knockdown&#39;</span><span class="p">);</span>
+<span class="n">top_axes</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Differential expression, ATF3 knockdown&#39;</span><span class="p">);</span>
 
 <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">d2</span><span class="o">.</span><span class="n">marginal</span><span class="o">.</span><span class="n">top_hists</span><span class="p">:</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&#39;No.</span><span class="se">\n</span><span class="s">transcripts&#39;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s">&#39;right&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s">&#39;center&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;No.</span><span class="se">\n</span><span class="s1">transcripts&#39;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
 
 <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">d2</span><span class="o">.</span><span class="n">marginal</span><span class="o">.</span><span class="n">right_hists</span><span class="p">:</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s">&#39;No.</span><span class="se">\n</span><span class="s">transcripts&#39;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=-</span><span class="mi">90</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s">&#39;left&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s">&#39;top&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;No.</span><span class="se">\n</span><span class="s1">transcripts&#39;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=-</span><span class="mi">90</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
 
 <span class="n">fig</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">figure</span>
-<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s">&#39;expression-demo.png&#39;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;expression-demo.png&#39;</span><span class="p">)</span>
 <span class="n">fig</span>
 </pre></div>
 </div>
@@ -774,9 +771,6 @@ histograms axes as well.</p>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -790,9 +784,6 @@ histograms axes as well.</p>
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
           <a href="autodocs.html" title="API docs"
              >next</a> |</li>
         <li class="right" >
@@ -803,7 +794,7 @@ histograms axes as well.</p>
     </div>
 <div class="footer">
     &copy; Copyright 2015, Ryan Dale.
-  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.4.1.
   <br />Theme based on <a href="http://readthedocs.org/">Read The Docs</a>
 
 </div>
