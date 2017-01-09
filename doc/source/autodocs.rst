@@ -3,7 +3,6 @@ API docs
 .. contents::
 
 
-.. currentmodule:: metaseq._genomic_signal
 
 :mod:`genomic_signal`
 ---------------------
@@ -173,3 +172,18 @@ API docs
     metaseq.filetype_adapters.BamAdapter
     metaseq.filetype_adapters.BedAdapter
     metaseq.filetype_adapters.BigBedAdapter
+    metaseq.filetype_adapters.BigWigAdapter
+
+:mod:`metaseq.array_helpers`
+----------------------------
+.. automodule:: metaseq.array_helpers
+
+.. rubric:: Functions
+
+.. autosummary::
+    :nosignatures:
+    :toctree: autodocs
+
+    _local_count
+    _local_coverage
+
