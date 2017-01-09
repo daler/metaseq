@@ -190,7 +190,10 @@ class BigWigAdapter(BaseAdapter):
             if s is None:
                 s = np.zeros((interval.stop - interval.start,))
             else:
-                s[np.isnan(s)] = 0
+                if zero_nan:
+                    s[np.isnan(s)] = 0
+                if zero_inf:
+                    s[np.isinf(s)] = 0
 
         elif method == 'ucsc_summarize':
             if function in ['mean', 'min', 'max', 'std', 'coverage']:

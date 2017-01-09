@@ -571,7 +571,20 @@ def test_bigwig_zero_inf_nan():
         assert np.all(np.isnan(expected[1]) == np.isnan(result[1]))
         assert np.all(result[1][valid] == expected[1][valid])
 
+
     for coord, kwargs, expected in [
+
+        (
+            'chr2L:1-200',
+            dict(zero_inf=True, zero_nan=True, method='get_as_array'),
+            np.array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])
+        ),
+        (
+            'chr2L:1-200',
+            dict(zero_inf=True, zero_nan=False, method='get_as_array'),
+            np.array([ nan,  nan,  nan,  nan,  nan,  nan,  nan,  nan,  nan,  nan])
+        ),
+
         (
             'chr2L:1-200',
             dict(zero_inf=True, zero_nan=True, method='summarize', function='mean'),
@@ -646,3 +659,4 @@ def test_bigwig_zero_inf_nan():
         ),
     ]:
         yield check, coord, kwargs, expected
+
