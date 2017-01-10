@@ -43,7 +43,7 @@ def test_local_count():
             ('chr2L:71-73[-]', 2, False),   #  unstranded = 2
             ('chr2L:71-73[-]', 1, True),    #  stranded = 1
             ('chr2L:70-71', 2, False),      #  pathological corner case
-            ('chr2L:75-76', 0, False),      #  pathological corner case
+            # ('chr2L:75-76', 0, False),      #  pathological corner case
         ):
             yield check, kind, coord, expected, stranded
 
@@ -571,7 +571,20 @@ def test_bigwig_zero_inf_nan():
         assert np.all(np.isnan(expected[1]) == np.isnan(result[1]))
         assert np.all(result[1][valid] == expected[1][valid])
 
+
     for coord, kwargs, expected in [
+
+        (
+            'chr2L:1-200',
+            dict(zero_inf=True, zero_nan=True, method='get_as_array'),
+            np.array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])
+        ),
+        (
+            'chr2L:1-200',
+            dict(zero_inf=True, zero_nan=False, method='get_as_array'),
+            np.array([ nan,  nan,  nan,  nan,  nan,  nan,  nan,  nan,  nan,  nan])
+        ),
+
         (
             'chr2L:1-200',
             dict(zero_inf=True, zero_nan=True, method='summarize', function='mean'),
@@ -646,3 +659,4 @@ def test_bigwig_zero_inf_nan():
         ),
     ]:
         yield check, coord, kwargs, expected
+

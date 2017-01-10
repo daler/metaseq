@@ -112,7 +112,7 @@ bais = [
 
     (
         '161K',
-        'f40de02458ce71db708480953a307507',
+        '1233314655e664a62611217674951168',
         os.path.join(
             args.data_dir,
             'wgEncodeHaibTfbsK562RxlchV0416101AlnRep1_chr17.bam.bai')),

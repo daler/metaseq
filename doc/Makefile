@@ -43,6 +43,11 @@ help:
 clean:
 	-rm -rf $(BUILDDIR)/*
 
+notebooks:
+	(cd source && ./notebook-runner.sh example_session.ipynb)
+	(cd source && ./notebook-runner.sh example_session_2.ipynb)
+
+
 html:
 	# The original README, visible on the GitHub home page, has absolute HTML
 	# links to the examples. So clicking on them in GitHub takes you to the
@@ -54,8 +59,6 @@ html:
 	-rm -rf source/metaseq-example
 	-rm -rf source/example.npz
 	-rm -rf source/example.features
-	(cd source && ./notebook-runner.sh example_session.ipynb)
-	(cd source && ./notebook-runner.sh example_session_2.ipynb)
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	cp source/demo.png $(BUILDDIR)/html/demo.png
 	cp source/demo.png ..
