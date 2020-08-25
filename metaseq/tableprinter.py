@@ -137,15 +137,13 @@ def table_maker(subset, ind1, ind2, row_labels, col_labels, title):
         sum(subset & ~ind1 & ind2),
         sum(subset & ~ind1 & ~ind2)
     ]
-    print
-    print title
-    print '-' * len(title)
-    print print_2x2_table(table, row_labels=row_labels, col_labels=col_labels)
-    print print_row_perc_table(
-        table, row_labels=row_labels, col_labels=col_labels)
-    print print_col_perc_table(
-        table, row_labels=row_labels, col_labels=col_labels)
-    print fisher.pvalue(*table)
+    print('\n')
+    print(title)
+    print('-' * len(title))
+    print(print_2x2_table(table, row_labels=row_labels, col_labels=col_labels))
+    print(print_row_perc_table(table, row_labels=row_labels, col_labels=col_labels))
+    print(print_col_perc_table(table, row_labels=row_labels, col_labels=col_labels))
+    print(fisher.pvalue(*table))
 
 
 if __name__ == "__main__":
@@ -169,5 +167,5 @@ if __name__ == "__main__":
     # For the test, remove the first newline and all common leading whitespace
     from textwrap import dedent
     str_table = "".join(str_table.splitlines(True)[1:])
-    print s
+    print(s)
     assert dedent(str_table) == s

@@ -21,9 +21,9 @@ for kind in ['bed', 'bam', 'bigbed', 'bigwig']:
 PROCESSES = int(os.environ.get("METASEQ_PROCESSES", multiprocessing.cpu_count()))
 
 def test_tointerval():
-    assert metaseq.helpers.tointerval("chr2L:1-10[-]").strand == '-'
-    assert metaseq.helpers.tointerval("chr2L:1-10[+]").strand == '+'
-    assert metaseq.helpers.tointerval("chr2L:1-10").strand == '.'
+    assert tointerval("chr2L:1-10[-]").strand == '-'
+    assert tointerval("chr2L:1-10[+]").strand == '+'
+    assert .tointerval("chr2L:1-10").strand == '.'
 
 
 def test_local_count():
@@ -260,7 +260,7 @@ def test_local_coverage_binned():
         try:
             assert np.allclose(result[0], expected[0]) and np.allclose(result[1], expected[1])
         except:
-            print (kind, coord, result, expected)
+            print(kind, coord, result, expected)
             raise
 
     for kind in ['bam', 'bigbed', 'bed', 'bigwig']:
@@ -294,7 +294,7 @@ def test_array_binned():
         try:
             assert np.allclose(result, expected)
         except:
-            print (kind, coord, result, expected)
+            print(kind, coord, result, expected)
             raise
 
     for kind in ['bam', 'bigbed', 'bed', 'bigwig']:
@@ -328,7 +328,7 @@ def test_array_binned_preserve_total():
         try:
             assert np.allclose(result, expected)
         except:
-            print (kind, coord, result, expected)
+            print(kind, coord, result, expected)
             raise
 
     for kind in ['bam', 'bigbed', 'bed', 'bigwig']:
@@ -388,7 +388,7 @@ def test_array_ragged():
                 for i, j in zip(result, expected):
                     assert np.allclose(i, j)
         except:
-            print (kind, coord, result, expected)
+            print(kind, coord, result, expected)
             raise
 
     for kind in ['bam', 'bigbed', 'bed', 'bigwig']:
@@ -466,7 +466,7 @@ def test_nonbigwig_kwargs():
                 ArgumentError, gs['bigwig'].local_coverage, 'chr2L:1-20',
                 **kwargs)
         except AssertionError:
-            print kwargs
+            print(kwargs)
             raise
 
     assert_raises(ArgumentError, gs['bigwig'].local_coverage, 'chr2L:1-20',
@@ -659,4 +659,3 @@ def test_bigwig_zero_inf_nan():
         ),
     ]:
         yield check, coord, kwargs, expected
-

@@ -24,7 +24,7 @@ def test_copy():
 
 def smoke_tests():
     #smoke test for repr
-    print repr(d)
+    print(repr(d))
 
 def test_db():
 

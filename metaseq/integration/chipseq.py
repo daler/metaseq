@@ -2,7 +2,6 @@
 This module integrates parts of metaseq that are useful for ChIP-seq analysis.
 """
 import os
-from itertools import izip
 import gffutils
 from gffutils.helpers import asinterval
 import metaseq
@@ -12,6 +11,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib
 import yaml
+
 
 def save(c, prefix, relative_paths=True):
     """
@@ -285,11 +285,11 @@ class Chipseq(object):
         limit = 5
         browser = True
         if len(event.ind) > limit:
-            print "more than %s genes selected; not spawning browsers" % limit
+            print("more than %s genes selected; not spawning browsers" % limit)
             browser = False
         for i in event.ind:
             feature = artist.features[ind[i]]
-            print feature,
+            print(feature,)
             if browser:
                 self.minibrowser.plot(feature)
 
@@ -398,7 +398,7 @@ def estimate_shift(signal, genome=None, windowsize=5000, thresh=None,
             "Running cross-correlation on %s regions that passed "
             "threshold\n" % sum(enough))
     results = np.zeros((sum(enough), 2 * maxlag + 1))
-    for i, xy in enumerate(izip(plus[enough], minus[enough])):
+    for i, xy in enumerate(zip(plus[enough], minus[enough])):
         x, y = xy
         results[i] = xcorr(x, y, maxlag)
 
@@ -435,7 +435,7 @@ if __name__ == "__main__":
     try:
         examples = sys.argv[1:]
     except IndexError:
-        print 'Choices are: ', choices
+        print('Choices are: ', choices)
         examples = []
 
     for ex in examples:

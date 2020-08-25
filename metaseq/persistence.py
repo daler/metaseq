@@ -67,10 +67,10 @@ def save_features_and_arrays(features, arrays, prefix, compressed=False,
 
     if link_features:
         if isinstance(features, pybedtools.BedTool):
-            assert isinstance(features.fn, basestring)
+            assert isinstance(features.fn, str)
             features_filename = features.fn
         else:
-            assert isinstance(features, basestring)
+            assert isinstance(features, str)
             features_filename = features
 
         if overwrite:

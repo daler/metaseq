@@ -24,7 +24,7 @@ def chunker(f, n):
     while 1:
         if len(x) < n:
             try:
-                x.append(f.next())
+                x.append(next(f))
             except StopIteration:
                 if len(x) > 0:
                     yield tuple(x)
@@ -94,7 +94,7 @@ def tointerval(s):
     """
     If string, then convert to an interval; otherwise just return the input
     """
-    if isinstance(s, basestring):
+    if isinstance(s, str):
         m = coord_re.search(s)
         if m.group('strand'):
             return pybedtools.create_interval_from_list([

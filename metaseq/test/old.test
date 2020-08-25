@@ -36,7 +36,7 @@ class ResultsTable_features_test(object):
         d = self.d[0]
         assert self.d.id[0] == d.id[0]
         d.id[0] = 'asdf'
-        print d.id
+        print(d.id)
         assert d.id[0] == 'asdf'
         assert d.id[0] != self.d.id[0]
 
@@ -54,7 +54,7 @@ class ResultsTable_features_test(object):
         ind = d.enriched()
         enriched = d[ind]
 
-        print enriched.padj
+        print(enriched.padj)
         assert np.all(enriched.padj < 0.05)
         #assert sum(enriched.padj == 0.05) == 1
         assert not np.any(enriched.padj > 0.05)
@@ -83,7 +83,7 @@ class GenomicSignal_local_count_test(object):
         self.m = metaseq.genomic_signal(
                 metaseq.example_filename('gdc.bam'), kind='bam')
         line = '[%s] %s\n' % (datetime.datetime.now(), self.__class__.__name__)
-        print line
+        print(line)
         sys.stdout.flush()
 
     def teardown(self):
@@ -116,7 +116,7 @@ class GenomicSignal_local_coverage_test(object):
         self.m = metaseq.genomic_signal(
                 metaseq.example_filename('gdc.bam'), kind='bam')
         line = '[%s] %s\n' % (datetime.datetime.now(), self.__class__.__name__)
-        print line
+        print(line)
         sys.stdout.flush()
         pass
 
@@ -556,7 +556,7 @@ class GenomicSignal_array_test(object):
                 (200, 220)]
         features = [pybedtools.Interval('chr2L', *i) for i in features]
         arr = self.m.array(features, bins=20, fragment_size=5)
-        print arr
+        print(arr)
         assert np.all(arr == np.array(
                 [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0],
@@ -586,13 +586,13 @@ class GenomicSignal_array_test(object):
 
         # use more features and test for identity again
         features *= 1000
-        print len(features)
+        print(len(features))
         arr0 = self.m.array(features, bins=20, fragment_size=5)
         arr1 = self.m.array(
                 features, bins=20, fragment_size=5, chunksize=5, processes=PROCESSES)
-        print arr0.shape
-        print arr1.shape
-        print (arr0 != arr1)
+        print(arr0.shape)
+        print(arr1.shape)
+        print(arr0 != arr1)
         assert np.all(arr0 == arr1)
 
 
@@ -616,4 +616,3 @@ class GenomicSignal_bigBed_array_test(GenomicSignal_array_test):
     def setup(self):
         self.m = metaseq.genomic_signal(
                 metaseq.example_filename('gdc.bigbed'), kind='bigbed')
-

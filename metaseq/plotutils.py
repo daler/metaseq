@@ -9,7 +9,7 @@ import numpy as np
 from matplotlib.ticker import MaxNLocator
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib import gridspec
-import colormap_adjust
+from metaseq import colormap_adjust
 from scipy import stats
 
 
@@ -144,11 +144,11 @@ def imshow(arr, x=None, ax=None, vmin=None, vmax=None, percentile=True,
         if vmin is None:
             vmin = arr.min()
         else:
-            vmin = mlab.prctile(arr.ravel(), vmin)
+            vmin = np.percentile(arr.ravel(), vmin)
         if vmax is None:
             vmax = arr.max()
         else:
-            vmax = mlab.prctile(arr.ravel(), vmax)
+            vmax = np.percentile(arr.ravel(), vmax)
     else:
         if vmin is None:
             vmin = arr.min()
@@ -304,9 +304,9 @@ def calculate_limits(array_dict, method='global', percentiles=None, limit=()):
             [i.ravel() for i in array_dict.itervalues()]
         )
         if percentiles:
-            vmin = mlab.prctile(
+            vmin = np.percentile(
                 all_arrays, percentiles[0])
-            vmax = mlab.prctile(
+            vmax = np.percentile(
                 all_arrays, percentiles[1])
 
         else:
@@ -326,9 +326,9 @@ def calculate_limits(array_dict, method='global', percentiles=None, limit=()):
             keys = list(keys)
             all_arrays = np.concatenate([array_dict[i] for i in keys])
             if percentiles:
-                vmin = mlab.prctile(
+                vmin = np.percentile(
                     all_arrays, percentiles[0])
-                vmax = mlab.prctile(
+                vmax = np.percentile(
                     all_arrays, percentiles[1])
             else:
                 vmin = all_arrays.min()
@@ -816,16 +816,16 @@ def input_ip_plots(iparr, inputarr, diffed, x, sort_ind,
     all_base = np.column_stack((iparr.ravel(), inputarr.ravel())).ravel()
 
     if limits1[0] is None:
-        limits1[0] = mlab.prctile(
+        limits1[0] = np.percentile(
             all_base, 1. / all_base.size)
     if limits1[1] is None:
-        limits1[1] = mlab.prctile(
+        limits1[1] = np.percentile(
             all_base, 100 - 1. / all_base.size)
     if limits2[0] is None:
-        limits2[0] = mlab.prctile(
+        limits2[0] = np.percentile(
             diffed.ravel(), 1. / all_base.size)
     if limits2[1] is None:
-        limits2[1] = mlab.prctile(
+        limits2[1] = np.percentile(
             diffed.ravel(), 100 - 1. / all_base.size)
 
     del all_base

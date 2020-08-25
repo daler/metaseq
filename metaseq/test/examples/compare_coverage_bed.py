@@ -33,7 +33,7 @@ if not os.path.exists(bam_fn):
 
 
 # Construct 10kb windows, but subset to only use chr19 (to speed up the test)
-print 'creating windows...'
+print('creating windows...')
 sys.stdout.flush()
 windows = pybedtools.BedTool()\
         .window_maker(genome='hg19', w=10000)\
@@ -46,7 +46,7 @@ def run_bedtools():
     # set up a BAM-based BedTool
     bt = pybedtools.BedTool(bam_fn)
 
-    print 'pybedtools coverageBed starting...',
+    print('pybedtools coverageBed starting...',)
     sys.stdout.flush()
     t0 = time.time()
 
@@ -55,7 +55,7 @@ def run_bedtools():
     bt_array = np.array([i[-1] for i in bt_result], dtype=int)
 
     t1 = time.time()
-    print 'completed in %.2fs' % (t1 - t0)
+    print('completed in %.2fs' % (t1 - t0))
     sys.stdout.flush()
     return bt_array
 
@@ -66,7 +66,7 @@ def run_metaseq():
             metaseq.example_filename('wgEncodeUwTfbsK562CtcfStdAlnRep1.bam'),
             kind='bam')
 
-    print 'metaseq starting...',
+    print('metaseq starting...',)
     sys.stdout.flush()
     t0 = time.time()
 
@@ -79,7 +79,7 @@ def run_metaseq():
             windows, processes=PROCESSES, chunksize=CHUNKSIZE, bins=1)
 
     t1 = time.time()
-    print 'completed in %.2fs' % (t1 - t0)
+    print('completed in %.2fs' % (t1 - t0))
     sys.stdout.flush()
     return ms_array.ravel()
 
@@ -112,8 +112,8 @@ if __name__ == "__main__":
     fig2.subplots_adjust(bottom=0.2)
 
     # Table of differences
-    print 'bin\tcount'
+    print('bin\tcount')
     for cnt, bn in zip(counts[::-1], bins[::-1]):
-        print '%s\t%s' % (bn, cnt)
+        print('%s\t%s' % (bn, cnt))
 
     plt.show()

@@ -29,15 +29,15 @@ import sys
 import subprocess
 
 import numpy as np
-from bx.bbi.bigwig_file import BigWigFile
+# from bx.bbi.bigwig_file import BigWigFile
 
-import pybedtools
+# import pybedtools
 
-from array_helpers import _array, _array_parallel, _local_coverage, \
+from metaseq.array_helpers import _array, _array_parallel, _local_coverage, \
     _local_count, _count_array, _count_array_parallel
-import filetype_adapters
-import helpers
-from helpers import rebin
+from  metaseq import filetype_adapters
+# import metaseq.helpers
+from metaseq.helpers import rebin
 
 
 def supported_formats():
@@ -144,7 +144,7 @@ class BaseSignal(object):
 
         # since if we got here processes is not None, then this will trigger
         # a parallel array creation
-        features = helpers.tointerval(features)
+        features = tointerval(features)
         x = np.arange(features.start, features.stop)
         features = list(helpers.split_feature(features, processes))
         ys = self.array(

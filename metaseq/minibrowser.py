@@ -57,7 +57,7 @@ from gffutils.helpers import asinterval
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.gridspec as gridspec
 from matplotlib.ticker import FormatStrFormatter
-import _genomic_signal
+from metaseq import _genomic_signal
 
 
 class BaseMiniBrowser(object):
@@ -185,7 +185,7 @@ class ChIPSeqMiniBrowser(BaseMiniBrowser):
         self.local_coverage_kwargs = local_coverage_kwargs or {}
         self.ip = ip
         self.control = control
-        if isinstance(db, basestring):
+        if isinstance(db, str):
             db = gffutils.FeatureDB(db)
         self.db = db
         self.ip_style = ip_style or {}

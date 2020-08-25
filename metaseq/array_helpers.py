@@ -2,12 +2,12 @@ import pybedtools
 import numpy as np
 import multiprocessing
 import itertools
-import pysam
-import sys
-from helpers import chunker
-import helpers
-from helpers import rebin
-import filetype_adapters
+
+from metaseq.helpers import chunker
+
+from metaseq.helpers import tointerval
+from metaseq.helpers import rebin
+from metaseq import filetype_adapters
 
 
 class ArgumentError(Exception):
@@ -25,8 +25,8 @@ def _local_count(reader, feature, stranded=False):
     :param stranded: If `stranded=True`, then only counts signal on the same
         strand as `feature`.
     """
-    if isinstance(feature, basestring):
-        feature = helpers.tointerval(feature)
+    if isinstance(feature, str):
+        feature = tointerval(feature)
     if stranded:
         strand = feature.strand
     else:
@@ -246,8 +246,8 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
                                 "bam")
 
     # e.g., features = "chr1:1-1000"
-    if isinstance(features, basestring):
-        features = helpers.tointerval(features)
+    if isinstance(features, str):
+        features = tointerval(features)
 
     if not ((isinstance(features, list) or isinstance(features, tuple))):
         if bins is not None:
@@ -270,7 +270,7 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
     profiles = []
     xs = []
     for window, nbin in zip(features, bins):
-        window = helpers.tointerval(window)
+        window = tointerval(window)
         chrom = window.chrom
         start = window.start
         stop = window.stop
@@ -411,11 +411,20 @@ def _array_parallel(fn, cls, genelist, chunksize=250, processes=1, **kwargs):
     #
     results = pool.map(
         func=_array_star,
-        iterable=itertools.izip(
+        iterable=zip(
             itertools.repeat(fn),
             itertools.repeat(cls),
             chunks,
             itertools.repeat(kwargs)))
+
+    # results = map(
+    #     _array_star,
+    #     zip(
+    #         itertools.repeat(fn),
+    #         itertools.repeat(cls),
+    #         chunks,
+    #         itertools.repeat(kwargs)))
+
     pool.close()
     pool.join()
     return results
@@ -425,7 +434,7 @@ def _count_array_parallel(fn, cls, genelist, chunksize=250, processes=1, **kwarg
     chunks = list(chunker(genelist, chunksize))
     results = pool.map(
         func=_count_array_star,
-        iterable=itertools.izip(
+        iterable=zip(
             itertools.repeat(fn),
             itertools.repeat(cls),
             chunks,
@@ -474,7 +483,17 @@ def _array(fn, cls, genelist, **kwargs):
     for gene in genelist:
         if not isinstance(gene, (list, tuple)):
             gene = [gene]
-        coverage_x, coverage_y = _local_coverage_func(
-            reader, gene, **kwargs)
+
+        try:
+            coverage_x, coverage_y = _local_coverage_func(
+                reader,
+                gene,
+                **kwargs)
+
+        except Exception as e:
+            print("Exception with locus {1}: {0}. skipping...".format(
+                e, gene))
+            coverage_y = np.zeros(shape=kwargs['bins'])
+
         biglist.append(coverage_y)
     return biglist
